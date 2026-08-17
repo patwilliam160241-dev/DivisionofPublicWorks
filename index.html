@@ -40,7 +40,7 @@
 
     <!-- ================= หน้า Dashboard ================= -->
     <div id="dashboardPage" class="hidden flex h-full">
-        <!-- Sidebar (ย่อไว้เพื่อความกะทัดรัด) -->
+        <!-- Sidebar -->
         <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col">
             <div class="h-16 flex items-center px-6 border-b border-slate-800">
                 <i class="fa-solid fa-cloud text-indigo-400 text-xl mr-3"></i>
@@ -103,7 +103,6 @@
                                 </tr>
                             </thead>
                             <tbody id="fileTableBody" class="text-sm divide-y divide-slate-100">
-                                <!-- ข้อมูลไฟล์จะถูกนำมาแสดงที่นี่โดย JavaScript -->
                                 <tr><td colspan="4" class="text-center py-4 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
                             </tbody>
                         </table>
@@ -113,32 +112,43 @@
         </main>
     </div>
 
+    <!-- Scripts -->
     <script>
         // =================ตั้งค่า Supabase=================
-        const supabaseUrl = 'https://cfmmjocjgznjtrmdhtrq.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmbW1qb2NqZ3puanRybWRodHJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MzUwOTEsImV4cCI6MjEwMjUxMTA5MX0.WSVttUmOoMEMEIMs354bKDz4uGDK6JmNr09twxnuXDc';
-        
-        // สร้าง Client
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        let supabaseClient = null;
+        try {
+            const supabaseUrl = 'https://cfmmjocjgznjtrmdhtrq.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmbW1qb2NqZ3puanRybWRodHJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MzUwOTEsImV4cCI6MjEwMjUxMTA5MX0.WSVttUmOoMEMEIMs354bKDz4uGDK6JmNr09twxnuXDc';
+            supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        } catch (err) {
+            console.error("ไม่สามารถเริ่มต้น Supabase ได้:", err);
+            alert("ระบบฐานข้อมูลโหลดไม่สำเร็จ กรุณารีเฟรชหน้าเว็บอีกครั้ง");
+        }
         // ==================================================
 
         // 1. ระบบ Login (รหัส 8888)
         document.getElementById('passwordInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') checkPassword();
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                checkPassword();
+            }
         });
 
         function checkPassword() {
             const pwd = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('errorMsg');
+            
             if (pwd === '8888') {
-                document.getElementById('errorMsg').classList.add('hidden');
+                errorMsg.classList.add('hidden');
                 document.getElementById('loginPage').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('loginPage').classList.add('hidden');
                     document.getElementById('dashboardPage').classList.remove('hidden');
-                    fetchFiles(); // ดึงข้อมูลไฟล์เมื่อเข้าสู่ระบบสำเร็จ
+                    if(supabaseClient) fetchFiles(); // ดึงข้อมูลไฟล์เมื่อเข้าสู่ระบบสำเร็จ
                 }, 300);
             } else {
-                document.getElementById('errorMsg').classList.remove('hidden');
+                errorMsg.innerText = "รหัสผ่านไม่ถูกต้อง! ลองใหม่อีกครั้ง";
+                errorMsg.classList.remove('hidden');
             }
         }
 
@@ -149,7 +159,7 @@
             setTimeout(() => document.getElementById('loginPage').style.opacity = '1', 50);
         }
 
-        // 2. ฟังก์ชันแปลงขนาดไฟล์ให้ดูง่าย (Bytes -> KB, MB)
+        // 2. ฟังก์ชันแปลงขนาดไฟล์
         function formatBytes(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
@@ -158,87 +168,88 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // 3. ฟังก์ชันดึงข้อมูลจาก Supabase Database
+        // 3. ฟังก์ชันดึงข้อมูลไฟล์
         async function fetchFiles() {
+            if (!supabaseClient) return;
             const tbody = document.getElementById('fileTableBody');
             tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
 
-            const { data, error } = await supabase
-                .from('files')
-                .select('*')
-                .order('created_at', { ascending: false });
+            try {
+                const { data, error } = await supabaseClient
+                    .from('files')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-            if (error) {
-                console.error('Error fetching data:', error);
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
-                return;
+                if (error) throw error;
+
+                document.getElementById('totalFilesCount').innerText = `${data.length} ไฟล์`;
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-slate-400">ยังไม่มีไฟล์ในระบบ</td></tr>';
+                    return;
+                }
+
+                data.forEach(file => {
+                    const date = new Date(file.created_at).toLocaleDateString('th-TH');
+                    
+                    let iconClass = 'fa-file text-slate-500';
+                    if(file.file_name.endsWith('.pdf')) iconClass = 'fa-file-pdf text-red-500';
+                    else if(file.file_name.match(/\.(jpg|jpeg|png|gif)$/i)) iconClass = 'fa-file-image text-green-500';
+                    else if(file.file_name.match(/\.(doc|docx)$/i)) iconClass = 'fa-file-word text-blue-500';
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="py-3 px-6 flex items-center">
+                            <i class="fa-solid ${iconClass} text-lg mr-3"></i> 
+                            <span class="truncate max-w-[200px] sm:max-w-xs">${file.file_name}</span>
+                        </td>
+                        <td class="py-3 px-6 text-slate-500">${formatBytes(file.file_size)}</td>
+                        <td class="py-3 px-6 text-slate-500">${date}</td>
+                        <td class="py-3 px-6 text-center space-x-2">
+                            <a href="${file.file_url}" target="_blank" class="text-indigo-500 hover:text-indigo-700 p-2"><i class="fa-solid fa-download"></i></a>
+                            <button onclick="deleteFile('${file.id}', '${file.file_name}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error('Error fetching data:', err);
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล โปรดตรวจสอบ Database</td></tr>';
             }
-
-            document.getElementById('totalFilesCount').innerText = `${data.length} ไฟล์`;
-            tbody.innerHTML = '';
-
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-slate-400">ยังไม่มีไฟล์ในระบบ</td></tr>';
-                return;
-            }
-
-            data.forEach(file => {
-                const date = new Date(file.created_at).toLocaleDateString('th-TH');
-                
-                // เลืออกไอคอนตามนามสกุลไฟล์
-                let iconClass = 'fa-file text-slate-500';
-                if(file.file_name.endsWith('.pdf')) iconClass = 'fa-file-pdf text-red-500';
-                else if(file.file_name.match(/\.(jpg|jpeg|png|gif)$/i)) iconClass = 'fa-file-image text-green-500';
-                else if(file.file_name.match(/\.(doc|docx)$/i)) iconClass = 'fa-file-word text-blue-500';
-
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition-colors';
-                tr.innerHTML = `
-                    <td class="py-3 px-6 flex items-center">
-                        <i class="fa-solid ${iconClass} text-lg mr-3"></i> 
-                        <span class="truncate max-w-[200px] sm:max-w-xs">${file.file_name}</span>
-                    </td>
-                    <td class="py-3 px-6 text-slate-500">${formatBytes(file.file_size)}</td>
-                    <td class="py-3 px-6 text-slate-500">${date}</td>
-                    <td class="py-3 px-6 text-center space-x-2">
-                        <a href="${file.file_url}" target="_blank" class="text-indigo-500 hover:text-indigo-700 p-2"><i class="fa-solid fa-download"></i></a>
-                        <button onclick="deleteFile('${file.id}', '${file.file_name}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
         }
 
         // 4. ฟังก์ชันอัปโหลดไฟล์
         async function uploadFile(event) {
+            if (!supabaseClient) return alert('ระบบฐานข้อมูลยังไม่พร้อมใช้งาน');
+            
             const file = event.target.files[0];
             if (!file) return;
 
             const icon = document.getElementById('uploadIcon');
             const text = document.getElementById('uploadText');
             
-            // เปลี่ยนสถานะ UI เป็นกำลังอัปโหลด
             icon.className = 'fa-solid fa-spinner fa-spin text-4xl text-indigo-500 mb-3';
             text.innerText = `กำลังอัปโหลด ${file.name}...`;
 
-            // สุ่มชื่อไฟล์กันซ้ำ (สร้าง Path)
             const uniqueFileName = `${Date.now()}_${file.name}`;
 
             try {
-                // 4.1 อัปโหลดไฟล์เข้า Supabase Storage (Bucket: uploads)
-                const { data: storageData, error: storageError } = await supabase.storage
+                // อัปโหลดเข้า Storage
+                const { data: storageData, error: storageError } = await supabaseClient.storage
                     .from('uploads')
                     .upload(uniqueFileName, file);
 
                 if (storageError) throw storageError;
 
-                // 4.2 ดึง URL รูปแบบ Public
-                const { data: urlData } = supabase.storage
+                // ดึง URL 
+                const { data: urlData } = supabaseClient.storage
                     .from('uploads')
                     .getPublicUrl(uniqueFileName);
 
-                // 4.3 บันทึกข้อมูลลง Database Table: files
-                const { error: dbError } = await supabase
+                // บันทึกลงตาราง SQL
+                const { error: dbError } = await supabaseClient
                     .from('files')
                     .insert([
                         { 
@@ -251,16 +262,15 @@
                 if (dbError) throw dbError;
 
                 alert('อัปโหลดไฟล์สำเร็จ!');
-                fetchFiles(); // รีเฟรชตาราง
+                fetchFiles(); 
 
             } catch (error) {
                 console.error(error);
                 alert('เกิดข้อผิดพลาดในการอัปโหลด: ' + error.message);
             } finally {
-                // คืนค่า UI กลับเป็นปกติ
                 icon.className = 'fa-solid fa-cloud-arrow-up text-4xl text-indigo-300 mb-3';
                 text.innerText = 'คลิกเพื่อเลือกไฟล์อัปโหลด';
-                document.getElementById('fileInput').value = ''; // เคลียร์ input
+                document.getElementById('fileInput').value = ''; 
             }
         }
 
@@ -269,8 +279,7 @@
             if (!confirm(`คุณต้องการลบไฟล์ "${fileName}" ใช่หรือไม่?`)) return;
 
             try {
-                // ลบจาก Database
-                const { error: dbError } = await supabase
+                const { error: dbError } = await supabaseClient
                     .from('files')
                     .delete()
                     .eq('id', id);
@@ -278,12 +287,7 @@
                 if (dbError) throw dbError;
 
                 alert('ลบไฟล์สำเร็จแล้ว');
-                fetchFiles(); // รีเฟรชตาราง
-                
-                // หมายเหตุ: หากต้องการลบไฟล์ออกจาก Storage จริงๆ ด้วย 
-                // ต้องมีคอลัมน์เก็บ path ของ storage ไว้ต่างหาก แล้วเรียก:
-                // await supabase.storage.from('uploads').remove(['path_ของไฟล์']);
-
+                fetchFiles(); 
             } catch (error) {
                 console.error(error);
                 alert('เกิดข้อผิดพลาดในการลบ: ' + error.message);
