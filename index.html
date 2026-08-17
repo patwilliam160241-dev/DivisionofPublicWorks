@@ -196,7 +196,7 @@
                     let iconClass = 'fa-file text-slate-500';
                     if(file.file_name.endsWith('.pdf')) iconClass = 'fa-file-pdf text-red-500';
                     else if(file.file_name.match(/\.(jpg|jpeg|png|gif)$/i)) iconClass = 'fa-file-image text-green-500';
-                    else if(file.file_name.match(/\.(doc|docx)$/i)) iconClass = 'fa-file-word text-blue-500';
+                    else if(file.file_name.match(/\.(doc|docx|xls|xlsx)$/i)) iconClass = 'fa-file-word text-blue-500';
 
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-slate-50 transition-colors';
@@ -220,7 +220,7 @@
             }
         }
 
-        // 4. ฟังก์ชันอัปโหลดไฟล์
+        // 4. ฟังก์ชันอัปโหลดไฟล์ (แก้ไขรองรับภาษาไทย)
         async function uploadFile(event) {
             if (!supabaseClient) return alert('ระบบฐานข้อมูลยังไม่พร้อมใช้งาน');
             
@@ -233,22 +233,27 @@
             icon.className = 'fa-solid fa-spinner fa-spin text-4xl text-indigo-500 mb-3';
             text.innerText = `กำลังอัปโหลด ${file.name}...`;
 
-            const uniqueFileName = `${Date.now()}_${file.name}`;
+            // ==========================================
+            // สร้างชื่อไฟล์ใหม่ให้ปลอดภัยกับ Storage (ตัวเลข + สุ่ม)
+            // ==========================================
+            const fileExt = file.name.split('.').pop();
+            const randomString = Math.random().toString(36).substring(2, 10);
+            const safeStorageName = `${Date.now()}_${randomString}.${fileExt}`;
 
             try {
-                // อัปโหลดเข้า Storage
+                // อัปโหลดเข้า Storage ด้วยชื่อภาษาอังกฤษที่ปลอดภัย
                 const { data: storageData, error: storageError } = await supabaseClient.storage
                     .from('uploads')
-                    .upload(uniqueFileName, file);
+                    .upload(safeStorageName, file);
 
                 if (storageError) throw storageError;
 
-                // ดึง URL 
+                // ดึง URL กลับมา
                 const { data: urlData } = supabaseClient.storage
                     .from('uploads')
-                    .getPublicUrl(uniqueFileName);
+                    .getPublicUrl(safeStorageName);
 
-                // บันทึกลงตาราง SQL
+                // บันทึกลงตาราง SQL โดยใช้ชื่อภาษาไทยต้นฉบับให้ผู้ใช้เห็น
                 const { error: dbError } = await supabaseClient
                     .from('files')
                     .insert([
