@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>กองช่างเทศบาลตำบลน้ำซึม - ระบบ BOQ</title>
+    <title>กองช่างเทศบาลตำบลน้ำซึม</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -29,7 +29,7 @@
 
         /* ================= CSS สำหรับการพิมพ์ (Print) ================= */
         @media print {
-            body > div:not(.modal-active-print) { display: none !important; }
+            body > div:not(#previewModal) { display: none !important; }
 
             body, html {
                 height: auto !important;
@@ -37,14 +37,14 @@
                 background-color: white !important;
             }
 
-            .modal-active-print {
+            #previewModal {
                 position: static !important;
                 background: white !important;
                 display: block !important;
                 padding: 0 !important;
             }
 
-            .modal-active-print > div {
+            #previewModal > div {
                 max-width: 100% !important;
                 width: 100% !important;
                 box-shadow: none !important;
@@ -55,29 +55,15 @@
                 border: none !important;
             }
 
-            .modal-active-print .bg-slate-50\/50,
-            .modal-active-print .bg-slate-50 {
+            #previewModal .bg-slate-50\/50 {
                 background-color: white !important;
             }
 
-            .modal-active-print .overflow-y-auto,
-            .modal-active-print .overflow-x-auto,
-            .modal-active-print .custom-scrollbar {
+            #previewSegmentsList {
                 overflow: visible !important;
                 max-height: none !important;
                 height: auto !important;
                 padding-right: 0 !important;
-            }
-
-            input[type="number"], input[type="text"] {
-                border: none !important;
-                background: transparent !important;
-                padding: 0 !important;
-                box-shadow: none !important;
-                outline: none !important;
-                -webkit-appearance: none;
-                appearance: none;
-                -moz-appearance: textfield;
             }
 
             .no-print { display: none !important; }
@@ -130,7 +116,7 @@
                     <i class="fa-solid fa-folder-open mr-2"></i> ระบบจัดการไฟล์
                 </button>
                 <button onclick="switchView('survey')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
-                    <i class="fa-solid fa-map-location-dot mr-2"></i> งานสำรวจและประเมินราคา
+                    <i class="fa-solid fa-map-location-dot mr-2"></i> งานสำรวจ
                 </button>
             </div>
 
@@ -207,7 +193,7 @@
             <div id="surveyWorkView" class="hidden flex-1 overflow-auto p-8 custom-scrollbar">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                     <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                        <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-list mr-2 text-emerald-600"></i>รายการงานสำรวจและประมาณราคา</h2>
+                        <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-list mr-2 text-emerald-600"></i>รายการงานสำรวจ</h2>
                         <button onclick="openSurveyModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium shadow-sm">
                             <i class="fa-solid fa-plus mr-2"></i> เพิ่มข้อมูลงานสำรวจ
                         </button>
@@ -299,6 +285,7 @@
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-sm font-semibold text-emerald-800">จุดเริ่มต้น (หัว)</span>
                                     <div class="flex gap-1.5">
+                                        <!-- ปุ่ม ปักหมุดบนแผนที่ เพิ่มใหม่ -->
                                         <button type="button" onclick="openLocationPicker('start')" class="text-[10px] bg-slate-600 hover:bg-slate-700 text-white px-2 py-1 rounded shadow transition-colors flex items-center">
                                             <i class="fa-solid fa-map-location-dot mr-1"></i> ปักหมุดเอง
                                         </button>
@@ -322,6 +309,7 @@
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-sm font-semibold text-blue-800">จุดสิ้นสุด (ท้าย)</span>
                                     <div class="flex gap-1.5">
+                                        <!-- ปุ่ม ปักหมุดบนแผนที่ เพิ่มใหม่ -->
                                         <button type="button" onclick="openLocationPicker('end')" class="text-[10px] bg-slate-600 hover:bg-slate-700 text-white px-2 py-1 rounded shadow transition-colors flex items-center">
                                             <i class="fa-solid fa-map-location-dot mr-1"></i> ปักหมุดเอง
                                         </button>
@@ -395,7 +383,7 @@
             <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-indigo-50 shrink-0">
                 <h3 class="text-xl font-bold text-indigo-800"><i class="fa-solid fa-road mr-2"></i> รูปแบบถนนและสรุปพื้นที่</h3>
                 <div class="flex gap-2 no-print">
-                    <button onclick="window.print()" class="text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition-colors font-medium shadow-sm flex items-center text-sm">
+                    <button onclick="printPreview()" class="text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition-colors font-medium shadow-sm flex items-center text-sm">
                         <i class="fa-solid fa-print mr-2"></i> พิมพ์
                     </button>
                     <button onclick="closePreviewModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors border border-slate-200"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -448,26 +436,21 @@
         </div>
     </div>
 
-    <!-- ================= Modal: สรุปประมาณราคา BOQ (ปรับปรุงใหม่ตาม ปร.4) ================= -->
+    <!-- ================= Modal: คำนวณราคา (Cost Calculator) ================= -->
     <div id="costModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-[120] flex items-center justify-center py-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl mx-4 flex flex-col overflow-hidden max-h-[95vh]">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-4 flex flex-col overflow-hidden max-h-[95vh]">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-gradient-to-r from-emerald-600 to-teal-600 shrink-0">
-                <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-file-invoice-dollar mr-2"></i> สรุปประมาณราคา (BOQ - แบบฟอร์ม ปร.4)</h3>
+                <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-calculator mr-2"></i> ประเมินราคาก่อสร้างเบื้องต้น</h3>
                 <button onclick="closeCostModal()" class="text-emerald-100 hover:text-white bg-transparent hover:bg-emerald-700 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             
-            <div class="p-6 overflow-y-auto flex-1 space-y-5 bg-slate-50 custom-scrollbar flex flex-col">
+            <div class="p-6 overflow-y-auto flex-1 space-y-6 bg-slate-50 custom-scrollbar">
                 
-                <!-- Header ข้อมูลโครงการ -->
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 shrink-0 page-break-avoid">
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
                     <h4 id="costProjectName" class="font-bold text-lg text-slate-800">ชื่อโครงการ</h4>
                     <p class="text-sm text-slate-500 mb-3">ประเภท: <span id="costRoadType" class="font-medium text-emerald-600"></span></p>
                     
-                    <div class="grid grid-cols-3 gap-4 text-sm">
-                        <div class="bg-slate-50 p-3 rounded border border-slate-100 text-center">
-                            <span class="block text-slate-500 mb-1">ระยะทางรวม (ม.)</span>
-                            <span id="costTotalLength" class="text-xl font-bold text-slate-700">0.00</span>
-                        </div>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
                         <div class="bg-slate-50 p-3 rounded border border-slate-100 text-center">
                             <span class="block text-slate-500 mb-1">พื้นที่รวม (ตร.ม.)</span>
                             <span id="costTotalArea" class="text-xl font-bold text-slate-700">0.00</span>
@@ -479,53 +462,76 @@
                     </div>
                 </div>
 
-                <!-- ตาราง BOQ -->
-                <div class="bg-white p-5 rounded-lg shadow-sm border border-slate-200 flex-1 flex flex-col">
-                    <div class="flex justify-between items-center mb-4 no-print">
-                        <h4 class="font-bold text-slate-800 flex items-center">
-                            <i class="fa-solid fa-table-list mr-2 text-indigo-500"></i> รายการประมาณการ (สามารถแก้ไขจำนวนและราคาต่อหน่วยได้)
-                        </h4>
-                        <div class="flex items-center gap-2 text-sm">
-                            <label class="font-semibold text-slate-600">ค่า Factor F (งานทาง):</label>
-                            <input type="number" step="0.0001" id="inputFactorF" value="1.3624" class="w-24 border border-slate-300 rounded px-2 py-1.5 text-center focus:ring-2 focus:ring-indigo-500 font-bold text-indigo-700 bg-indigo-50" onchange="renderBOQ()">
+                <div class="bg-white p-5 rounded-lg shadow-sm border border-amber-200 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
+                    <h4 class="font-bold text-slate-800 mb-1 flex items-center">
+                        <i class="fa-solid fa-coins mr-2 text-amber-500"></i> อัตราค่าวัสดุและน้ำมัน
+                    </h4>
+                    <p class="text-xs text-slate-500 mb-4">* กรุณาปรับปรุงราคาให้ตรงกับประกาศ <a href="https://uthaithani.moc.go.th/" target="_blank" class="text-blue-500 hover:underline">สำนักงานพาณิชย์จังหวัดอุทัยธานี</a> ประจำเดือนปัจจุบัน</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2 bg-blue-50 p-3 rounded border border-blue-100 flex justify-between items-center">
+                            <label class="text-sm font-semibold text-blue-800">ราคาน้ำมันดีเซล ณ วันนี้ (บาท/ลิตร)</label>
+                            <input type="number" step="any" id="inputOilPrice" value="32.94" class="w-24 border border-blue-300 rounded px-2 py-1 text-right focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-700" onchange="calculateCost()">
+                        </div>
+
+                        <div id="costInputsConcrete" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">คอนกรีตผสมเสร็จ (บาท/ลบ.ม.)</label>
+                                <input type="number" step="any" id="inputConcretePrice" value="2200" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">เหล็กเสริมตะแกรง Wire Mesh (บาท/ตร.ม.)</label>
+                                <input type="number" step="any" id="inputWiremeshPrice" value="45" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">ทรายรองใต้ผิวจราจร (บาท/ลบ.ม.)</label>
+                                <input type="number" step="any" id="inputSandPrice" value="450" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
+                        </div>
+
+                        <div id="costInputsAsphalt" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">แอสฟัลท์ติกคอนกรีต (บาท/ตัน)</label>
+                                <input type="number" step="any" id="inputAsphaltPrice" value="3500" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">น้ำยา Tack Coat (บาท/ตร.ม.)</label>
+                                <input type="number" step="any" id="inputTackcoatPrice" value="15" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
+                        </div>
+
+                        <div id="costInputsGravel" class="hidden md:col-span-2 grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1" id="labelBaseMaterial">ราคาวัสดุ (ลูกรัง/หินคลุก/ดิน) (บาท/ลบ.ม.)</label>
+                                <input type="number" step="any" id="inputBasePrice" value="350" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                <div class="bg-emerald-50 p-5 rounded-lg shadow-sm border border-emerald-200">
+                    <h4 class="font-bold text-emerald-800 mb-4 text-center text-lg">สรุปราคากลางประเมิน</h4>
                     
-                    <div class="overflow-x-auto border border-slate-200 rounded-lg">
-                        <table class="w-full text-left border-collapse min-w-[950px]">
-                            <thead>
-                                <tr class="bg-slate-100 text-[12px] text-slate-600 border-b border-slate-200 uppercase tracking-wide">
-                                    <th class="py-3 px-3 text-center w-12">ลำดับ</th>
-                                    <th class="py-3 px-3">รายการ</th>
-                                    <th class="py-3 px-3 text-center w-20">หน่วย</th>
-                                    <th class="py-3 px-3 text-right w-24">จำนวน</th>
-                                    <th class="py-3 px-3 text-right w-28">ราคา/หน่วย</th>
-                                    <th class="py-3 px-3 text-right w-28">ราคาทุน</th>
-                                    <th class="py-3 px-3 text-right w-24">Factor F</th>
-                                    <th class="py-3 px-3 text-right w-32">ราคากลาง</th>
-                                    <th class="py-3 px-2 text-center w-12 no-print">จัดการ</th> <!-- คอลัมน์จัดการ -->
-                                </tr>
-                            </thead>
-                            <tbody id="boqTableBody" class="text-[13px] divide-y divide-slate-100">
-                                <!-- JS Generated Rows -->
-                            </tbody>
-                            <tfoot class="bg-emerald-50 border-t-[3px] border-emerald-200">
-                                <tr>
-                                    <td colspan="5" class="py-3 px-4 text-right font-bold text-emerald-800">รวมค่างานต้นทุน:</td>
-                                    <td id="outputDirectCost" class="py-3 px-3 text-right font-mono font-bold text-emerald-700 text-sm">0.00</td>
-                                    <td class="py-3 px-4 text-right font-bold text-emerald-800">ราคากลางสุทธิ:</td>
-                                    <td id="outputTotalCost" class="py-3 px-3 text-right font-mono font-black text-emerald-700 text-[16px]">0.00</td>
-                                    <td class="no-print"></td> <!-- ช่องว่างสำหรับคอลัมน์จัดการ -->
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                    
-                    <div class="mt-4 flex gap-2 justify-end no-print">
-                        <p class="text-xs text-slate-500 mr-auto flex items-center"><i class="fa-solid fa-circle-info mr-1 text-indigo-400"></i> ราคาต่อหน่วยอ้างอิงจากฐานข้อมูลเบื้องต้นของหน่วยงาน สามารถคลิกแก้ตัวเลขในตารางได้ทันที</p>
-                        <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center">
-                            <i class="fa-solid fa-print mr-2"></i> พิมพ์ ปร.4
-                        </button>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between items-center border-b border-emerald-100 pb-2">
+                            <span class="text-slate-600">ค่างานต้นทุน (Direct Cost)</span>
+                            <span id="outputDirectCost" class="font-mono text-base text-slate-800">0.00 บาท</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-emerald-100 pb-2">
+                            <span class="text-slate-600 flex items-center">
+                                ค่า Factor F (งานทาง)
+                                <input type="number" step="0.0001" id="inputFactorF" value="1.3624" class="ml-2 w-20 border border-emerald-300 rounded px-1 py-0.5 text-xs text-center" onchange="calculateCost()">
+                            </span>
+                            <span id="outputFactorFCost" class="font-mono text-base text-slate-800">0.00 บาท</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-emerald-700 font-bold text-lg">ราคากลางสุทธิโดยประมาณ</span>
+                            <span id="outputTotalCost" class="font-mono text-2xl font-black text-emerald-600">0.00 บาท</span>
+                        </div>
+                        <p class="text-[10px] text-emerald-600 text-center mt-4 bg-white p-2 rounded border border-emerald-100">
+                            * การประเมินราคานี้ใช้สมการพื้นฐานเพื่อความสะดวกรวดเร็ว ราคากลางที่ใช้เบิกจ่ายจริงต้องผ่านการคำนวณตามหลักเกณฑ์ของกรมบัญชีกลางและประกาศของพาณิชย์จังหวัดอุทัยธานีอย่างละเอียดอีกครั้ง
+                        </p>
                     </div>
                 </div>
 
@@ -547,6 +553,11 @@
         let currentCategoryId = 'all'; 
         let categoriesData = []; 
         let surveysData = [];
+
+        // ตัวแปรสำหรับคำนวณราคา
+        let calcCurrentProject = null;
+        let calcTotalArea = 0;
+        let calcTotalVolume = 0;
 
         // ตัวแปรสำหรับแผนที่ (โชว์เส้นทาง + แก้ไขหัว/ท้าย)
         let routeMap = null;
@@ -622,7 +633,7 @@
                 fileView.classList.add('hidden');
                 surveyView.classList.remove('hidden');
                 sidebarFileControls.classList.add('hidden');
-                title.innerHTML = '<i class="fa-solid fa-map-location-dot text-emerald-500 mr-2"></i> หมวดหมู่งานสำรวจและประมาณราคา';
+                title.innerHTML = '<i class="fa-solid fa-map-location-dot text-emerald-500 mr-2"></i> หมวดหมู่งานสำรวจ';
                 fetchSurveys();
             }
         }
@@ -725,7 +736,7 @@
                                     </td>
                                     <td class="py-3 px-3 align-top border-l border-slate-100 text-center whitespace-nowrap" rowspan="${rowCount}">
                                         <div class="flex flex-col gap-1.5 w-full">
-                                            <button onclick="openCostModal('${item.id}')" class="text-white bg-teal-500 hover:bg-teal-600 px-2 py-1.5 rounded shadow-sm transition-colors text-xs flex items-center justify-center w-full"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> ทำ ปร.4</button>
+                                            <button onclick="openCostModal('${item.id}')" class="text-white bg-teal-500 hover:bg-teal-600 px-2 py-1.5 rounded shadow-sm transition-colors text-xs flex items-center justify-center w-full"><i class="fa-solid fa-calculator mr-1"></i> ประเมินราคา</button>
                                             
                                             <div class="flex gap-1 w-full mt-1">
                                                 <button onclick="openPreviewModal('${item.id}')" class="flex-1 text-indigo-500 hover:text-indigo-700 bg-white hover:bg-indigo-50 border border-slate-200 p-1.5 rounded shadow-sm transition-colors" title="ดูรูปแบบถนน"><i class="fa-solid fa-image"></i></button>
@@ -800,11 +811,7 @@
             document.getElementById('mapDistance').innerText = "...";
             document.getElementById('mapDistanceLabel').innerText = "กำลังคำนวณเส้นทาง...";
             document.getElementById('saveMapPositionBtn').classList.add('hidden');
-            
-            const modal = document.getElementById('mapModal');
-            modal.classList.remove('hidden');
-            // Remove print class if left somehow
-            modal.classList.remove('modal-active-print');
+            document.getElementById('mapModal').classList.remove('hidden');
 
             if (!routeMap) {
                 routeMap = L.map('mapContainer', { zoomControl: true });
@@ -833,12 +840,17 @@
                 iconAnchor: [9, 9]
             });
 
+            // หมุดหัว/ท้ายสามารถลากได้
             const markerStart = L.marker([startLat, startLng], {
-                icon: startIcon, draggable: true, autoPan: true
+                icon: startIcon,
+                draggable: true,
+                autoPan: true
             }).bindPopup('<b class="text-emerald-600">จุดเริ่มต้น</b><br><small>ลากหมุดเพื่อเปลี่ยนจุดเริ่มต้น</small>').addTo(routeMap);
 
             const markerEnd = L.marker([endLat, endLng], {
-                icon: endIcon, draggable: true, autoPan: true
+                icon: endIcon,
+                draggable: true,
+                autoPan: true
             }).bindPopup('<b class="text-blue-600">จุดสิ้นสุด</b><br><small>ลากหมุดเพื่อเปลี่ยนจุดสิ้นสุด</small>').addTo(routeMap);
 
             mapMarkers.push(markerStart, markerEnd);
@@ -896,10 +908,15 @@
             }
 
             document.getElementById('mapDistance').innerText = displayDistance.toLocaleString('en-US', {
-                minimumFractionDigits: 2, maximumFractionDigits: 2
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
             });
 
-            mapPolyline = L.polyline(latlngs, { color: '#ef4444', weight: 4, opacity: 0.9 }).addTo(routeMap);
+            mapPolyline = L.polyline(latlngs, {
+                color: '#ef4444',
+                weight: 4,
+                opacity: 0.9
+            }).addTo(routeMap);
 
             if (latlngs.length > 1) {
                 routeMap.fitBounds(mapPolyline.getBounds(), { padding: [50, 50] });
@@ -908,7 +925,8 @@
 
         async function saveMapPositions() {
             if (!currentMapSurveyId || !currentMapStart || !currentMapEnd) {
-                alert('ไม่พบข้อมูลพิกัดที่ต้องการบันทึก'); return;
+                alert('ไม่พบข้อมูลพิกัดที่ต้องการบันทึก');
+                return;
             }
 
             const btn = document.getElementById('saveMapPositionBtn');
@@ -967,6 +985,7 @@
             let latInput = document.getElementById(target === 'start' ? 'surveyStartLat' : 'surveyEndLat');
             let lngInput = document.getElementById(target === 'start' ? 'surveyStartLng' : 'surveyEndLng');
 
+            // อุทัยธานี (ค่าตั้งต้น)
             let initialLat = 15.3829; 
             let initialLng = 100.0242;
             let zoomLevel = 10;
@@ -1033,7 +1052,8 @@
 
         function confirmLocationPicker() {
             if (!pickerMarker) {
-                alert('กรุณาคลิกเลือกตำแหน่งบนแผนที่ก่อนกดยืนยัน'); return;
+                alert('กรุณาคลิกเลือกตำแหน่งบนแผนที่ก่อนกดยืนยัน');
+                return;
             }
             const pos = pickerMarker.getLatLng();
             if (currentPickerTarget === 'start') {
@@ -1046,23 +1066,33 @@
             closeLocationPicker();
         }
 
-        // ================= สรุปประมาณราคา BOQ อัตโนมัติ (ปร.4) =================
-        let boqItems = []; // สถานะเก็บข้อมูล BOQ แบบแก้ไขได้
-
+        // ================= ระบบประเมินราคาก่อสร้าง (Cost Calculation) =================
         function openCostModal(id) {
             const item = surveysData.find(s => s.id === id);
             if(!item) return;
 
+            calcCurrentProject = item;
+            
             document.getElementById('costProjectName').innerText = item.project_name;
             document.getElementById('costRoadType').innerText = item.road_type || '-';
 
-            let calcTotalArea = 0;
-            let calcTotalVolume = 0;
-            let calcTotalLength = 0;
-            
-            let avgWidth = parseFloat(item.width || 0);
-            let avgThickness = parseFloat(item.thickness || 0.15);
+            // ซ่อน/แสดง ฟอร์มราคาย่อยตามประเภทถนน
+            document.getElementById('costInputsConcrete').classList.add('hidden');
+            document.getElementById('costInputsAsphalt').classList.add('hidden');
+            document.getElementById('costInputsGravel').classList.add('hidden');
 
+            if (item.road_type.includes('คสล') || item.road_type.includes('คอนกรีต')) {
+                document.getElementById('costInputsConcrete').classList.remove('hidden');
+            } else if (item.road_type.includes('แอสฟัลท์') || item.road_type.includes('ยางมะตอย')) {
+                document.getElementById('costInputsAsphalt').classList.remove('hidden');
+            } else {
+                document.getElementById('costInputsGravel').classList.remove('hidden');
+                document.getElementById('labelBaseMaterial').innerText = `ราคาวัสดุ (${item.road_type}) (บาท/ลบ.ม.)`;
+            }
+
+            calcTotalArea = 0;
+            calcTotalVolume = 0;
+            
             let segments = item.segments || [];
             if(!Array.isArray(segments) || segments.length === 0) {
                  segments = [{
@@ -1082,6 +1112,7 @@
                 const ew_br = parseFloat(seg.ew_br || 0); const el_br = parseFloat(seg.el_br || 0); const et_br = parseFloat(seg.et_br || 0);
 
                 const areaEar = (0.5 * ew_fl * el_fl) + (0.5 * ew_fr * el_fr) + (0.5 * ew_bl * el_bl) + (0.5 * ew_br * el_br);
+                
                 const volEar = (0.5 * ew_fl * el_fl * et_fl) + 
                                (0.5 * ew_fr * el_fr * et_fr) + 
                                (0.5 * ew_bl * el_bl * et_bl) + 
@@ -1089,238 +1120,65 @@
 
                 calcTotalArea += (areaMain + areaEar);
                 calcTotalVolume += (volMain + volEar);
-                calcTotalLength += l;
-
-                if(w > 0) avgWidth = w;
-                if(t > 0) avgThickness = t;
             });
 
-            document.getElementById('costTotalLength').innerText = calcTotalLength.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('costTotalArea').innerText = calcTotalArea.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('costTotalVolume').innerText = calcTotalVolume.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-            // สร้างตารางโครง BOQ ตามราคาพาณิชย์และกรมบัญชีกลาง (อิงจากไฟล์ Excel)
-            boqItems = [];
-            const roadType = item.road_type;
-            
-            if (roadType.includes('คสล') || roadType.includes('คอนกรีต')) {
-                boqItems.push({
-                    group: '1. งานรองพื้นทาง',
-                    items: [
-                        { name: '1.1 ทรายรองพื้น', unit: 'ลบ.ม.', qty: calcTotalArea * 0.05, price: 357.39 }
-                    ]
-                });
-                boqItems.push({
-                    group: '2. งานวัสดุทางขึ้นทางลง',
-                    items: [
-                        { name: '2.1 วัสดุหินคลุก', unit: 'ลบ.ม.', qty: 15, price: 481.17 }
-                    ]
-                });
-                
-                let expJoints = Math.floor(calcTotalLength / 40) * avgWidth;
-                let conJoints = Math.floor(calcTotalLength / 10) * avgWidth;
-                if(expJoints === 0 && calcTotalLength > 0) expJoints = avgWidth;
-                
-                boqItems.push({
-                    group: '3. งานผิวทาง',
-                    items: [
-                        { name: `3.1 งานผิวทางปอร์ตแลนด์ซีเมนต์คอนกรีต หนา ${avgThickness} เมตร`, unit: 'ตร.ม.', qty: calcTotalArea, price: 393.38 },
-                        { name: '3.2 รอยต่อเผื่อขยายตามขวาง (Expansion Joint)', unit: 'เมตร', qty: expJoints, price: 187.19 },
-                        { name: '3.3 รอยต่อเผื่อหดตัวตามขวาง (Contraction Joint)', unit: 'เมตร', qty: conJoints, price: 89.92 }
-                    ]
-                });
-                boqItems.push({
-                    group: '4. งานท่อพร้อมบ่อพัก',
-                    items: [
-                        { name: '4.1 ท่อคสล.ขนาด Ø 0.40 เมตร', unit: 'เมตร', qty: 0, price: 755.00 },
-                        { name: '4.2 บ่อพัก 1.00 x 1.00 เมตร', unit: 'บ่อ', qty: 0, price: 6199.68 },
-                        { name: '4.3 งานสกัดเชื่อมท่อระบายน้ำเดิม', unit: 'งาน', qty: 0, price: 2000.00 }
-                    ]
-                });
-            } else if (roadType.includes('แอสฟัลท์') || roadType.includes('ยางมะตอย')) {
-                boqItems.push({
-                    group: '1. งานรองพื้นทางและพื้นทาง',
-                    items: [
-                        { name: '1.1 วัสดุลูกรัง', unit: 'ลบ.ม.', qty: calcTotalVolume * 1.2, price: 350.00 },
-                        { name: '1.2 หินคลุก', unit: 'ลบ.ม.', qty: calcTotalVolume * 0.8, price: 481.17 }
-                    ]
-                });
-                boqItems.push({
-                    group: '2. งานผิวทาง',
-                    items: [
-                        { name: '2.1 ลาดยาง Prime Coat', unit: 'ตร.ม.', qty: calcTotalArea, price: 25.00 },
-                        { name: '2.2 ลาดยาง Tack Coat', unit: 'ตร.ม.', qty: calcTotalArea, price: 15.00 },
-                        { name: `2.3 ผิวทางแอสฟัลท์ติกคอนกรีต หนา ${avgThickness} เมตร (คิดเป็นตัน)`, unit: 'ตัน', qty: calcTotalVolume * 2.36, price: 3500.00 }
-                    ]
-                });
-            } else {
-                boqItems.push({
-                    group: '1. งานดินและวัสดุทาง',
-                    items: [
-                        { name: `1.1 วัสดุทาง (${item.road_type})`, unit: 'ลบ.ม.', qty: calcTotalVolume * 1.35, price: 350.00 }
-                    ]
-                });
-            }
-
-            // คำนวณเบื้องต้นเพื่อหา Factor F ให้สอดคล้องกับค่างานต้นทุนตามตารางกรมบัญชีกลาง
-            let tempDirectCost = 0;
-            boqItems.forEach(g => g.items.forEach(i => tempDirectCost += i.qty * i.price));
-            
-            let autoFactorF = 1.3624;
-            if (tempDirectCost <= 5000000) autoFactorF = 1.3624;
-            else if (tempDirectCost <= 10000000) autoFactorF = 1.3575;
-            else if (tempDirectCost <= 20000000) autoFactorF = 1.3533;
-            else if (tempDirectCost <= 30000000) autoFactorF = 1.3491;
-            
-            document.getElementById('inputFactorF').value = autoFactorF.toFixed(4);
-
-            renderBOQ();
-            
-            const modal = document.getElementById('costModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('modal-active-print'); // สำหรับสั่งพิมพ์
+            calculateCost();
+            document.getElementById('costModal').classList.remove('hidden');
         }
 
         function closeCostModal() {
-            const modal = document.getElementById('costModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('modal-active-print');
+            document.getElementById('costModal').classList.add('hidden');
         }
 
-        // ================= ฟังก์ชันจัดการและ Render BOQ =================
-        function renderBOQ() {
-            let html = '';
-            let totalDirectCost = 0;
-            let totalFactorFCost = 0;
-            const f = parseFloat(document.getElementById('inputFactorF').value || 1.3624);
+        function calculateCost() {
+            if(!calcCurrentProject) return;
 
-            let rowNum = 1;
-            boqItems.forEach((group, gIndex) => {
-                // แถวหัวข้อหมวดหมู่
-                html += `
-                    <tr class="bg-indigo-50/70 font-bold text-indigo-900 border-b border-indigo-100 print:bg-slate-100 group">
-                        <td class="py-2.5 px-3 text-center">${rowNum}</td>
-                        <td class="py-2.5 px-3" colspan="7">
-                            <input type="text" class="w-full bg-transparent font-bold outline-none focus:border-b border-indigo-300 print:border-none" value="${group.group}" onchange="updateBOQGroup(${gIndex}, this.value)">
-                        </td>
-                        <td class="py-2.5 px-2 text-center no-print align-middle">
-                            <button onclick="removeBOQGroup(${gIndex})" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-red-50 rounded p-1 shadow-sm border border-red-100" title="ลบหมวดงานนี้"><i class="fa-solid fa-trash text-xs"></i></button>
-                        </td>
-                    </tr>
-                `;
+            const oilPrice = parseFloat(document.getElementById('inputOilPrice').value || 0);
+            const factorF = parseFloat(document.getElementById('inputFactorF').value || 1.3624);
+            const roadType = calcCurrentProject.road_type;
+            
+            let directCost = 0;
 
-                // แถวรายการย่อย
-                group.items.forEach((item, iIndex) => {
-                    const cost = item.qty * item.price;
-                    const midCost = cost * f;
-                    totalDirectCost += cost;
-                    totalFactorFCost += midCost;
+            if (roadType.includes('คสล') || roadType.includes('คอนกรีต')) {
+                const pConcrete = parseFloat(document.getElementById('inputConcretePrice').value || 0);
+                const pWiremesh = parseFloat(document.getElementById('inputWiremeshPrice').value || 0);
+                const pSand = parseFloat(document.getElementById('inputSandPrice').value || 0);
+                
+                const costConcrete = calcTotalVolume * pConcrete;
+                const costWiremesh = calcTotalArea * 1.1 * pWiremesh; // เผื่อ 10%
+                const costSand = calcTotalArea * 0.05 * pSand; // หนา 0.05
+                const laborMachineCost = calcTotalVolume * (400 + (oilPrice * 2));
 
-                    html += `
-                        <tr class="hover:bg-slate-50 transition-colors group">
-                            <td class="py-1.5 px-3"></td>
-                            <td class="py-1.5 px-3 text-slate-800">
-                                <input type="text" class="w-full border border-transparent hover:border-slate-300 rounded px-2 py-1 focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700 bg-transparent focus:bg-white print:p-0" value="${item.name}" onchange="updateBOQItem(${gIndex}, ${iIndex}, 'name', this.value)" placeholder="ชื่อรายการ">
-                            </td>
-                            <td class="py-1.5 px-3 text-center text-slate-600">
-                                <input type="text" class="w-full border border-transparent hover:border-slate-300 rounded px-1 py-1 text-center focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700 bg-transparent focus:bg-white print:p-0" value="${item.unit}" onchange="updateBOQItem(${gIndex}, ${iIndex}, 'unit', this.value)" placeholder="หน่วย">
-                            </td>
-                            <td class="py-1.5 px-3 text-right">
-                                <input type="number" step="any" class="w-full max-w-[80px] border border-slate-300 rounded px-2 py-1 text-right focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700 bg-white" value="${item.qty}" onchange="updateBOQItem(${gIndex}, ${iIndex}, 'qty', this.value)">
-                            </td>
-                            <td class="py-1.5 px-3 text-right">
-                                <input type="number" step="any" class="w-full max-w-[90px] border border-slate-300 rounded px-2 py-1 text-right focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700 bg-white" value="${item.price}" onchange="updateBOQItem(${gIndex}, ${iIndex}, 'price', this.value)">
-                            </td>
-                            <td class="py-1.5 px-3 text-right font-mono text-slate-700">${cost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td class="py-1.5 px-3 text-right text-slate-500">${f.toFixed(4)}</td>
-                            <td class="py-1.5 px-3 text-right font-mono font-bold text-emerald-700">${midCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td class="py-1.5 px-2 text-center no-print align-middle">
-                                <button onclick="removeBOQItem(${gIndex}, ${iIndex})" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-red-50 rounded p-1 shadow-sm border border-slate-200" title="ลบรายการนี้"><i class="fa-solid fa-xmark text-xs"></i></button>
-                            </td>
-                        </tr>
-                    `;
-                });
+                directCost = costConcrete + costWiremesh + costSand + laborMachineCost;
 
-                // ปุ่มเพิ่มรายการย่อยในหมวด (ไม่แสดงตอนพิมพ์)
-                html += `
-                    <tr class="no-print">
-                        <td class="py-1 px-3"></td>
-                        <td class="py-2 px-3" colspan="8">
-                            <button onclick="addBOQItem(${gIndex})" class="text-[11px] text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded transition-colors flex items-center shadow-sm">
-                                <i class="fa-solid fa-plus mr-1"></i> เพิ่มรายการ
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                rowNum++;
-            });
+            } else if (roadType.includes('แอสฟัลท์') || roadType.includes('ยางมะตอย')) {
+                const pAsphalt = parseFloat(document.getElementById('inputAsphaltPrice').value || 0);
+                const pTack = parseFloat(document.getElementById('inputTackcoatPrice').value || 0);
+                
+                const weightTons = calcTotalVolume * 2.4;
+                const costAsphalt = weightTons * pAsphalt;
+                const costTack = calcTotalArea * pTack;
+                const laborMachineCost = calcTotalArea * (oilPrice * 1.5);
 
-            // ปุ่มเพิ่มหมวดงานใหม่ต่อท้ายตาราง (ไม่แสดงตอนพิมพ์)
-            html += `
-                <tr class="no-print border-t-[3px] border-slate-200">
-                    <td class="py-4 px-3 text-center" colspan="9">
-                        <button onclick="addBOQGroup()" class="text-sm text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-6 py-2.5 rounded-lg transition-colors flex items-center justify-center w-full shadow-sm font-bold">
-                            <i class="fa-solid fa-layer-group mr-2"></i> เพิ่มหมวดงานใหม่
-                        </button>
-                    </td>
-                </tr>
-            `;
+                directCost = costAsphalt + costTack + laborMachineCost;
 
-            document.getElementById('boqTableBody').innerHTML = html;
-            document.getElementById('outputDirectCost').innerText = totalDirectCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('outputTotalCost').innerText = totalFactorFCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        }
-
-        // อัปเดตข้อมูลเมื่อมีการพิมพ์แก้ไข
-        function updateBOQItem(gIndex, iIndex, field, value) {
-            if (field === 'qty' || field === 'price') {
-                boqItems[gIndex].items[iIndex][field] = parseFloat(value) || 0;
             } else {
-                boqItems[gIndex].items[iIndex][field] = value;
+                const pBase = parseFloat(document.getElementById('inputBasePrice').value || 0);
+                const costMaterial = calcTotalVolume * (pBase * 1.2); // เผื่อยุบตัว 20%
+                const laborMachineCost = calcTotalVolume * (oilPrice * 2.5);
+                directCost = costMaterial + laborMachineCost;
             }
-            renderBOQ(); // Re-render เพื่อคำนวณราคาทันที
+
+            const totalCost = directCost * factorF;
+
+            document.getElementById('outputDirectCost').innerText = directCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' บาท';
+            document.getElementById('outputFactorFCost').innerText = (totalCost - directCost).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' บาท';
+            document.getElementById('outputTotalCost').innerText = totalCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' บาท';
         }
 
-        function updateBOQGroup(gIndex, value) {
-            boqItems[gIndex].group = value;
-        }
-
-        // ฟังก์ชันเพิ่มรายการย่อย
-        function addBOQItem(gIndex) {
-            boqItems[gIndex].items.push({ 
-                name: '', 
-                unit: 'ตร.ม.', 
-                qty: 0, 
-                price: 0 
-            });
-            renderBOQ();
-        }
-
-        // ฟังก์ชันลบรายการย่อย
-        function removeBOQItem(gIndex, iIndex) {
-            if(confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) {
-                boqItems[gIndex].items.splice(iIndex, 1);
-                renderBOQ();
-            }
-        }
-
-        // ฟังก์ชันเพิ่มหมวดงานหลัก
-        function addBOQGroup() {
-            const nextNum = boqItems.length + 1;
-            boqItems.push({
-                group: `${nextNum}. หมวดงานใหม่`,
-                items: [{ name: '', unit: 'ตร.ม.', qty: 0, price: 0 }]
-            });
-            renderBOQ();
-        }
-
-        // ฟังก์ชันลบหมวดงานหลัก
-        function removeBOQGroup(gIndex) {
-            if(confirm('ต้องการลบหมวดงานนี้ พร้อมรายการย่อยทั้งหมด ใช่หรือไม่?')) {
-                boqItems.splice(gIndex, 1);
-                renderBOQ();
-            }
-        }
 
         // ================= ระบบเพิ่ม Dynamic Segments (Form Survey) =================
         function createSegmentHTML(seg, index) {
@@ -1532,6 +1390,8 @@
                 const area_bl = 0.5 * ew_bl * el_bl;
                 const area_br = 0.5 * ew_br * el_br;
                 
+                const segEarTotalArea = area_fl + area_fr + area_bl + area_br;
+
                 segmentsHtml += `
                 <div class="bg-white border-2 border-slate-100 rounded-xl overflow-hidden shadow-sm page-break-avoid mb-6">
                     <div class="bg-indigo-50/70 px-4 py-3 border-b border-slate-100 flex justify-between items-center">
@@ -1580,15 +1440,16 @@
             });
 
             document.getElementById('previewSegmentsList').innerHTML = segmentsHtml;
-            const modal = document.getElementById('previewModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('modal-active-print');
+            document.getElementById('previewModal').classList.remove('hidden');
         }
 
         function closePreviewModal() {
-            const modal = document.getElementById('previewModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('modal-active-print');
+            document.getElementById('previewModal').classList.add('hidden');
+        }
+
+        // ================= สั่งพิมพ์หน้าจอ Preview =================
+        function printPreview() {
+            window.print();
         }
 
         // ================= GPS Function =================
