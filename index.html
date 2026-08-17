@@ -26,6 +26,67 @@
         
         /* Map Z-index fix for Modals */
         .leaflet-container { z-index: 10 !important; }
+
+        /* ================= CSS สำหรับการพิมพ์ (Print) ================= */
+        @media print {
+            /* ซ่อนหน้าอื่นๆ ทั้งหมด ยกเว้น Modal Preview */
+            body > div:not(#previewModal) { display: none !important; }
+
+            /* รีเซ็ตหน้าให้แสดงผลแบบเลื่อนลงมาได้เต็มที่ ไม่โดนตัด */
+            body, html {
+                height: auto !important;
+                overflow: visible !important;
+                background-color: white !important;
+            }
+
+            /* ปลดล็อก Modal จาก Fixed เป็น Static เพื่อให้ปริ้นได้หลายหน้า */
+            #previewModal {
+                position: static !important;
+                background: white !important;
+                display: block !important;
+                padding: 0 !important;
+            }
+
+            /* ลบเงา ความสูงที่จำกัด และปรับให้คอนเทนต์แสดงเต็ม */
+            #previewModal > div {
+                max-width: 100% !important;
+                width: 100% !important;
+                box-shadow: none !important;
+                max-height: none !important;
+                height: auto !important;
+                overflow: visible !important;
+                margin: 0 !important;
+                border: none !important;
+            }
+
+            /* ลบสีพื้นหลังสีเทาออกตอนปริ้นให้ดูสะอาดขึ้น */
+            #previewModal .bg-slate-50\/50 {
+                background-color: white !important;
+            }
+
+            /* ปลดล็อก Scrollbar ให้เนื้อหาไหลลงมาเพื่อปริ้น */
+            #previewSegmentsList {
+                overflow: visible !important;
+                max-height: none !important;
+                height: auto !important;
+                padding-right: 0 !important;
+            }
+
+            /* ซ่อนปุ่มและส่วนที่ไม่ต้องการให้โชว์ในกระดาษ */
+            .no-print { display: none !important; }
+
+            /* บังคับให้เบราว์เซอร์ปริ้นสีพื้นหลัง (เช่น สีถนน สีหูช้าง) */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* ป้องกันการปริ้นแล้วรูปถนนโดนตัดครึ่งหน้า */
+            .page-break-avoid {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen overflow-hidden">
@@ -330,7 +391,12 @@
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-4 flex flex-col overflow-hidden max-h-[95vh]">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-indigo-50 shrink-0">
                 <h3 class="text-xl font-bold text-indigo-800"><i class="fa-solid fa-road mr-2"></i> รูปแบบถนนและสรุปพื้นที่</h3>
-                <button onclick="closePreviewModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <div class="flex gap-2 no-print">
+                    <button onclick="printPreview()" class="text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition-colors font-medium shadow-sm flex items-center text-sm">
+                        <i class="fa-solid fa-print mr-2"></i> พิมพ์
+                    </button>
+                    <button onclick="closePreviewModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors border border-slate-200"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
             </div>
             
             <div class="p-6 flex-1 flex flex-col gap-6 bg-slate-50/50 overflow-hidden">
@@ -1215,7 +1281,7 @@
                 const segEarTotalArea = area_fl + area_fr + area_bl + area_br;
 
                 segmentsHtml += `
-                <div class="bg-white border-2 border-slate-100 rounded-xl overflow-hidden shadow-sm">
+                <div class="bg-white border-2 border-slate-100 rounded-xl overflow-hidden shadow-sm page-break-avoid mb-6">
                     <div class="bg-indigo-50/70 px-4 py-3 border-b border-slate-100 flex justify-between items-center">
                         <span class="font-bold text-indigo-800">${seg.name || `ช่วงที่ ${index+1}`}</span>
                     </div>
@@ -1267,6 +1333,11 @@
 
         function closePreviewModal() {
             document.getElementById('previewModal').classList.add('hidden');
+        }
+
+        // ================= สั่งพิมพ์หน้าจอ Preview =================
+        function printPreview() {
+            window.print();
         }
 
         // ================= GPS Function =================
