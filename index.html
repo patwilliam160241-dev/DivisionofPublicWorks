@@ -1,12 +1,3 @@
-เพื่อเป็นการเพิ่มฟังก์ชันให้ **"ลากขยับจุดพิกัดในแผนที่เส้นทางได้"** และสามารถกดบันทึกโดย **ไม่ไปกระทบ/รื้อโครงสร้างโค้ดเดิม** ผมได้ทำการแทรกโค้ดเข้าไปเบาๆ ดังนี้ครับ:
-
-1. เพิ่มปุ่ม **"บันทึกตำแหน่งใหม่"** ในส่วนหัวของแผนที่ (ซ่อนไว้ก่อน จะโชว์เมื่อลากหมุด)
-2. สั่งให้หมุดบนแผนที่ตั้งค่า `draggable: true`
-3. เขียนฟังก์ชันให้ตอนลากเสร็จ ระบบจะคำนวณเส้นทางใหม่ทันที และอัปเดตลงฐานข้อมูลเมื่อกดปุ่มบันทึก
-
-คุณสามารถคัดลอกโค้ดทั้งหมดด้านล่างนี้ ไปวางทับไฟล์เดิมได้เลยครับ:
-
-```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -48,54 +39,53 @@
                 background-color: white !important;
             }
 
-            /* ปลดล็อก Modal จาก Fixed เป็น Static เพื่อให้ปริ้นได้หลายหน้า */
-            #previewModal {
-                position: static !important;
-                background: white !important;
+            /* แปลงโครงสร้าง Flexbox ทั้งหมดให้เป็น Block เพื่อให้ตัดหน้ากระดาษได้สมบูรณ์ */
+            #previewModal, 
+            #previewModal > div,
+            #previewModal .flex-col, 
+            #previewModal .flex-1,
+            #previewSegmentsList {
                 display: block !important;
-                padding: 0 !important;
+                position: static !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
             }
 
-            /* ลบเงา ความสูงที่จำกัด และปรับให้คอนเทนต์แสดงเต็ม */
+            /* ล้างระยะขอบและเงาต่างๆ ของ Modal */
+            #previewModal {
+                padding: 0 !important;
+                background: white !important;
+            }
+
             #previewModal > div {
-                max-width: 100% !important;
-                width: 100% !important;
                 box-shadow: none !important;
-                max-height: none !important;
-                height: auto !important;
-                overflow: visible !important;
                 margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
                 border: none !important;
             }
 
-            /* ลบสีพื้นหลังสีเทาออกตอนปริ้นให้ดูสะอาดขึ้น */
-            #previewModal .bg-slate-50\/50 {
-                background-color: white !important;
-            }
-
-            /* ปลดล็อก Scrollbar ให้เนื้อหาไหลลงมาเพื่อปริ้น */
-            #previewSegmentsList {
-                overflow: visible !important;
-                max-height: none !important;
-                height: auto !important;
-                padding-right: 0 !important;
-            }
-
-            /* ซ่อนปุ่มและส่วนที่ไม่ต้องการให้โชว์ในกระดาษ */
-            .no-print { display: none !important; }
-
-            /* บังคับให้เบราว์เซอร์ปริ้นสีพื้นหลัง (เช่น สีถนน สีหูช้าง) */
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            /* ป้องกันการปริ้นแล้วรูปถนนโดนตัดครึ่งหน้า */
+            /* ป้องกันการปริ้นแล้วรูปถนนโดนตัดครึ่งหน้า (คำสั่งนี้จะทำงานได้ดีเมื่อ Container เป็น Block) */
             .page-break-avoid {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 display: block !important;
                 margin-bottom: 2rem !important;
+            }
+
+            /* เอาสีพื้นหลังสีเทาออกตอนปริ้นให้ดูสะอาดขึ้น */
+            #previewModal .bg-slate-50\/50 {
+                background-color: white !important;
+            }
+
+            /* ซ่อนส่วนที่ไม่ต้องการให้โชว์ในกระดาษ */
+            .no-print { display: none !important; }
+
+            /* บังคับให้เบราว์เซอร์ปริ้นสีพื้นหลังถนนให้ครบ */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
         }
     </style>
@@ -428,7 +418,7 @@
             <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-sky-50 shrink-0">
                 <h3 class="text-xl font-bold text-sky-800"><i class="fa-solid fa-map-location-dot mr-2"></i> แผนที่เส้นทางตามถนน (หัว-ท้าย)</h3>
                 <div class="flex gap-2">
-                    <button id="saveMapRouteBtn" onclick="saveMapNewCoords()" class="hidden text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg transition-colors text-sm font-medium shadow-sm flex items-center">
+                    <button id="saveMapCoordsBtn" onclick="saveDraggedMapCoords()" class="hidden text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg transition-colors font-medium shadow-sm flex items-center text-sm">
                         <i class="fa-solid fa-floppy-disk mr-2"></i> บันทึกตำแหน่งใหม่
                     </button>
                     <button onclick="closeMapModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors border border-slate-200"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -584,7 +574,7 @@
         let mapPolyline = null;
         let mapMarkerStart = null;
         let mapMarkerEnd = null;
-        let activeMapSurveyId = null; // เพิ่มตัวแปรเก็บ ID โครงการที่กำลังเปิดแผนที่
+        let currentMapSurveyId = null;
 
         // ตัวแปรสำหรับตัวเลือกแผนที่ (ปักหมุดเอง)
         let pickerMap = null;
@@ -806,127 +796,9 @@
             return null;
         }
 
-        async function updateRouteAndShowSave() {
-            document.getElementById('saveMapRouteBtn').classList.remove('hidden');
+        async function redrawRouteLine(startLat, startLng, endLat, endLng, fitBounds = false) {
             document.getElementById('mapDistance').innerText = "...";
             document.getElementById('mapDistanceLabel').innerText = "กำลังคำนวณเส้นทางใหม่...";
-
-            const sLat = mapMarkerStart.getLatLng().lat;
-            const sLng = mapMarkerStart.getLatLng().lng;
-            const eLat = mapMarkerEnd.getLatLng().lat;
-            const eLng = mapMarkerEnd.getLatLng().lng;
-
-            if (mapPolyline) routeMap.removeLayer(mapPolyline);
-
-            const routeData = await fetchRoute(sLat, sLng, eLat, eLng);
-            let latlngs = [];
-            let displayDistance = 0;
-
-            if (routeData) {
-                latlngs = routeData.coordinates;
-                displayDistance = routeData.distanceMeters;
-                document.getElementById('mapDistanceLabel').innerText = "ระยะทางตามถนนโดยประมาณ";
-            } else {
-                latlngs = [[sLat, sLng], [eLat, eLng]];
-                displayDistance = calculateDistance(sLat, sLng, eLat, eLng) * 1000;
-                document.getElementById('mapDistanceLabel').innerText = "ระยะทางเส้นตรง (ไม่พบข้อมูลเส้นทางถนน)";
-            }
-
-            document.getElementById('mapDistance').innerText = displayDistance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            mapPolyline = L.polyline(latlngs, {color: '#ef4444', weight: 4}).addTo(routeMap);
-        }
-
-        async function saveMapNewCoords() {
-            if (!activeMapSurveyId || !mapMarkerStart || !mapMarkerEnd) return;
-            const btn = document.getElementById('saveMapRouteBtn');
-            const origHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังบันทึก...';
-            btn.disabled = true;
-
-            const sLat = mapMarkerStart.getLatLng().lat.toFixed(6);
-            const sLng = mapMarkerStart.getLatLng().lng.toFixed(6);
-            const eLat = mapMarkerEnd.getLatLng().lat.toFixed(6);
-            const eLng = mapMarkerEnd.getLatLng().lng.toFixed(6);
-
-            try {
-                const { error } = await supabaseClient.from('survey_works').update({
-                    start_lat: parseFloat(sLat),
-                    start_lng: parseFloat(sLng),
-                    end_lat: parseFloat(eLat),
-                    end_lng: parseFloat(eLng)
-                }).eq('id', activeMapSurveyId);
-                
-                if (error) throw error;
-                
-                alert("บันทึกตำแหน่งใหม่เรียบร้อยแล้ว");
-                btn.classList.add('hidden');
-                
-                const item = surveysData.find(s => s.id === activeMapSurveyId);
-                if(item) {
-                    item.start_lat = parseFloat(sLat);
-                    item.start_lng = parseFloat(sLng);
-                    item.end_lat = parseFloat(eLat);
-                    item.end_lng = parseFloat(eLng);
-                }
-                fetchSurveys(); 
-            } catch (err) {
-                console.error(err);
-                alert("เกิดข้อผิดพลาดในการบันทึกพิกัด");
-            } finally {
-                btn.innerHTML = origHtml;
-                btn.disabled = false;
-            }
-        }
-
-        async function openMapModal(id) {
-            const item = surveysData.find(s => s.id === id);
-            if(!item) return;
-
-            if (!item.start_lat || !item.start_lng || !item.end_lat || !item.end_lng) {
-                alert("ไม่สามารถแสดงแผนที่ได้ เนื่องจากระบุพิกัดไม่ครบถ้วน");
-                return;
-            }
-
-            activeMapSurveyId = id;
-            document.getElementById('saveMapRouteBtn').classList.add('hidden');
-
-            document.getElementById('mapProjectName').innerText = item.project_name;
-            document.getElementById('mapDistance').innerText = "...";
-            document.getElementById('mapDistanceLabel').innerText = "กำลังคำนวณเส้นทาง...";
-            document.getElementById('mapModal').classList.remove('hidden');
-
-            const startLat = parseFloat(item.start_lat);
-            const startLng = parseFloat(item.start_lng);
-            const endLat = parseFloat(item.end_lat);
-            const endLng = parseFloat(item.end_lng);
-
-            if (!routeMap) {
-                routeMap = L.map('mapContainer', { zoomControl: true });
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap'
-                }).addTo(routeMap);
-            } else {
-                if(mapMarkerStart) routeMap.removeLayer(mapMarkerStart);
-                if(mapMarkerEnd) routeMap.removeLayer(mapMarkerEnd);
-                if(mapPolyline) routeMap.removeLayer(mapPolyline);
-            }
-
-            const startIcon = L.divIcon({
-                className: 'custom-map-icon',
-                html: "<div style='background-color:#10b981; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow: 0 0 6px rgba(0,0,0,0.5);'></div>",
-                iconSize: [16, 16], iconAnchor: [8, 8]
-            });
-            const endIcon = L.divIcon({
-                className: 'custom-map-icon',
-                html: "<div style='background-color:#3b82f6; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow: 0 0 6px rgba(0,0,0,0.5);'></div>",
-                iconSize: [16, 16], iconAnchor: [8, 8]
-            });
-
-            mapMarkerStart = L.marker([startLat, startLng], {icon: startIcon, draggable: true}).bindPopup('<b class="text-emerald-600">จุดเริ่มต้น (ลากเพื่อย้าย)</b>').addTo(routeMap);
-            mapMarkerEnd = L.marker([endLat, endLng], {icon: endIcon, draggable: true}).bindPopup('<b class="text-blue-600">จุดสิ้นสุด (ลากเพื่อย้าย)</b>').addTo(routeMap);
-            
-            mapMarkerStart.on('dragend', updateRouteAndShowSave);
-            mapMarkerEnd.on('dragend', updateRouteAndShowSave);
 
             const routeData = await fetchRoute(startLat, startLng, endLat, endLng);
             
@@ -944,16 +816,128 @@
             }
 
             document.getElementById('mapDistance').innerText = displayDistance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            if (mapPolyline) routeMap.removeLayer(mapPolyline);
             mapPolyline = L.polyline(latlngs, {color: '#ef4444', weight: 4}).addTo(routeMap);
 
-            setTimeout(() => {
-                routeMap.invalidateSize();
-                if(displayDistance < 10) {
-                    routeMap.setView([startLat, startLng], 18);
-                } else {
-                    routeMap.fitBounds(mapPolyline.getBounds(), {padding: [50, 50]});
+            if(fitBounds) {
+                setTimeout(() => {
+                    routeMap.invalidateSize();
+                    if(displayDistance < 10) {
+                        routeMap.setView([startLat, startLng], 18);
+                    } else {
+                        routeMap.fitBounds(mapPolyline.getBounds(), {padding: [50, 50]});
+                    }
+                }, 200);
+            }
+        }
+
+        async function updateRouteLineAndShowSave() {
+            document.getElementById('saveMapCoordsBtn').classList.remove('hidden');
+            const posStart = mapMarkerStart.getLatLng();
+            const posEnd = mapMarkerEnd.getLatLng();
+            await redrawRouteLine(posStart.lat, posStart.lng, posEnd.lat, posEnd.lng, false);
+        }
+
+        async function saveDraggedMapCoords() {
+            if(!currentMapSurveyId || !mapMarkerStart || !mapMarkerEnd) return;
+            const posStart = mapMarkerStart.getLatLng();
+            const posEnd = mapMarkerEnd.getLatLng();
+
+            const btn = document.getElementById('saveMapCoordsBtn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังบันทึก...';
+            btn.disabled = true;
+
+            try {
+                const payload = {
+                    start_lat: posStart.lat.toFixed(6),
+                    start_lng: posStart.lng.toFixed(6),
+                    end_lat: posEnd.lat.toFixed(6),
+                    end_lng: posEnd.lng.toFixed(6)
+                };
+
+                const { error } = await supabaseClient.from('survey_works').update(payload).eq('id', currentMapSurveyId);
+                if (error) throw error;
+                
+                alert('บันทึกพิกัดใหม่เรียบร้อยแล้ว');
+                btn.classList.add('hidden');
+                
+                // Update local array to reflect changes instantly without full reload overhead
+                const item = surveysData.find(s => s.id === currentMapSurveyId);
+                if(item) {
+                    item.start_lat = payload.start_lat;
+                    item.start_lng = payload.start_lng;
+                    item.end_lat = payload.end_lat;
+                    item.end_lng = payload.end_lng;
                 }
-            }, 200);
+                fetchSurveys(); // Refresh UI tables
+            } catch (err) {
+                console.error(err);
+                alert('เกิดข้อผิดพลาดในการบันทึกพิกัด');
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        }
+
+        async function openMapModal(id) {
+            const item = surveysData.find(s => s.id === id);
+            if(!item) return;
+
+            if (!item.start_lat || !item.start_lng || !item.end_lat || !item.end_lng) {
+                alert("ไม่สามารถแสดงแผนที่ได้ เนื่องจากระบุพิกัดไม่ครบถ้วน");
+                return;
+            }
+
+            currentMapSurveyId = id;
+            document.getElementById('saveMapCoordsBtn').classList.add('hidden');
+
+            document.getElementById('mapProjectName').innerText = item.project_name;
+            document.getElementById('mapDistance').innerText = "...";
+            document.getElementById('mapDistanceLabel').innerText = "กำลังคำนวณเส้นทาง...";
+            document.getElementById('mapModal').classList.remove('hidden');
+
+            const startLat = parseFloat(item.start_lat);
+            const startLng = parseFloat(item.start_lng);
+            const endLat = parseFloat(item.end_lat);
+            const endLng = parseFloat(item.end_lng);
+
+            if (!routeMap) {
+                routeMap = L.map('mapContainer', { zoomControl: true });
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(routeMap);
+            } else {
+                // เคลียร์หมุดเก่าถ้าเคยมีโหลดก่อนหน้า
+                if(mapMarkerStart) routeMap.removeLayer(mapMarkerStart);
+                if(mapMarkerEnd) routeMap.removeLayer(mapMarkerEnd);
+                if(mapPolyline) routeMap.removeLayer(mapPolyline);
+            }
+
+            const startIcon = L.divIcon({
+                className: 'custom-map-icon',
+                html: "<div style='background-color:#10b981; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow: 0 0 6px rgba(0,0,0,0.5);'></div>",
+                iconSize: [16, 16], iconAnchor: [8, 8]
+            });
+            const endIcon = L.divIcon({
+                className: 'custom-map-icon',
+                html: "<div style='background-color:#3b82f6; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow: 0 0 6px rgba(0,0,0,0.5);'></div>",
+                iconSize: [16, 16], iconAnchor: [8, 8]
+            });
+
+            // เพิ่ม Draggable = true เพื่อให้สามารถลากหมุดได้
+            mapMarkerStart = L.marker([startLat, startLng], {icon: startIcon, draggable: true})
+                .bindPopup('<b class="text-emerald-600">จุดเริ่มต้น (ลากเพื่อย้าย)</b>').addTo(routeMap);
+            
+            mapMarkerEnd = L.marker([endLat, endLng], {icon: endIcon, draggable: true})
+                .bindPopup('<b class="text-blue-600">จุดสิ้นสุด (ลากเพื่อย้าย)</b>').addTo(routeMap);
+
+            // เมื่อลากเสร็จ ให้คำนวณเส้นใหม่ และโชว์ปุ่มบันทึก
+            mapMarkerStart.on('dragend', updateRouteLineAndShowSave);
+            mapMarkerEnd.on('dragend', updateRouteLineAndShowSave);
+
+            await redrawRouteLine(startLat, startLng, endLat, endLng, true);
         }
 
         function closeMapModal() {
@@ -1164,5 +1148,3 @@
     </script>
 </body>
 </html>
-
-```
