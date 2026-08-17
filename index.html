@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดเก็บข้อมูล & ไฟล์งาน (Supabase)</title>
-    <!-- Tailwind CSS -->
+    <title>ระบบจัดเก็บข้อมูลแยกบุคคล (Supabase)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
         body { font-family: 'Kanit', sans-serif; }
+        .active-category { background-color: #4f46e5; color: white; }
+        .inactive-category { hover:background-color: #1e293b; color: #cbd5e1; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen overflow-hidden">
@@ -24,10 +23,8 @@
                 <i class="fa-solid fa-folder-open text-3xl"></i>
             </div>
             <h2 class="text-2xl font-bold mb-2">ระบบหลังบ้าน</h2>
-            <p class="text-slate-500 mb-6">กรุณาใส่รหัสผ่านเพื่อเข้าสู่ระบบจัดเก็บไฟล์</p>
-            
+            <p class="text-slate-500 mb-6">กรุณาใส่รหัสผ่านเพื่อเข้าสู่ระบบ</p>
             <div class="mb-4 text-left">
-                <label class="block text-sm font-medium text-slate-700 mb-1">รหัสผ่าน</label>
                 <input type="password" id="passwordInput" placeholder="กรอกรหัสผ่าน..." 
                        class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
             </div>
@@ -41,55 +38,61 @@
     <!-- ================= หน้า Dashboard ================= -->
     <div id="dashboardPage" class="hidden flex h-full">
         <!-- Sidebar -->
-        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col">
-            <div class="h-16 flex items-center px-6 border-b border-slate-800">
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col h-full">
+            <div class="h-16 flex items-center px-6 border-b border-slate-800 shrink-0">
                 <i class="fa-solid fa-cloud text-indigo-400 text-xl mr-3"></i>
-                <span class="text-white font-bold text-lg">CloudStorage</span>
+                <span class="text-white font-bold text-lg">WorkSpace</span>
             </div>
-            <nav class="flex-1 p-4 space-y-2">
-                <a href="#" class="flex items-center px-4 py-3 bg-indigo-600 text-white rounded-lg"><i class="fa-solid fa-file w-6"></i> ไฟล์ทั้งหมด</a>
+            
+            <div class="p-4 shrink-0">
+                <button onclick="createCategory()" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
+                    <i class="fa-solid fa-plus mr-2"></i> สร้างแฟ้มบุคคล
+                </button>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto p-4 space-y-2" id="categoryMenu">
+                <!-- รายชื่อหมวดหมู่จะถูกแทรกที่นี่ -->
             </nav>
-            <div class="p-4 border-t border-slate-800">
+
+            <div class="p-4 border-t border-slate-800 shrink-0">
                 <button onclick="logout()" class="flex items-center px-4 py-2 w-full hover:bg-red-500 hover:text-white rounded-lg transition-colors text-slate-400">
-                    <i class="fa-solid fa-right-from-bracket w-6"></i> ออกจากระบบ
+                    <i class="fa-solid fa-right-from-bracket w-6 mr-2"></i> ออกจากระบบ
                 </button>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 flex flex-col h-full overflow-hidden">
+        <main class="flex-1 flex flex-col h-full overflow-hidden relative">
             <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shadow-sm">
-                <h1 class="text-xl font-semibold text-slate-800">ระบบจัดการไฟล์งาน</h1>
+                <h1 id="currentCategoryTitle" class="text-xl font-semibold text-slate-800">ไฟล์ทั้งหมด</h1>
             </header>
 
             <div class="flex-1 overflow-auto p-8">
-                <!-- สรุปข้อมูล -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center">
-                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-xl mr-4"><i class="fa-solid fa-file-lines"></i></div>
-                        <div>
-                            <p class="text-sm text-slate-500">ไฟล์ทั้งหมด</p>
-                            <p id="totalFilesCount" class="text-2xl font-bold">0 ไฟล์</p>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- อัปโหลดไฟล์ -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-8">
-                    <h2 class="text-lg font-semibold mb-4">อัปโหลดไฟล์ใหม่</h2>
-                    <!-- ซ่อน input file ไว้ แล้วใช้ div เป็นปุ่มกดแทน -->
+                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">
+                        <h2 class="text-lg font-semibold">อัปโหลดไฟล์ใหม่</h2>
+                        
+                        <!-- เลือกหมวดหมู่ก่อนอัปโหลด -->
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm text-slate-600">จัดเก็บในแฟ้ม:</label>
+                            <select id="uploadCategorySelect" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 min-w-[200px]">
+                                <option value="">-- กรุณาเลือกแฟ้มบุคคล --</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <input type="file" id="fileInput" class="hidden" onchange="uploadFile(event)">
-                    <div onclick="document.getElementById('fileInput').click()" id="uploadBox" class="border-2 border-dashed border-slate-300 rounded-xl p-10 text-center hover:bg-slate-50 hover:border-indigo-400 transition-colors cursor-pointer relative">
+                    <div onclick="triggerUpload()" id="uploadBox" class="border-2 border-dashed border-slate-300 rounded-xl p-10 text-center hover:bg-slate-50 hover:border-indigo-400 transition-colors cursor-pointer relative">
                         <i id="uploadIcon" class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-300 mb-3"></i>
                         <p id="uploadText" class="text-slate-600 font-medium">คลิกเพื่อเลือกไฟล์อัปโหลด</p>
-                        <p id="uploadSubText" class="text-sm text-slate-400 mt-1">อัปโหลดเข้าสู่ Supabase Storage</p>
                     </div>
                 </div>
 
                 <!-- ตารางไฟล์ -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                     <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                        <h2 class="text-lg font-semibold">ไฟล์งานล่าสุด</h2>
+                        <h2 class="text-lg font-semibold">รายการไฟล์ (<span id="totalFilesCount">0</span>)</h2>
                         <button onclick="fetchFiles()" class="text-sm bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded text-slate-600"><i class="fa-solid fa-rotate-right"></i> รีเฟรช</button>
                     </div>
                     <div class="overflow-x-auto">
@@ -97,13 +100,14 @@
                             <thead>
                                 <tr class="bg-slate-50 text-slate-500 text-sm border-b border-slate-200">
                                     <th class="py-3 px-6 font-medium">ชื่อไฟล์</th>
+                                    <th class="py-3 px-6 font-medium">แฟ้มบุคคล</th>
                                     <th class="py-3 px-6 font-medium">ขนาด</th>
-                                    <th class="py-3 px-6 font-medium">วันที่อัปโหลด</th>
+                                    <th class="py-3 px-6 font-medium">วันที่</th>
                                     <th class="py-3 px-6 font-medium text-center">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody id="fileTableBody" class="text-sm divide-y divide-slate-100">
-                                <tr><td colspan="4" class="text-center py-4 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
+                                <tr><td colspan="5" class="text-center py-4 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -112,7 +116,6 @@
         </main>
     </div>
 
-    <!-- Scripts -->
     <script>
         // =================ตั้งค่า Supabase=================
         let supabaseClient = null;
@@ -121,34 +124,30 @@
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmbW1qb2NqZ3puanRybWRodHJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MzUwOTEsImV4cCI6MjEwMjUxMTA5MX0.WSVttUmOoMEMEIMs354bKDz4uGDK6JmNr09twxnuXDc';
             supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         } catch (err) {
-            console.error("ไม่สามารถเริ่มต้น Supabase ได้:", err);
             alert("ระบบฐานข้อมูลโหลดไม่สำเร็จ กรุณารีเฟรชหน้าเว็บอีกครั้ง");
         }
-        // ==================================================
 
-        // 1. ระบบ Login (รหัส 8888)
+        let currentCategoryId = 'all'; // เก็บว่าตอนนี้ดูแฟ้มไหนอยู่ (all = ดูทั้งหมด)
+        let categoriesData = []; // เก็บข้อมูลหมวดหมู่ทั้งหมด
+
+        // ================= ระบบ Login =================
         document.getElementById('passwordInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                checkPassword();
-            }
+            if (e.key === 'Enter') { e.preventDefault(); checkPassword(); }
         });
 
         function checkPassword() {
-            const pwd = document.getElementById('passwordInput').value;
-            const errorMsg = document.getElementById('errorMsg');
-            
-            if (pwd === '8888') {
-                errorMsg.classList.add('hidden');
+            if (document.getElementById('passwordInput').value === '8888') {
+                document.getElementById('errorMsg').classList.add('hidden');
                 document.getElementById('loginPage').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('loginPage').classList.add('hidden');
                     document.getElementById('dashboardPage').classList.remove('hidden');
-                    if(supabaseClient) fetchFiles(); // ดึงข้อมูลไฟล์เมื่อเข้าสู่ระบบสำเร็จ
+                    if(supabaseClient) {
+                        loadCategories(); // โหลดหมวดหมู่ก่อน
+                    }
                 }, 300);
             } else {
-                errorMsg.innerText = "รหัสผ่านไม่ถูกต้อง! ลองใหม่อีกครั้ง";
-                errorMsg.classList.remove('hidden');
+                document.getElementById('errorMsg').classList.remove('hidden');
             }
         }
 
@@ -159,7 +158,6 @@
             setTimeout(() => document.getElementById('loginPage').style.opacity = '1', 50);
         }
 
-        // 2. ฟังก์ชันแปลงขนาดไฟล์
         function formatBytes(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
@@ -168,30 +166,121 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // 3. ฟังก์ชันดึงข้อมูลไฟล์
+        // ================= ระบบจัดการหมวดหมู่ =================
+        async function loadCategories() {
+            try {
+                const { data, error } = await supabaseClient.from('categories').select('*').order('created_at', { ascending: true });
+                if (error) throw error;
+                
+                categoriesData = data;
+                renderCategoriesMenu();
+                renderCategorySelect();
+                fetchFiles(); // โหลดไฟล์หลังจากได้หมวดหมู่แล้ว
+            } catch (err) {
+                console.error('Error loading categories:', err);
+            }
+        }
+
+        function renderCategoriesMenu() {
+            const menu = document.getElementById('categoryMenu');
+            menu.innerHTML = `
+                <a href="#" onclick="selectCategory('all', 'ไฟล์ทั้งหมด')" 
+                   class="flex items-center px-4 py-3 rounded-lg transition-colors ${currentCategoryId === 'all' ? 'active-category' : 'inactive-category hover:bg-slate-800'}">
+                    <i class="fa-solid fa-layer-group w-6"></i> ไฟล์ทั้งหมด
+                </a>
+            `;
+
+            categoriesData.forEach(cat => {
+                const isActive = currentCategoryId === cat.id;
+                const cssClass = isActive ? 'active-category' : 'inactive-category hover:bg-slate-800';
+                
+                menu.innerHTML += `
+                    <div class="flex items-center justify-between px-4 py-3 rounded-lg transition-colors cursor-pointer group ${cssClass}">
+                        <div class="flex items-center flex-1" onclick="selectCategory('${cat.id}', '${cat.name}')">
+                            <i class="fa-solid fa-folder w-6"></i> ${cat.name}
+                        </div>
+                        <i class="fa-solid fa-trash text-red-400 opacity-0 group-hover:opacity-100 hover:text-red-600 transition-opacity" 
+                           onclick="deleteCategory('${cat.id}', '${cat.name}')" title="ลบแฟ้มนี้"></i>
+                    </div>
+                `;
+            });
+        }
+
+        function renderCategorySelect() {
+            const select = document.getElementById('uploadCategorySelect');
+            select.innerHTML = '<option value="">-- กรุณาเลือกแฟ้มบุคคล --</option>';
+            categoriesData.forEach(cat => {
+                select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+            });
+            // เลือกแฟ้มปัจจุบันให้อัตโนมัติใน Dropdown
+            if(currentCategoryId !== 'all') {
+                select.value = currentCategoryId;
+            }
+        }
+
+        function selectCategory(id, name) {
+            currentCategoryId = id;
+            document.getElementById('currentCategoryTitle').innerText = name === 'ไฟล์ทั้งหมด' ? name : `หมวดหมู่: ${name}`;
+            renderCategoriesMenu();
+            renderCategorySelect();
+            fetchFiles();
+        }
+
+        async function createCategory() {
+            const name = prompt("ตั้งชื่อแฟ้ม / บุคคล:");
+            if (!name || name.trim() === "") return;
+
+            try {
+                const { error } = await supabaseClient.from('categories').insert([{ name: name.trim() }]);
+                if (error) throw error;
+                loadCategories();
+            } catch (err) {
+                alert("เกิดข้อผิดพลาด หรือชื่อนี้อาจมีอยู่แล้ว");
+                console.error(err);
+            }
+        }
+
+        async function deleteCategory(id, name) {
+            if (!confirm(`ยืนยันการลบแฟ้ม "${name}" ใช่หรือไม่?\n(คำเตือน: ไฟล์ทั้งหมดในแฟ้มนี้จะถูกลบออกไปจากระบบ)`)) return;
+            try {
+                const { error } = await supabaseClient.from('categories').delete().eq('id', id);
+                if (error) throw error;
+                if(currentCategoryId === id) selectCategory('all', 'ไฟล์ทั้งหมด'); // ถ้าลบแฟ้มที่กำลังเปิดอยู่ ให้กลับไปหน้าแรก
+                else loadCategories();
+            } catch (err) {
+                alert("ลบไม่สำเร็จ: " + err.message);
+            }
+        }
+
+        // ================= ระบบจัดการไฟล์ =================
         async function fetchFiles() {
             if (!supabaseClient) return;
             const tbody = document.getElementById('fileTableBody');
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
 
             try {
-                const { data, error } = await supabaseClient
-                    .from('files')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+                // ดึงข้อมูลไฟล์ พร้อมจอยตาราง categories เพื่อเอาชื่อมาโชว์
+                let query = supabaseClient.from('files').select('*, categories(name)').order('created_at', { ascending: false });
+                
+                // ถ้าไม่ได้เลือก "ไฟล์ทั้งหมด" ให้ Filter ข้อมูล
+                if (currentCategoryId !== 'all') {
+                    query = query.eq('category_id', currentCategoryId);
+                }
 
+                const { data, error } = await query;
                 if (error) throw error;
 
-                document.getElementById('totalFilesCount').innerText = `${data.length} ไฟล์`;
+                document.getElementById('totalFilesCount').innerText = data.length;
                 tbody.innerHTML = '';
 
                 if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-slate-400">ยังไม่มีไฟล์ในระบบ</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-slate-400">ไม่พบไฟล์ในแฟ้มนี้</td></tr>';
                     return;
                 }
 
                 data.forEach(file => {
                     const date = new Date(file.created_at).toLocaleDateString('th-TH');
+                    const categoryName = file.categories ? file.categories.name : '- ไม่ระบุ -';
                     
                     let iconClass = 'fa-file text-slate-500';
                     if(file.file_name.endsWith('.pdf')) iconClass = 'fa-file-pdf text-red-500';
@@ -203,7 +292,10 @@
                     tr.innerHTML = `
                         <td class="py-3 px-6 flex items-center">
                             <i class="fa-solid ${iconClass} text-lg mr-3"></i> 
-                            <span class="truncate max-w-[200px] sm:max-w-xs">${file.file_name}</span>
+                            <span class="truncate max-w-[200px]">${file.file_name}</span>
+                        </td>
+                        <td class="py-3 px-6 text-slate-600">
+                            <span class="bg-slate-200 px-2 py-1 rounded text-xs">${categoryName}</span>
                         </td>
                         <td class="py-3 px-6 text-slate-500">${formatBytes(file.file_size)}</td>
                         <td class="py-3 px-6 text-slate-500">${date}</td>
@@ -215,15 +307,24 @@
                     tbody.appendChild(tr);
                 });
             } catch (err) {
-                console.error('Error fetching data:', err);
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล โปรดตรวจสอบ Database</td></tr>';
+                console.error('Error:', err);
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
             }
         }
 
-        // 4. ฟังก์ชันอัปโหลดไฟล์ (แก้ไขรองรับภาษาไทย)
+        function triggerUpload() {
+            const selectedCat = document.getElementById('uploadCategorySelect').value;
+            if(!selectedCat) {
+                alert("กรุณาเลือกแฟ้มบุคคลจาก Dropdown (ด้านบนขวา) ก่อนทำการอัปโหลดไฟล์ครับ!");
+                return;
+            }
+            document.getElementById('fileInput').click();
+        }
+
         async function uploadFile(event) {
-            if (!supabaseClient) return alert('ระบบฐานข้อมูลยังไม่พร้อมใช้งาน');
-            
+            const selectedCat = document.getElementById('uploadCategorySelect').value;
+            if(!selectedCat) return;
+
             const file = event.target.files[0];
             if (!file) return;
 
@@ -233,44 +334,34 @@
             icon.className = 'fa-solid fa-spinner fa-spin text-4xl text-indigo-500 mb-3';
             text.innerText = `กำลังอัปโหลด ${file.name}...`;
 
-            // ==========================================
-            // สร้างชื่อไฟล์ใหม่ให้ปลอดภัยกับ Storage (ตัวเลข + สุ่ม)
-            // ==========================================
             const fileExt = file.name.split('.').pop();
             const randomString = Math.random().toString(36).substring(2, 10);
             const safeStorageName = `${Date.now()}_${randomString}.${fileExt}`;
 
             try {
-                // อัปโหลดเข้า Storage ด้วยชื่อภาษาอังกฤษที่ปลอดภัย
-                const { data: storageData, error: storageError } = await supabaseClient.storage
-                    .from('uploads')
-                    .upload(safeStorageName, file);
-
+                // 1. โยนไฟล์เข้า Storage
+                const { error: storageError } = await supabaseClient.storage.from('uploads').upload(safeStorageName, file);
                 if (storageError) throw storageError;
 
-                // ดึง URL กลับมา
-                const { data: urlData } = supabaseClient.storage
-                    .from('uploads')
-                    .getPublicUrl(safeStorageName);
+                // 2. ขอ URL คืนมา
+                const { data: urlData } = supabaseClient.storage.from('uploads').getPublicUrl(safeStorageName);
 
-                // บันทึกลงตาราง SQL โดยใช้ชื่อภาษาไทยต้นฉบับให้ผู้ใช้เห็น
-                const { error: dbError } = await supabaseClient
-                    .from('files')
-                    .insert([
-                        { 
-                            file_name: file.name, 
-                            file_size: file.size, 
-                            file_url: urlData.publicUrl 
-                        }
-                    ]);
+                // 3. บันทึกลงตาราง พร้อมผูก category_id (แฟ้มใครแฟ้มมัน)
+                const { error: dbError } = await supabaseClient.from('files').insert([{ 
+                    file_name: file.name, 
+                    file_size: file.size, 
+                    file_url: urlData.publicUrl,
+                    category_id: selectedCat // <--- ส่ง ID หมวดหมู่ไปด้วย
+                }]);
 
                 if (dbError) throw dbError;
 
                 alert('อัปโหลดไฟล์สำเร็จ!');
-                fetchFiles(); 
-
+                // ถ้ายืนอยู่หน้า "ไฟล์ทั้งหมด" หรือแฟ้มที่เราเพิ่งอัปโหลดไป ให้รีเฟรชตาราง
+                if (currentCategoryId === 'all' || currentCategoryId === selectedCat) {
+                    fetchFiles(); 
+                }
             } catch (error) {
-                console.error(error);
                 alert('เกิดข้อผิดพลาดในการอัปโหลด: ' + error.message);
             } finally {
                 icon.className = 'fa-solid fa-cloud-arrow-up text-4xl text-indigo-300 mb-3';
@@ -279,22 +370,13 @@
             }
         }
 
-        // 5. ฟังก์ชันลบไฟล์
         async function deleteFile(id, fileName) {
             if (!confirm(`คุณต้องการลบไฟล์ "${fileName}" ใช่หรือไม่?`)) return;
-
             try {
-                const { error: dbError } = await supabaseClient
-                    .from('files')
-                    .delete()
-                    .eq('id', id);
-
-                if (dbError) throw dbError;
-
-                alert('ลบไฟล์สำเร็จแล้ว');
+                const { error } = await supabaseClient.from('files').delete().eq('id', id);
+                if (error) throw error;
                 fetchFiles(); 
             } catch (error) {
-                console.error(error);
                 alert('เกิดข้อผิดพลาดในการลบ: ' + error.message);
             }
         }
