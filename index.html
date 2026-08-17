@@ -54,7 +54,7 @@
                 </button>
             </div>
 
-            <!-- ส่วนของหมวดหมู่ไฟล์ (จะซ่อนเมื่องานสำรวจทำงาน) -->
+            <!-- ส่วนของหมวดหมู่ไฟล์ -->
             <div id="sidebarFileControls" class="flex flex-col flex-1 overflow-hidden">
                 <div class="p-4 shrink-0">
                     <button onclick="createCategory()" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
@@ -81,11 +81,9 @@
 
             <!-- ================= วิว: ระบบจัดการไฟล์ ================= -->
             <div id="fileManagerView" class="flex-1 overflow-auto p-8">
-                <!-- อัปโหลดไฟล์ -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-8">
                     <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">
                         <h2 class="text-lg font-semibold">อัปโหลดไฟล์ใหม่</h2>
-                        <!-- เลือกหมวดหมู่ก่อนอัปโหลด -->
                         <div class="flex items-center gap-2">
                             <label class="text-sm text-slate-600">จัดเก็บในแฟ้ม:</label>
                             <select id="uploadCategorySelect" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 min-w-[200px]">
@@ -100,7 +98,6 @@
                     </div>
                 </div>
 
-                <!-- ตารางไฟล์ -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                     <div class="p-6 border-b border-slate-100 flex justify-between items-center">
                         <h2 class="text-lg font-semibold">รายการไฟล์ (<span id="totalFilesCount">0</span>)</h2>
@@ -125,7 +122,7 @@
                 </div>
             </div>
 
-            <!-- ================= วิว: ระบบงานสำรวจ (เพิ่มใหม่) ================= -->
+            <!-- ================= วิว: ระบบงานสำรวจ ================= -->
             <div id="surveyWorkView" class="hidden flex-1 overflow-auto p-8">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                     <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -141,7 +138,8 @@
                                     <th class="py-3 px-6 font-medium">ชื่อโครงการ</th>
                                     <th class="py-3 px-4 font-medium text-center border-l border-slate-200" colspan="3">ขนาดหลัก (ม.)</th>
                                     <th class="py-3 px-4 font-medium text-center border-l border-slate-200" colspan="3">หูช้าง (ม.)</th>
-                                    <th class="py-3 px-6 font-medium text-center border-l border-slate-200" rowspan="2">จัดการ</th>
+                                    <th class="py-3 px-4 font-medium text-center border-l border-slate-200">พิกัดแผนที่</th>
+                                    <th class="py-3 px-6 font-medium text-center border-l border-slate-200">จัดการ</th>
                                 </tr>
                                 <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200 text-center">
                                     <th class="py-2 px-6"></th>
@@ -151,10 +149,12 @@
                                     <th class="py-2 px-2 border-l border-slate-200">กว้าง</th>
                                     <th class="py-2 px-2">ยาว</th>
                                     <th class="py-2 px-2">หนา</th>
+                                    <th class="py-2 px-2 border-l border-slate-200"></th>
+                                    <th class="py-2 px-6 border-l border-slate-200"></th>
                                 </tr>
                             </thead>
                             <tbody id="surveyTableBody" class="text-sm divide-y divide-slate-100">
-                                <tr><td colspan="8" class="text-center py-4 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
+                                <tr><td colspan="9" class="text-center py-4 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -170,10 +170,10 @@
                 <h3 id="surveyModalTitle" class="text-xl font-bold text-slate-800">เพิ่มข้อมูลงานสำรวจ</h3>
                 <button onclick="closeSurveyModal()" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <div class="p-6 overflow-y-auto">
+            <div class="p-6 overflow-y-auto space-y-6">
                 <input type="hidden" id="surveyId">
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-slate-700 mb-2">ชื่อโครงการ</label>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">ชื่อโครงการ <span class="text-red-500">*</span></label>
                     <input type="text" id="surveyProjectName" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="ระบุชื่อโครงการ">
                 </div>
 
@@ -216,6 +216,27 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- ตำแหน่งที่ตั้งพิกัด GPS (ใหม่) -->
+                <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                    <div class="flex justify-between items-center mb-3 border-b border-emerald-200 pb-2">
+                        <h4 class="font-semibold text-emerald-800"><i class="fa-solid fa-location-dot mr-1"></i> ตำแหน่งที่ตั้ง (พิกัด GPS)</h4>
+                        <button type="button" onclick="getCurrentGPS()" id="gpsBtn" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded shadow transition-colors flex items-center">
+                            <i class="fa-solid fa-crosshairs mr-1"></i> ดึงพิกัดปัจจุบัน
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-600 mb-1">ละติจูด (Latitude)</label>
+                            <input type="number" step="any" id="surveyLat" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="เช่น 15.3835">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-600 mb-1">ลองจิจูด (Longitude)</label>
+                            <input type="number" step="any" id="surveyLng" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="เช่น 100.0246">
+                        </div>
+                    </div>
+                </div>
+
             </div>
             <div class="p-6 border-t border-slate-200 flex justify-end gap-3 bg-slate-50 shrink-0">
                 <button onclick="closeSurveyModal()" class="px-5 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">ยกเลิก</button>
@@ -237,7 +258,7 @@
 
         let currentCategoryId = 'all'; 
         let categoriesData = []; 
-        let surveysData = []; // เก็บข้อมูลงานสำรวจ
+        let surveysData = [];
 
         // ================= ระบบ Login =================
         document.getElementById('passwordInput').addEventListener('keypress', function (e) {
@@ -253,7 +274,7 @@
                     document.getElementById('dashboardPage').classList.remove('hidden');
                     if(supabaseClient) {
                         loadCategories();
-                        fetchSurveys(); // โหลดข้อมูลงานสำรวจเตรียมไว้
+                        fetchSurveys();
                     }
                 }, 300);
             } else {
@@ -276,7 +297,7 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // ================= ระบบสลับหน้าจอ (ใหม่) =================
+        // ================= ระบบสลับหน้าจอ =================
         function switchView(view) {
             const fileView = document.getElementById('fileManagerView');
             const surveyView = document.getElementById('surveyWorkView');
@@ -287,7 +308,6 @@
                 fileView.classList.remove('hidden');
                 surveyView.classList.add('hidden');
                 sidebarFileControls.classList.remove('hidden');
-                // อัปเดต Title คืนตามหมวดหมู่
                 const currentCat = categoriesData.find(c => c.id === currentCategoryId);
                 title.innerText = currentCategoryId === 'all' ? 'ไฟล์ทั้งหมด' : `หมวดหมู่: ${currentCat ? currentCat.name : ''}`;
             } else if (view === 'survey') {
@@ -295,15 +315,15 @@
                 surveyView.classList.remove('hidden');
                 sidebarFileControls.classList.add('hidden');
                 title.innerHTML = '<i class="fa-solid fa-map-location-dot text-emerald-500 mr-2"></i> หมวดหมู่งานสำรวจ';
-                fetchSurveys(); // รีเฟรชข้อมูลเมื่อสลับหน้า
+                fetchSurveys();
             }
         }
 
-        // ================= ระบบจัดการงานสำรวจ (ใหม่) =================
+        // ================= ระบบจัดการงานสำรวจ + พิกัด =================
         async function fetchSurveys() {
             if (!supabaseClient) return;
             const tbody = document.getElementById('surveyTableBody');
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
 
             try {
                 const { data, error } = await supabaseClient.from('survey_works').select('*').order('created_at', { ascending: false });
@@ -313,9 +333,17 @@
                 let htmlContent = '';
 
                 if (data.length === 0) {
-                    htmlContent = '<tr><td colspan="8" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลงานสำรวจ</td></tr>';
+                    htmlContent = '<tr><td colspan="9" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลงานสำรวจ</td></tr>';
                 } else {
                     data.forEach(item => {
+                        // เช็คว่ามีพิกัดหรือไม่ เพื่อแสดงปุ่ม Google Maps
+                        const hasLocation = item.latitude && item.longitude;
+                        const mapButton = hasLocation 
+                            ? `<a href="https://www.google.com/maps?q=${item.latitude},${item.longitude}" target="_blank" class="inline-flex items-center gap-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-1 rounded-full text-xs font-medium transition-colors" title="คลิกเพื่อเปิด Google Maps">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> แผนที่
+                               </a>`
+                            : `<span class="text-xs text-slate-400">- ไม่ระบุ -</span>`;
+
                         htmlContent += `
                             <tr class="hover:bg-slate-50 transition-colors">
                                 <td class="py-3 px-6 font-medium text-slate-800">${item.project_name}</td>
@@ -328,6 +356,10 @@
                                 <td class="py-3 px-2 text-center text-amber-600">${item.ear_length || '-'}</td>
                                 <td class="py-3 px-2 text-center text-amber-600">${item.ear_thickness || '-'}</td>
                                 
+                                <td class="py-3 px-4 text-center border-l border-slate-100 whitespace-nowrap">
+                                    ${mapButton}
+                                </td>
+
                                 <td class="py-3 px-6 text-center space-x-2 whitespace-nowrap border-l border-slate-100">
                                     <button onclick="openSurveyModal('${item.id}')" class="text-slate-500 hover:text-blue-600 p-2"><i class="fa-solid fa-pen-to-square"></i></button>
                                     <button onclick="deleteSurvey('${item.id}', '${item.project_name}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button>
@@ -339,7 +371,7 @@
                 tbody.innerHTML = htmlContent;
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
             }
         }
 
@@ -347,7 +379,6 @@
             document.getElementById('surveyModal').classList.remove('hidden');
             
             if (id) {
-                // โหมดแก้ไข
                 document.getElementById('surveyModalTitle').innerText = 'แก้ไขข้อมูลงานสำรวจ';
                 const item = surveysData.find(s => s.id === id);
                 document.getElementById('surveyId').value = item.id;
@@ -358,8 +389,9 @@
                 document.getElementById('surveyEarWidth').value = item.ear_width || '';
                 document.getElementById('surveyEarLength').value = item.ear_length || '';
                 document.getElementById('surveyEarThickness').value = item.ear_thickness || '';
+                document.getElementById('surveyLat').value = item.latitude || '';
+                document.getElementById('surveyLng').value = item.longitude || '';
             } else {
-                // โหมดเพิ่มใหม่ (เคลียร์ค่า)
                 document.getElementById('surveyModalTitle').innerText = 'เพิ่มข้อมูลงานสำรวจ';
                 document.getElementById('surveyId').value = '';
                 document.getElementById('surveyProjectName').value = '';
@@ -369,11 +401,42 @@
                 document.getElementById('surveyEarWidth').value = '';
                 document.getElementById('surveyEarLength').value = '';
                 document.getElementById('surveyEarThickness').value = '';
+                document.getElementById('surveyLat').value = '';
+                document.getElementById('surveyLng').value = '';
             }
         }
 
         function closeSurveyModal() {
             document.getElementById('surveyModal').classList.add('hidden');
+        }
+
+        // ฟังก์ชันดึง GPS อัตโนมัติจาก Browser / มือถือ
+        function getCurrentGPS() {
+            const btn = document.getElementById('gpsBtn');
+            if ("geolocation" in navigator) {
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังดึงพิกัด...';
+                btn.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById('surveyLat').value = position.coords.latitude.toFixed(6);
+                        document.getElementById('surveyLng').value = position.coords.longitude.toFixed(6);
+                        btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> สำเร็จ';
+                        btn.disabled = false;
+                        setTimeout(() => {
+                            btn.innerHTML = '<i class="fa-solid fa-crosshairs mr-1"></i> ดึงพิกัดปัจจุบัน';
+                        }, 2000);
+                    },
+                    (error) => {
+                        alert("ไม่สามารถดึงพิกัดได้ กรุณาเปิดการเข้าถึงตำแหน่ง (GPS) ในเบราว์เซอร์");
+                        btn.innerHTML = '<i class="fa-solid fa-crosshairs mr-1"></i> ดึงพิกัดปัจจุบัน';
+                        btn.disabled = false;
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                alert("เบราว์เซอร์ของคุณไม่รองรับการดึงตำแหน่ง GPS");
+            }
         }
 
         async function saveSurvey() {
@@ -393,15 +456,15 @@
                 ear_width: document.getElementById('surveyEarWidth').value || 0,
                 ear_length: document.getElementById('surveyEarLength').value || 0,
                 ear_thickness: document.getElementById('surveyEarThickness').value || 0,
+                latitude: document.getElementById('surveyLat').value ? parseFloat(document.getElementById('surveyLat').value) : null,
+                longitude: document.getElementById('surveyLng').value ? parseFloat(document.getElementById('surveyLng').value) : null
             };
 
             try {
                 if (id) {
-                    // Update
                     const { error } = await supabaseClient.from('survey_works').update(payload).eq('id', id);
                     if (error) throw error;
                 } else {
-                    // Insert
                     const { error } = await supabaseClient.from('survey_works').insert([payload]);
                     if (error) throw error;
                 }
@@ -425,8 +488,7 @@
             }
         }
 
-
-        // ================= ระบบจัดการหมวดหมู่และไฟล์ (ของเดิม) =================
+        // ================= ระบบจัดการหมวดหมู่และไฟล์ =================
         async function loadCategories() {
             try {
                 const { data, error } = await supabaseClient.from('categories').select('*').order('created_at', { ascending: true });
