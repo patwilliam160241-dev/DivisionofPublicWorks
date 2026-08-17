@@ -416,7 +416,12 @@
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-4 flex flex-col overflow-hidden max-h-[95vh]">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-sky-50 shrink-0">
                 <h3 class="text-xl font-bold text-sky-800"><i class="fa-solid fa-map-location-dot mr-2"></i> แผนที่เส้นทางตามถนน (หัว-ท้าย)</h3>
-                <button onclick="closeMapModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <div class="flex items-center gap-2">
+                    <button id="saveMapPositionBtn" onclick="saveMapPositions()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกตำแหน่ง
+                    </button>
+                    <button onclick="closeMapModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
             </div>
             
             <div class="p-4 flex flex-col gap-4 flex-1">
@@ -563,10 +568,14 @@
         let calcTotalArea = 0;
         let calcTotalVolume = 0;
 
-        // ตัวแปรสำหรับแผนที่ (โชว์เส้นทาง)
+        // ตัวแปรสำหรับแผนที่ (โชว์เส้นทาง + แก้ไขหัว/ท้าย)
         let routeMap = null;
         let mapMarkers = [];
         let mapPolyline = null;
+        let currentMapSurveyId = null;
+        let currentMapStart = null;
+        let currentMapEnd = null;
+        let mapPositionChanged = false;
 
         // ตัวแปรสำหรับตัวเลือกแผนที่ (ปักหมุดเอง)
         let pickerMap = null;
@@ -790,22 +799,28 @@
 
         async function openMapModal(id) {
             const item = surveysData.find(s => s.id === id);
-            if(!item) return;
-
-            if (!item.start_lat || !item.start_lng || !item.end_lat || !item.end_lng) {
-                alert("ไม่สามารถแสดงแผนที่ได้ เนื่องจากระบุพิกัดไม่ครบถ้วน");
-                return;
-            }
-
-            document.getElementById('mapProjectName').innerText = item.project_name;
-            document.getElementById('mapDistance').innerText = "...";
-            document.getElementById('mapDistanceLabel').innerText = "กำลังคำนวณเส้นทาง...";
-            document.getElementById('mapModal').classList.remove('hidden');
+            if (!item) return;
 
             const startLat = parseFloat(item.start_lat);
             const startLng = parseFloat(item.start_lng);
             const endLat = parseFloat(item.end_lat);
             const endLng = parseFloat(item.end_lng);
+
+            if (![startLat, startLng, endLat, endLng].every(Number.isFinite)) {
+                alert("ไม่สามารถแสดงแผนที่ได้ เนื่องจากระบุพิกัดไม่ครบถ้วน");
+                return;
+            }
+
+            currentMapSurveyId = id;
+            currentMapStart = { lat: startLat, lng: startLng };
+            currentMapEnd = { lat: endLat, lng: endLng };
+            mapPositionChanged = false;
+
+            document.getElementById('mapProjectName').innerText = item.project_name;
+            document.getElementById('mapDistance').innerText = "...";
+            document.getElementById('mapDistanceLabel').innerText = "กำลังคำนวณเส้นทาง...";
+            document.getElementById('saveMapPositionBtn').classList.add('hidden');
+            document.getElementById('mapModal').classList.remove('hidden');
 
             if (!routeMap) {
                 routeMap = L.map('mapContainer', { zoomControl: true });
@@ -816,52 +831,158 @@
 
             mapMarkers.forEach(m => routeMap.removeLayer(m));
             mapMarkers = [];
-            if (mapPolyline) routeMap.removeLayer(mapPolyline);
+            if (mapPolyline) {
+                routeMap.removeLayer(mapPolyline);
+                mapPolyline = null;
+            }
 
             const startIcon = L.divIcon({
                 className: 'custom-map-icon',
-                html: "<div style='background-color:#10b981; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow: 0 0 6px rgba(0,0,0,0.5);'></div>",
-                iconSize: [16, 16], iconAnchor: [8, 8]
+                html: "<div style='background-color:#10b981; width:18px; height:18px; border-radius:50%; border:3px solid white; box-shadow:0 0 8px rgba(0,0,0,0.5);'></div>",
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
             });
             const endIcon = L.divIcon({
                 className: 'custom-map-icon',
-                html: "<div style='background-color:#3b82f6; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow: 0 0 6px rgba(0,0,0,0.5);'></div>",
-                iconSize: [16, 16], iconAnchor: [8, 8]
+                html: "<div style='background-color:#3b82f6; width:18px; height:18px; border-radius:50%; border:3px solid white; box-shadow:0 0 8px rgba(0,0,0,0.5);'></div>",
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
             });
 
-            const markerStart = L.marker([startLat, startLng], {icon: startIcon}).bindPopup('<b class="text-emerald-600">จุดเริ่มต้น</b>').addTo(routeMap);
-            const markerEnd = L.marker([endLat, endLng], {icon: endIcon}).bindPopup('<b class="text-blue-600">จุดสิ้นสุด</b>').addTo(routeMap);
+            // หมุดหัว/ท้ายสามารถลากได้
+            const markerStart = L.marker([startLat, startLng], {
+                icon: startIcon,
+                draggable: true,
+                autoPan: true
+            }).bindPopup('<b class="text-emerald-600">จุดเริ่มต้น</b><br><small>ลากหมุดเพื่อเปลี่ยนจุดเริ่มต้น</small>').addTo(routeMap);
+
+            const markerEnd = L.marker([endLat, endLng], {
+                icon: endIcon,
+                draggable: true,
+                autoPan: true
+            }).bindPopup('<b class="text-blue-600">จุดสิ้นสุด</b><br><small>ลากหมุดเพื่อเปลี่ยนจุดสิ้นสุด</small>').addTo(routeMap);
+
             mapMarkers.push(markerStart, markerEnd);
 
+            markerStart.on('dragend', async function () {
+                const pos = markerStart.getLatLng();
+                currentMapStart = { lat: pos.lat, lng: pos.lng };
+                mapPositionChanged = true;
+                document.getElementById('saveMapPositionBtn').classList.remove('hidden');
+                await updateRouteFromMarkers();
+            });
+
+            markerEnd.on('dragend', async function () {
+                const pos = markerEnd.getLatLng();
+                currentMapEnd = { lat: pos.lat, lng: pos.lng };
+                mapPositionChanged = true;
+                document.getElementById('saveMapPositionBtn').classList.remove('hidden');
+                await updateRouteFromMarkers();
+            });
+
+            setTimeout(async () => {
+                routeMap.invalidateSize();
+                await updateRouteFromMarkers();
+            }, 200);
+        }
+
+        async function updateRouteFromMarkers() {
+            if (!routeMap || !currentMapStart || !currentMapEnd) return;
+
+            const startLat = currentMapStart.lat;
+            const startLng = currentMapStart.lng;
+            const endLat = currentMapEnd.lat;
+            const endLng = currentMapEnd.lng;
+
+            document.getElementById('mapDistance').innerText = "...";
+            document.getElementById('mapDistanceLabel').innerText = "กำลังคำนวณเส้นทางใหม่...";
+
+            if (mapPolyline) {
+                routeMap.removeLayer(mapPolyline);
+                mapPolyline = null;
+            }
+
             const routeData = await fetchRoute(startLat, startLng, endLat, endLng);
-            
-            let latlngs = [];
-            let displayDistance = 0;
+            let latlngs;
+            let displayDistance;
 
             if (routeData) {
                 latlngs = routeData.coordinates;
                 displayDistance = routeData.distanceMeters;
                 document.getElementById('mapDistanceLabel').innerText = "ระยะทางตามถนนโดยประมาณ";
             } else {
-                latlngs = [ [startLat, startLng], [endLat, endLng] ];
+                latlngs = [[startLat, startLng], [endLat, endLng]];
                 displayDistance = calculateDistance(startLat, startLng, endLat, endLng) * 1000;
                 document.getElementById('mapDistanceLabel').innerText = "ระยะทางเส้นตรง (ไม่พบข้อมูลเส้นทางถนน)";
             }
 
-            document.getElementById('mapDistance').innerText = displayDistance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            mapPolyline = L.polyline(latlngs, {color: '#ef4444', weight: 4}).addTo(routeMap);
+            document.getElementById('mapDistance').innerText = displayDistance.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
 
-            setTimeout(() => {
-                routeMap.invalidateSize();
-                if(displayDistance < 10) {
-                    routeMap.setView([startLat, startLng], 18);
-                } else {
-                    routeMap.fitBounds(mapPolyline.getBounds(), {padding: [50, 50]});
+            mapPolyline = L.polyline(latlngs, {
+                color: '#ef4444',
+                weight: 4,
+                opacity: 0.9
+            }).addTo(routeMap);
+
+            if (latlngs.length > 1) {
+                routeMap.fitBounds(mapPolyline.getBounds(), { padding: [50, 50] });
+            }
+        }
+
+        async function saveMapPositions() {
+            if (!currentMapSurveyId || !currentMapStart || !currentMapEnd) {
+                alert('ไม่พบข้อมูลพิกัดที่ต้องการบันทึก');
+                return;
+            }
+
+            const btn = document.getElementById('saveMapPositionBtn');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังบันทึก...';
+
+            try {
+                const { error } = await supabaseClient
+                    .from('survey_works')
+                    .update({
+                        start_lat: currentMapStart.lat,
+                        start_lng: currentMapStart.lng,
+                        end_lat: currentMapEnd.lat,
+                        end_lng: currentMapEnd.lng
+                    })
+                    .eq('id', currentMapSurveyId);
+
+                if (error) throw error;
+
+                const item = surveysData.find(s => s.id === currentMapSurveyId);
+                if (item) {
+                    item.start_lat = currentMapStart.lat;
+                    item.start_lng = currentMapStart.lng;
+                    item.end_lat = currentMapEnd.lat;
+                    item.end_lng = currentMapEnd.lng;
                 }
-            }, 200);
+
+                mapPositionChanged = false;
+                btn.classList.add('hidden');
+                alert('บันทึกตำแหน่งหัว-ท้ายเรียบร้อยแล้ว');
+                fetchSurveys();
+            } catch (error) {
+                console.error('Save map positions error:', error);
+                alert('บันทึกตำแหน่งไม่สำเร็จ: ' + (error.message || 'เกิดข้อผิดพลาด'));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
         }
 
         function closeMapModal() {
+            if (mapPositionChanged) {
+                if (!confirm('มีการขยับจุดเริ่มต้นหรือจุดสิ้นสุด แต่ยังไม่ได้บันทึก ต้องการปิดแผนที่หรือไม่?')) {
+                    return;
+                }
+            }
             document.getElementById('mapModal').classList.add('hidden');
         }
 
