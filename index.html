@@ -150,7 +150,6 @@
                                     <th class="py-3 px-3 font-medium text-center border-l border-slate-200" rowspan="2">ช่วงระยะงาน</th>
                                     <th class="py-2 px-2 font-medium text-center border-l border-slate-200" colspan="3">ขนาดหลัก (ม.)</th>
                                     <th class="py-3 px-2 font-medium text-center border-l border-slate-200 bg-amber-50/50 min-w-[120px]" rowspan="2">พื้นที่หูช้างรวม (ตร.ม.)</th>
-                                    <th class="py-3 px-3 font-medium text-center border-l border-slate-200 min-w-[120px]" rowspan="2">หมายเหตุ</th>
                                     <th class="py-3 px-4 font-medium text-center border-l border-slate-200" rowspan="2">พิกัด (หัว-ท้าย)</th>
                                     <th class="py-3 px-4 font-medium text-center border-l border-slate-200" rowspan="2">จัดการ</th>
                                 </tr>
@@ -161,7 +160,7 @@
                                 </tr>
                             </thead>
                             <tbody id="surveyTableBody" class="text-sm divide-y divide-slate-100">
-                                <tr><td colspan="10" class="text-center py-8 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
+                                <tr><td colspan="9" class="text-center py-8 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -280,7 +279,7 @@
         </div>
     </div>
 
-    <!-- ================= Modal: ดูตัวอย่างรูปถนน (Preview) แบบแยกช่วง ================= -->
+    <!-- ================= Modal: ดูตัวอย่างรูปถนน (Preview) ================= -->
     <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-[110] flex items-center justify-center py-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-4 flex flex-col overflow-hidden max-h-[95vh]">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-indigo-50 shrink-0">
@@ -299,18 +298,112 @@
                 <div id="previewSegmentsList" class="flex-1 overflow-y-auto custom-scrollbar space-y-5 pr-2">
                     <!-- JavaScript จะสร้างรูปถนนแต่ละช่วงมาใส่ที่นี่ -->
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <!-- สรุปพื้นที่รวม (อยู่ด้านล่างสุดเสมอ) -->
-                <div class="bg-white p-5 rounded-xl border border-amber-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 shrink-0">
-                    <div>
-                        <h5 class="font-bold text-amber-800 text-lg flex items-center"><i class="fa-solid fa-calculator mr-2 text-amber-500"></i>สรุปพื้นที่หูช้างรูปสามเหลี่ยมทั้งหมด</h5>
-                        <p class="text-xs text-slate-500 mt-1">คำนวณจากสูตร: <span class="font-mono bg-slate-100 px-1 rounded">0.5 × กว้าง × ยาว</span> (นำมารวมกันทุกช่วงและทุกมุม)</p>
-                    </div>
-                    <div class="text-right bg-amber-50 px-6 py-3 rounded-lg border border-amber-100">
-                        <span class="text-3xl font-black text-amber-600" id="previewArea">0.00</span>
-                        <span class="text-sm font-bold text-amber-800 ml-1">ตร.ม.</span>
+    <!-- ================= Modal: คำนวณราคา (Cost Calculator) ================= -->
+    <div id="costModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-[120] flex items-center justify-center py-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-4 flex flex-col overflow-hidden max-h-[95vh]">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-gradient-to-r from-emerald-600 to-teal-600 shrink-0">
+                <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-calculator mr-2"></i> ประเมินราคาก่อสร้างเบื้องต้น</h3>
+                <button onclick="closeCostModal()" class="text-emerald-100 hover:text-white bg-transparent hover:bg-emerald-700 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 space-y-6 bg-slate-50 custom-scrollbar">
+                
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                    <h4 id="costProjectName" class="font-bold text-lg text-slate-800">ชื่อโครงการ</h4>
+                    <p class="text-sm text-slate-500 mb-3">ประเภท: <span id="costRoadType" class="font-medium text-emerald-600"></span></p>
+                    
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="bg-slate-50 p-3 rounded border border-slate-100 text-center">
+                            <span class="block text-slate-500 mb-1">พื้นที่รวม (ตร.ม.)</span>
+                            <span id="costTotalArea" class="text-xl font-bold text-slate-700">0.00</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded border border-slate-100 text-center">
+                            <span class="block text-slate-500 mb-1">ปริมาตรรวม (ลบ.ม.)</span>
+                            <span id="costTotalVolume" class="text-xl font-bold text-slate-700">0.00</span>
+                        </div>
                     </div>
                 </div>
+
+                <div class="bg-white p-5 rounded-lg shadow-sm border border-amber-200 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
+                    <h4 class="font-bold text-slate-800 mb-1 flex items-center">
+                        <i class="fa-solid fa-coins mr-2 text-amber-500"></i> อัตราค่าวัสดุและน้ำมัน
+                    </h4>
+                    <p class="text-xs text-slate-500 mb-4">* กรุณาปรับปรุงราคาให้ตรงกับประกาศ <a href="https://uthaithani.moc.go.th/" target="_blank" class="text-blue-500 hover:underline">สำนักงานพาณิชย์จังหวัดอุทัยธานี</a> ประจำเดือนปัจจุบัน</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2 bg-blue-50 p-3 rounded border border-blue-100 flex justify-between items-center">
+                            <label class="text-sm font-semibold text-blue-800">ราคาน้ำมันดีเซล ณ วันนี้ (บาท/ลิตร)</label>
+                            <input type="number" step="any" id="inputOilPrice" value="32.94" class="w-24 border border-blue-300 rounded px-2 py-1 text-right focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-700" onchange="calculateCost()">
+                        </div>
+
+                        <!-- ฟอร์มสำหรับ คสล. -->
+                        <div id="costInputsConcrete" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">คอนกรีตผสมเสร็จ (บาท/ลบ.ม.)</label>
+                                <input type="number" step="any" id="inputConcretePrice" value="2200" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">เหล็กเสริมตะแกรง Wire Mesh (บาท/ตร.ม.)</label>
+                                <input type="number" step="any" id="inputWiremeshPrice" value="45" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">ทรายรองใต้ผิวจราจร (บาท/ลบ.ม.)</label>
+                                <input type="number" step="any" id="inputSandPrice" value="450" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
+                        </div>
+
+                        <!-- ฟอร์มสำหรับ ยางมะตอย (แอสฟัลท์) -->
+                        <div id="costInputsAsphalt" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">แอสฟัลท์ติกคอนกรีต (บาท/ตัน)</label>
+                                <input type="number" step="any" id="inputAsphaltPrice" value="3500" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">น้ำยา Tack Coat (บาท/ตร.ม.)</label>
+                                <input type="number" step="any" id="inputTackcoatPrice" value="15" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
+                        </div>
+
+                        <!-- ฟอร์มสำหรับ ลูกรัง/หินคลุก/ดิน -->
+                        <div id="costInputsGravel" class="hidden md:col-span-2 grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1" id="labelBaseMaterial">ราคาวัสดุ (ลูกรัง/หินคลุก/ดิน) (บาท/ลบ.ม.)</label>
+                                <input type="number" step="any" id="inputBasePrice" value="350" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-50 p-5 rounded-lg shadow-sm border border-emerald-200">
+                    <h4 class="font-bold text-emerald-800 mb-4 text-center text-lg">สรุปราคากลางประเมิน</h4>
+                    
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between items-center border-b border-emerald-100 pb-2">
+                            <span class="text-slate-600">ค่างานต้นทุน (Direct Cost)</span>
+                            <span id="outputDirectCost" class="font-mono text-base text-slate-800">0.00 บาท</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-emerald-100 pb-2">
+                            <span class="text-slate-600 flex items-center">
+                                ค่า Factor F (งานทาง)
+                                <input type="number" step="0.0001" id="inputFactorF" value="1.3624" class="ml-2 w-20 border border-emerald-300 rounded px-1 py-0.5 text-xs text-center" onchange="calculateCost()">
+                            </span>
+                            <span id="outputFactorFCost" class="font-mono text-base text-slate-800">0.00 บาท</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-emerald-700 font-bold text-lg">ราคากลางสุทธิโดยประมาณ</span>
+                            <span id="outputTotalCost" class="font-mono text-2xl font-black text-emerald-600">0.00 บาท</span>
+                        </div>
+                        <p class="text-[10px] text-emerald-600 text-center mt-4 bg-white p-2 rounded border border-emerald-100">
+                            * การประเมินราคานี้ใช้สมการพื้นฐานเพื่อความสะดวกรวดเร็ว ราคากลางที่ใช้เบิกจ่ายจริงต้องผ่านการคำนวณตามหลักเกณฑ์ของกรมบัญชีกลางและประกาศของพาณิชย์จังหวัดอุทัยธานีอย่างละเอียดอีกครั้ง
+                        </p>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -329,6 +422,11 @@
         let currentCategoryId = 'all'; 
         let categoriesData = []; 
         let surveysData = [];
+
+        // ตัวแปรสำหรับคำนวณราคา
+        let calcCurrentProject = null;
+        let calcTotalArea = 0;
+        let calcTotalVolume = 0;
 
         // ================= ระบบ Login =================
         document.getElementById('passwordInput').addEventListener('keypress', function (e) {
@@ -399,7 +497,7 @@
         async function fetchSurveys() {
             if (!supabaseClient) return;
             const tbody = document.getElementById('surveyTableBody');
-            tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
 
             try {
                 const { data, error } = await supabaseClient.from('survey_works').select('*').order('created_at', { ascending: false });
@@ -409,7 +507,7 @@
                 let htmlContent = '';
 
                 if (data.length === 0) {
-                    htmlContent = '<tr><td colspan="10" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลงานสำรวจ</td></tr>';
+                    htmlContent = '<tr><td colspan="9" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลงานสำรวจ</td></tr>';
                 } else {
                     data.forEach(item => {
                         const hasStart = item.start_lat && item.start_lng;
@@ -445,7 +543,6 @@
 
                         let segments = item.segments || [];
                         if (!Array.isArray(segments) || segments.length === 0) {
-                            // รองรับข้อมูลโครงสร้างเก่า
                             segments = [{
                                 name: '-', 
                                 w: item.width, l: item.length, t: item.thickness,
@@ -454,12 +551,8 @@
                         }
 
                         const rowCount = segments.length;
-                        const remarkText = item.remark 
-                            ? `<div class="whitespace-pre-wrap text-xs text-slate-600 line-clamp-3 text-left leading-relaxed" title="${item.remark}">${item.remark}</div>` 
-                            : `<span class="text-slate-300">-</span>`;
-
+                        
                         segments.forEach((seg, idx) => {
-                            // คำนวณพื้นที่หูช้างรวมของ Segment นี้ (4 มุม)
                             const ew_fl = parseFloat(seg.ew_fl || seg.ew || 0); const el_fl = parseFloat(seg.el_fl || seg.el || 0);
                             const ew_fr = parseFloat(seg.ew_fr || 0); const el_fr = parseFloat(seg.el_fr || 0);
                             const ew_bl = parseFloat(seg.ew_bl || 0); const el_bl = parseFloat(seg.el_bl || 0);
@@ -471,7 +564,10 @@
                             
                             if (idx === 0) {
                                 htmlContent += `
-                                    <td class="py-3 px-4 font-medium text-slate-800 break-words align-top" rowspan="${rowCount}">${item.project_name}</td>
+                                    <td class="py-3 px-4 font-medium text-slate-800 break-words align-top" rowspan="${rowCount}">
+                                        ${item.project_name}
+                                        ${item.remark ? `<div class="mt-2 text-xs text-amber-600 bg-amber-50 p-1.5 rounded border border-amber-100 line-clamp-2" title="${item.remark}"><i class="fa-solid fa-comment-dots"></i> ${item.remark}</div>` : ''}
+                                    </td>
                                     <td class="py-3 px-3 align-top border-l border-slate-100" rowspan="${rowCount}">
                                         <span class="bg-slate-200 px-2 py-1 rounded text-xs text-slate-700 whitespace-nowrap block text-center">${item.road_type || '-'}</span>
                                     </td>
@@ -483,23 +579,24 @@
                                 <td class="py-2 px-2 text-center text-[13px] border-l border-slate-100 text-slate-700">${seg.w || '-'}</td>
                                 <td class="py-2 px-2 text-center text-[13px] text-slate-700">${seg.l || '-'}</td>
                                 <td class="py-2 px-2 text-center text-[13px] text-slate-700">${seg.t || '-'}</td>
-                                
                                 <td class="py-2 px-2 text-center text-[13px] border-l border-slate-100 text-slate-700 bg-amber-50/30 font-bold text-amber-700">${totalEarArea > 0 ? totalEarArea.toFixed(2) : '-'}</td>
                             `;
 
                             if (idx === 0) {
                                 htmlContent += `
-                                    <td class="py-3 px-3 align-top border-l border-slate-100 min-w-[120px]" rowspan="${rowCount}">
-                                        ${remarkText}
-                                    </td>
                                     <td class="py-3 px-3 align-top border-l border-slate-100" rowspan="${rowCount}">
                                         ${locationHTML}
                                     </td>
-                                    <td class="py-3 px-3 align-top border-l border-slate-100 text-center space-x-1 whitespace-nowrap" rowspan="${rowCount}">
-                                        <button onclick="openPreviewModal('${item.id}')" class="text-indigo-500 hover:text-indigo-700 bg-white hover:bg-indigo-50 border border-slate-200 p-2 rounded shadow-sm transition-colors mb-1" title="ดูรูปแบบถนนและสรุปพื้นที่"><i class="fa-solid fa-image"></i></button>
-                                        <br>
-                                        <button onclick="openSurveyModal('${item.id}')" class="text-slate-500 hover:text-blue-600 bg-white hover:bg-blue-50 border border-slate-200 p-2 rounded shadow-sm transition-colors"><i class="fa-solid fa-pen-to-square"></i></button>
-                                        <button onclick="deleteSurvey('${item.id}', '${item.project_name}')" class="text-red-500 hover:text-red-700 bg-white hover:bg-red-50 border border-slate-200 p-2 rounded shadow-sm transition-colors"><i class="fa-solid fa-trash"></i></button>
+                                    <td class="py-3 px-3 align-top border-l border-slate-100 text-center whitespace-nowrap" rowspan="${rowCount}">
+                                        <div class="flex flex-col gap-1.5 w-full">
+                                            <button onclick="openCostModal('${item.id}')" class="text-white bg-teal-500 hover:bg-teal-600 px-2 py-1.5 rounded shadow-sm transition-colors text-xs flex items-center justify-center w-full"><i class="fa-solid fa-calculator mr-1"></i> ประเมินราคา</button>
+                                            
+                                            <div class="flex gap-1 w-full mt-1">
+                                                <button onclick="openPreviewModal('${item.id}')" class="flex-1 text-indigo-500 hover:text-indigo-700 bg-white hover:bg-indigo-50 border border-slate-200 p-1.5 rounded shadow-sm transition-colors" title="ดูรูปแบบถนน"><i class="fa-solid fa-image"></i></button>
+                                                <button onclick="openSurveyModal('${item.id}')" class="flex-1 text-slate-500 hover:text-blue-600 bg-white hover:bg-blue-50 border border-slate-200 p-1.5 rounded shadow-sm transition-colors" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
+                                                <button onclick="deleteSurvey('${item.id}', '${item.project_name}')" class="flex-1 text-red-500 hover:text-red-700 bg-white hover:bg-red-50 border border-slate-200 p-1.5 rounded shadow-sm transition-colors" title="ลบ"><i class="fa-solid fa-trash"></i></button>
+                                            </div>
+                                        </div>
                                     </td>
                                 `;
                             }
@@ -510,14 +607,149 @@
                 tbody.innerHTML = htmlContent;
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
             }
         }
 
-        // ================= ระบบเพิ่ม Dynamic Segments =================
+        // ================= ระบบประเมินราคาก่อสร้าง (Cost Calculation) =================
+        function openCostModal(id) {
+            const item = surveysData.find(s => s.id === id);
+            if(!item) return;
+
+            calcCurrentProject = item;
+            
+            document.getElementById('costProjectName').innerText = item.project_name;
+            document.getElementById('costRoadType').innerText = item.road_type || '-';
+
+            // ซ่อน/แสดง ฟอร์มราคาย่อยตามประเภทถนน
+            document.getElementById('costInputsConcrete').classList.add('hidden');
+            document.getElementById('costInputsAsphalt').classList.add('hidden');
+            document.getElementById('costInputsGravel').classList.add('hidden');
+
+            if (item.road_type.includes('คสล') || item.road_type.includes('คอนกรีต')) {
+                document.getElementById('costInputsConcrete').classList.remove('hidden');
+            } else if (item.road_type.includes('แอสฟัลท์') || item.road_type.includes('ยางมะตอย')) {
+                document.getElementById('costInputsAsphalt').classList.remove('hidden');
+            } else {
+                // ลูกรัง, หินคลุก, ดิน
+                document.getElementById('costInputsGravel').classList.remove('hidden');
+                document.getElementById('labelBaseMaterial').innerText = `ราคาวัสดุ (${item.road_type}) (บาท/ลบ.ม.)`;
+            }
+
+            // คำนวณ พื้นที่ และ ปริมาตร รวมทั้งหมดของโครงการ
+            calcTotalArea = 0;
+            calcTotalVolume = 0;
+            
+            let segments = item.segments || [];
+            if(!Array.isArray(segments) || segments.length === 0) {
+                 segments = [{
+                    w: item.width, l: item.length, t: item.thickness,
+                    ew_fl: item.ear_width, el_fl: item.ear_length, et_fl: item.ear_thickness
+                }];
+            }
+
+            segments.forEach(seg => {
+                const w = parseFloat(seg.w || 0); const l = parseFloat(seg.l || 0); const t = parseFloat(seg.t || 0);
+                const areaMain = w * l;
+                const volMain = areaMain * t;
+
+                const ew_fl = parseFloat(seg.ew_fl || seg.ew || 0); const el_fl = parseFloat(seg.el_fl || seg.el || 0); const et_fl = parseFloat(seg.et_fl || seg.et || 0);
+                const ew_fr = parseFloat(seg.ew_fr || 0); const el_fr = parseFloat(seg.el_fr || 0); const et_fr = parseFloat(seg.et_fr || 0);
+                const ew_bl = parseFloat(seg.ew_bl || 0); const el_bl = parseFloat(seg.el_bl || 0); const et_bl = parseFloat(seg.et_bl || 0);
+                const ew_br = parseFloat(seg.ew_br || 0); const el_br = parseFloat(seg.el_br || 0); const et_br = parseFloat(seg.et_br || 0);
+
+                const areaEar = (0.5 * ew_fl * el_fl) + (0.5 * ew_fr * el_fr) + (0.5 * ew_bl * el_bl) + (0.5 * ew_br * el_br);
+                
+                // สำหรับปริมาตรหูช้าง เราจะคำนวณแยกตามความหนาแต่ละมุม
+                const volEar = (0.5 * ew_fl * el_fl * et_fl) + 
+                               (0.5 * ew_fr * el_fr * et_fr) + 
+                               (0.5 * ew_bl * el_bl * et_bl) + 
+                               (0.5 * ew_br * el_br * et_br);
+
+                calcTotalArea += (areaMain + areaEar);
+                calcTotalVolume += (volMain + volEar);
+            });
+
+            document.getElementById('costTotalArea').innerText = calcTotalArea.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('costTotalVolume').innerText = calcTotalVolume.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            // ทำการประเมินราคาเบื้องต้นทันที
+            calculateCost();
+
+            document.getElementById('costModal').classList.remove('hidden');
+        }
+
+        function closeCostModal() {
+            document.getElementById('costModal').classList.add('hidden');
+        }
+
+        function calculateCost() {
+            if(!calcCurrentProject) return;
+
+            const oilPrice = parseFloat(document.getElementById('inputOilPrice').value || 0);
+            const factorF = parseFloat(document.getElementById('inputFactorF').value || 1.3624);
+            const roadType = calcCurrentProject.road_type;
+            
+            let directCost = 0;
+
+            if (roadType.includes('คสล') || roadType.includes('คอนกรีต')) {
+                const pConcrete = parseFloat(document.getElementById('inputConcretePrice').value || 0);
+                const pWiremesh = parseFloat(document.getElementById('inputWiremeshPrice').value || 0);
+                const pSand = parseFloat(document.getElementById('inputSandPrice').value || 0);
+                
+                // ราคาคอนกรีต = ปริมาตร * ราคา/ลบ.ม.
+                const costConcrete = calcTotalVolume * pConcrete;
+                
+                // ราคา Wiremesh = พื้นที่ * ราคา/ตร.ม. (บวกเผื่อทาบ 10%)
+                const costWiremesh = calcTotalArea * 1.1 * pWiremesh;
+                
+                // ราคาทรายรองพื้น (สมมติมาตรฐานหนา 0.05 ม.) = พื้นที่ * 0.05 * ราคา/ลบ.ม.
+                const costSand = calcTotalArea * 0.05 * pSand;
+                
+                // ค่าดำเนินการเท/ปาด/แต่ง (อิงค่าน้ำมันเบื้องต้น สมมติ ~ 400 + (ราคาน้ำมัน*2)) ต่อ ลบ.ม.
+                const laborMachineCost = calcTotalVolume * (400 + (oilPrice * 2));
+
+                directCost = costConcrete + costWiremesh + costSand + laborMachineCost;
+
+            } else if (roadType.includes('แอสฟัลท์') || roadType.includes('ยางมะตอย')) {
+                const pAsphalt = parseFloat(document.getElementById('inputAsphaltPrice').value || 0);
+                const pTack = parseFloat(document.getElementById('inputTackcoatPrice').value || 0);
+                
+                // แอสฟัลท์ 1 ลบ.ม. หนักประมาณ 2.4 ตัน
+                const weightTons = calcTotalVolume * 2.4;
+                const costAsphalt = weightTons * pAsphalt;
+                
+                const costTack = calcTotalArea * pTack;
+
+                // ค่าปูและบดทับ (อิงราคาน้ำมัน)
+                const laborMachineCost = calcTotalArea * (oilPrice * 1.5);
+
+                directCost = costAsphalt + costTack + laborMachineCost;
+
+            } else {
+                // ลูกรัง, หินคลุก, ดิน
+                const pBase = parseFloat(document.getElementById('inputBasePrice').value || 0);
+                
+                const costMaterial = calcTotalVolume * (pBase * 1.2); // เผื่อยุบตัว 20%
+                
+                // ค่าเกลี่ยแต่งและบดทับ (อิงราคาน้ำมัน)
+                const laborMachineCost = calcTotalVolume * (oilPrice * 2.5);
+
+                directCost = costMaterial + laborMachineCost;
+            }
+
+            const totalCost = directCost * factorF;
+
+            // แสดงผล
+            document.getElementById('outputDirectCost').innerText = directCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' บาท';
+            document.getElementById('outputFactorFCost').innerText = (totalCost - directCost).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' บาท';
+            document.getElementById('outputTotalCost').innerText = totalCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' บาท';
+        }
+
+
+        // ================= ระบบเพิ่ม Dynamic Segments (Form Survey) =================
         function createSegmentHTML(seg, index) {
             const showDelete = index > 0;
-
             const corners = [
                 { key: 'fl', label: 'หัว-ซ้าย' },
                 { key: 'fr', label: 'หัว-ขวา' },
@@ -527,7 +759,6 @@
 
             let cornersHTML = '';
             corners.forEach(c => {
-                // สำหรับข้อมูลเก่าที่มีแค่ ew, el, et จะถูกดึงไปใส่ในหัวซ้าย (fl)
                 const valW = seg[`ew_${c.key}`] !== undefined ? seg[`ew_${c.key}`] : (c.key === 'fl' ? (seg.ew || '') : '');
                 const valL = seg[`el_${c.key}`] !== undefined ? seg[`el_${c.key}`] : (c.key === 'fl' ? (seg.el || '') : '');
                 const valT = seg[`et_${c.key}`] !== undefined ? seg[`et_${c.key}`] : (c.key === 'fl' ? (seg.et || '') : '');
@@ -694,7 +925,7 @@
             document.getElementById('surveyModal').classList.add('hidden');
         }
 
-        // ================= ดูตัวอย่างรูปถนน (Preview Modal) แบบแยกช่วง =================
+        // ================= ดูตัวอย่างรูปถนน (Preview Modal) =================
         function openPreviewModal(id) {
             const item = surveysData.find(s => s.id === id);
             if(!item) return;
@@ -702,7 +933,6 @@
             document.getElementById('previewModalProjectName').innerText = item.project_name;
             document.getElementById('previewModalRoadType').innerText = item.road_type || '-';
 
-            let totalFlareArea = 0;
             let segments = item.segments || [];
             
             if(!Array.isArray(segments) || segments.length === 0) {
@@ -719,7 +949,6 @@
                 const w = parseFloat(seg.w || 0).toFixed(2);
                 const l = parseFloat(seg.l || 0).toFixed(2);
                 
-                // คำนวณหูช้าง 4 มุม
                 const ew_fl = parseFloat(seg.ew_fl || seg.ew || 0); const el_fl = parseFloat(seg.el_fl || seg.el || 0);
                 const ew_fr = parseFloat(seg.ew_fr || 0); const el_fr = parseFloat(seg.el_fr || 0);
                 const ew_bl = parseFloat(seg.ew_bl || 0); const el_bl = parseFloat(seg.el_bl || 0);
@@ -731,7 +960,6 @@
                 const area_br = 0.5 * ew_br * el_br;
                 
                 const segEarTotalArea = area_fl + area_fr + area_bl + area_br;
-                totalFlareArea += segEarTotalArea;
 
                 segmentsHtml += `
                 <div class="bg-white border-2 border-slate-100 rounded-xl overflow-hidden shadow-sm">
@@ -777,20 +1005,12 @@
                         <div class="absolute left-4 top-1/2 -translate-y-1/2 bg-white px-3 py-1.5 rounded-lg shadow text-xs font-bold text-indigo-700 border border-indigo-100 flex items-center gap-1.5">
                             <i class="fa-solid fa-arrows-up-down"></i> กว้าง: ${w} ม.
                         </div>
-
-                        <!-- สรุปหูช้างของช่วงนี้ -->
-                        <div class="absolute right-4 bottom-3 bg-white px-3 py-2 rounded-lg shadow text-xs font-bold text-amber-700 border border-amber-100 text-right">
-                            <div class="flex items-center gap-1.5 mb-1 text-[10px] text-amber-500 uppercase">พื้นที่หูช้าง 4 มุม</div>
-                            <div class="text-base">${segEarTotalArea.toFixed(2)} <span class="text-[10px]">ตร.ม.</span></div>
-                        </div>
                     </div>
                 </div>
                 `;
             });
 
             document.getElementById('previewSegmentsList').innerHTML = segmentsHtml;
-            document.getElementById('previewArea').innerText = totalFlareArea.toFixed(2);
-            
             document.getElementById('previewModal').classList.remove('hidden');
         }
 
@@ -856,7 +1076,6 @@
                 length: firstSeg.l ? parseFloat(firstSeg.l) : 0,
                 thickness: firstSeg.t ? parseFloat(firstSeg.t) : 0,
                 
-                // เก็บค่า fl เป็นค่าตั้งต้นสำหรับ backward compatibility
                 ear_width: firstSeg.ew_fl ? parseFloat(firstSeg.ew_fl) : 0,
                 ear_length: firstSeg.el_fl ? parseFloat(firstSeg.el_fl) : 0,
                 ear_thickness: firstSeg.et_fl ? parseFloat(firstSeg.et_fl) : 0,
