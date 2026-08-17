@@ -82,10 +82,11 @@
                         </div>
                     </div>
 
-                    <input type="file" id="fileInput" class="hidden" onchange="uploadFile(event)">
+                    <!-- เพิ่ม attribute 'multiple' เพื่อให้เลือกได้หลายไฟล์ -->
+                    <input type="file" id="fileInput" class="hidden" multiple onchange="uploadFile(event)">
                     <div onclick="triggerUpload()" id="uploadBox" class="border-2 border-dashed border-slate-300 rounded-xl p-10 text-center hover:bg-slate-50 hover:border-indigo-400 transition-colors cursor-pointer relative">
                         <i id="uploadIcon" class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-300 mb-3"></i>
-                        <p id="uploadText" class="text-slate-600 font-medium">คลิกเพื่อเลือกไฟล์อัปโหลด</p>
+                        <p id="uploadText" class="text-slate-600 font-medium">คลิกเพื่อเลือกไฟล์อัปโหลด (สามารถเลือกได้หลายไฟล์)</p>
                     </div>
                 </div>
 
@@ -127,8 +128,8 @@
             alert("ระบบฐานข้อมูลโหลดไม่สำเร็จ กรุณารีเฟรชหน้าเว็บอีกครั้ง");
         }
 
-        let currentCategoryId = 'all'; // เก็บว่าตอนนี้ดูแฟ้มไหนอยู่ (all = ดูทั้งหมด)
-        let categoriesData = []; // เก็บข้อมูลหมวดหมู่ทั้งหมด
+        let currentCategoryId = 'all'; 
+        let categoriesData = []; 
 
         // ================= ระบบ Login =================
         document.getElementById('passwordInput').addEventListener('keypress', function (e) {
@@ -143,7 +144,7 @@
                     document.getElementById('loginPage').classList.add('hidden');
                     document.getElementById('dashboardPage').classList.remove('hidden');
                     if(supabaseClient) {
-                        loadCategories(); // โหลดหมวดหมู่ก่อน
+                        loadCategories();
                     }
                 }, 300);
             } else {
@@ -175,7 +176,7 @@
                 categoriesData = data;
                 renderCategoriesMenu();
                 renderCategorySelect();
-                fetchFiles(); // โหลดไฟล์หลังจากได้หมวดหมู่แล้ว
+                fetchFiles(); 
             } catch (err) {
                 console.error('Error loading categories:', err);
             }
@@ -212,7 +213,6 @@
             categoriesData.forEach(cat => {
                 select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
             });
-            // เลือกแฟ้มปัจจุบันให้อัตโนมัติใน Dropdown
             if(currentCategoryId !== 'all') {
                 select.value = currentCategoryId;
             }
@@ -245,7 +245,7 @@
             try {
                 const { error } = await supabaseClient.from('categories').delete().eq('id', id);
                 if (error) throw error;
-                if(currentCategoryId === id) selectCategory('all', 'ไฟล์ทั้งหมด'); // ถ้าลบแฟ้มที่กำลังเปิดอยู่ ให้กลับไปหน้าแรก
+                if(currentCategoryId === id) selectCategory('all', 'ไฟล์ทั้งหมด'); 
                 else loadCategories();
             } catch (err) {
                 alert("ลบไม่สำเร็จ: " + err.message);
@@ -259,10 +259,8 @@
             tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
 
             try {
-                // ดึงข้อมูลไฟล์ พร้อมจอยตาราง categories เพื่อเอาชื่อมาโชว์
                 let query = supabaseClient.from('files').select('*, categories(name)').order('created_at', { ascending: false });
                 
-                // ถ้าไม่ได้เลือก "ไฟล์ทั้งหมด" ให้ Filter ข้อมูล
                 if (currentCategoryId !== 'all') {
                     query = query.eq('category_id', currentCategoryId);
                 }
@@ -321,52 +319,75 @@
             document.getElementById('fileInput').click();
         }
 
+        // แก้ไขฟังก์ชัน uploadFile เพื่อรองรับหลายไฟล์
         async function uploadFile(event) {
             const selectedCat = document.getElementById('uploadCategorySelect').value;
-            if(!selectedCat) return;
+            if (!selectedCat) return;
 
-            const file = event.target.files[0];
-            if (!file) return;
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
 
             const icon = document.getElementById('uploadIcon');
             const text = document.getElementById('uploadText');
             
             icon.className = 'fa-solid fa-spinner fa-spin text-4xl text-indigo-500 mb-3';
-            text.innerText = `กำลังอัปโหลด ${file.name}...`;
+            
+            let successCount = 0;
+            let failCount = 0;
 
-            const fileExt = file.name.split('.').pop();
-            const randomString = Math.random().toString(36).substring(2, 10);
-            const safeStorageName = `${Date.now()}_${randomString}.${fileExt}`;
+            // ปิดปุ่ม input ไม่ให้กดซ้ำระหว่างอัปโหลด
+            document.getElementById('uploadBox').style.pointerEvents = 'none';
 
-            try {
-                // 1. โยนไฟล์เข้า Storage
-                const { error: storageError } = await supabaseClient.storage.from('uploads').upload(safeStorageName, file);
-                if (storageError) throw storageError;
+            // วนลูปอัปโหลดทีละไฟล์
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                text.innerText = `กำลังอัปโหลดไฟล์ที่ ${i + 1} จาก ${files.length} (${file.name})...`;
 
-                // 2. ขอ URL คืนมา
-                const { data: urlData } = supabaseClient.storage.from('uploads').getPublicUrl(safeStorageName);
+                const fileExt = file.name.split('.').pop();
+                const randomString = Math.random().toString(36).substring(2, 10);
+                const safeStorageName = `${Date.now()}_${randomString}.${fileExt}`;
 
-                // 3. บันทึกลงตาราง พร้อมผูก category_id (แฟ้มใครแฟ้มมัน)
-                const { error: dbError } = await supabaseClient.from('files').insert([{ 
-                    file_name: file.name, 
-                    file_size: file.size, 
-                    file_url: urlData.publicUrl,
-                    category_id: selectedCat // <--- ส่ง ID หมวดหมู่ไปด้วย
-                }]);
+                try {
+                    // 1. โยนไฟล์เข้า Storage
+                    const { error: storageError } = await supabaseClient.storage.from('uploads').upload(safeStorageName, file);
+                    if (storageError) throw storageError;
 
-                if (dbError) throw dbError;
+                    // 2. ขอ URL คืนมา
+                    const { data: urlData } = supabaseClient.storage.from('uploads').getPublicUrl(safeStorageName);
 
-                alert('อัปโหลดไฟล์สำเร็จ!');
-                // ถ้ายืนอยู่หน้า "ไฟล์ทั้งหมด" หรือแฟ้มที่เราเพิ่งอัปโหลดไป ให้รีเฟรชตาราง
-                if (currentCategoryId === 'all' || currentCategoryId === selectedCat) {
-                    fetchFiles(); 
+                    // 3. บันทึกลงตาราง
+                    const { error: dbError } = await supabaseClient.from('files').insert([{ 
+                        file_name: file.name, 
+                        file_size: file.size, 
+                        file_url: urlData.publicUrl,
+                        category_id: selectedCat 
+                    }]);
+
+                    if (dbError) throw dbError;
+                    
+                    successCount++;
+                } catch (error) {
+                    console.error(`Error uploading ${file.name}:`, error);
+                    failCount++;
                 }
-            } catch (error) {
-                alert('เกิดข้อผิดพลาดในการอัปโหลด: ' + error.message);
-            } finally {
-                icon.className = 'fa-solid fa-cloud-arrow-up text-4xl text-indigo-300 mb-3';
-                text.innerText = 'คลิกเพื่อเลือกไฟล์อัปโหลด';
-                document.getElementById('fileInput').value = ''; 
+            }
+
+            // คืนค่า UI ให้กลับมาปกติ
+            icon.className = 'fa-solid fa-cloud-arrow-up text-4xl text-indigo-300 mb-3';
+            text.innerText = 'คลิกเพื่อเลือกไฟล์อัปโหลด (สามารถเลือกได้หลายไฟล์)';
+            document.getElementById('fileInput').value = ''; 
+            document.getElementById('uploadBox').style.pointerEvents = 'auto';
+
+            // แจ้งเตือนผลลัพธ์
+            if (failCount === 0) {
+                alert(`อัปโหลดเสร็จสิ้น! สำเร็จทั้งหมด ${successCount} ไฟล์`);
+            } else {
+                alert(`อัปโหลดเสร็จสิ้น!\nสำเร็จ: ${successCount} ไฟล์\nล้มเหลว: ${failCount} ไฟล์`);
+            }
+
+            // รีเฟรชตาราง
+            if (currentCategoryId === 'all' || currentCategoryId === selectedCat) {
+                fetchFiles(); 
             }
         }
 
