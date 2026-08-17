@@ -138,7 +138,7 @@
                                     <th class="py-3 px-6 font-medium">ชื่อโครงการ</th>
                                     <th class="py-3 px-4 font-medium text-center border-l border-slate-200" colspan="3">ขนาดหลัก (ม.)</th>
                                     <th class="py-3 px-4 font-medium text-center border-l border-slate-200" colspan="3">หูช้าง (ม.)</th>
-                                    <th class="py-3 px-4 font-medium text-center border-l border-slate-200">พิกัดแผนที่</th>
+                                    <th class="py-3 px-4 font-medium text-center border-l border-slate-200">พิกัดแผนที่ (N,E)</th>
                                     <th class="py-3 px-6 font-medium text-center border-l border-slate-200">จัดการ</th>
                                 </tr>
                                 <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200 text-center">
@@ -217,7 +217,7 @@
                     </div>
                 </div>
 
-                <!-- ตำแหน่งที่ตั้งพิกัด GPS (ใหม่) -->
+                <!-- ตำแหน่งที่ตั้งพิกัด GPS -->
                 <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
                     <div class="flex justify-between items-center mb-3 border-b border-emerald-200 pb-2">
                         <h4 class="font-semibold text-emerald-800"><i class="fa-solid fa-location-dot mr-1"></i> ตำแหน่งที่ตั้ง (พิกัด GPS)</h4>
@@ -227,12 +227,12 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs text-slate-600 mb-1">ละติจูด (Latitude)</label>
-                            <input type="number" step="any" id="surveyLat" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="เช่น 15.3835">
+                            <label class="block text-xs text-slate-600 mb-1">ละติจูด <span class="text-emerald-700 font-bold">(N)</span></label>
+                            <input type="number" step="any" id="surveyLat" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono" placeholder="เช่น 15.3835">
                         </div>
                         <div>
-                            <label class="block text-xs text-slate-600 mb-1">ลองจิจูด (Longitude)</label>
-                            <input type="number" step="any" id="surveyLng" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="เช่น 100.0246">
+                            <label class="block text-xs text-slate-600 mb-1">ลองจิจูด <span class="text-emerald-700 font-bold">(E)</span></label>
+                            <input type="number" step="any" id="surveyLng" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono" placeholder="เช่น 100.0246">
                         </div>
                     </div>
                 </div>
@@ -336,12 +336,22 @@
                     htmlContent = '<tr><td colspan="9" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลงานสำรวจ</td></tr>';
                 } else {
                     data.forEach(item => {
-                        // เช็คว่ามีพิกัดหรือไม่ เพื่อแสดงปุ่ม Google Maps
+                        // ปรับการแสดงผลพิกัดเป็นกรอบแสดงค่า N และ E
                         const hasLocation = item.latitude && item.longitude;
-                        const mapButton = hasLocation 
-                            ? `<a href="https://www.google.com/maps?q=${item.latitude},${item.longitude}" target="_blank" class="inline-flex items-center gap-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-1 rounded-full text-xs font-medium transition-colors" title="คลิกเพื่อเปิด Google Maps">
-                                <i class="fa-solid fa-location-dot text-red-500"></i> แผนที่
-                               </a>`
+                        const locationDisplay = hasLocation 
+                            ? `<div class="inline-block bg-slate-50 border border-slate-200 rounded p-1.5 shadow-sm min-w-[120px] text-left">
+                                <div class="text-[11px] font-mono text-slate-700 leading-tight">
+                                    <span class="font-bold text-emerald-600 mr-1">N:</span>${item.latitude}
+                                </div>
+                                <div class="text-[11px] font-mono text-slate-700 leading-tight mt-0.5">
+                                    <span class="font-bold text-emerald-600 mr-1">E:</span>${item.longitude}
+                                </div>
+                                <div class="mt-1.5 border-t border-slate-200 pt-1 text-center">
+                                    <a href="https://www.google.com/maps?q=${item.latitude},${item.longitude}" target="_blank" class="text-[10px] text-blue-600 hover:text-blue-800 flex items-center justify-center gap-1 font-medium transition-colors">
+                                        <i class="fa-solid fa-map-location-dot text-red-500"></i> ดูแผนที่
+                                    </a>
+                                </div>
+                               </div>`
                             : `<span class="text-xs text-slate-400">- ไม่ระบุ -</span>`;
 
                         htmlContent += `
@@ -357,7 +367,7 @@
                                 <td class="py-3 px-2 text-center text-amber-600">${item.ear_thickness || '-'}</td>
                                 
                                 <td class="py-3 px-4 text-center border-l border-slate-100 whitespace-nowrap">
-                                    ${mapButton}
+                                    ${locationDisplay}
                                 </td>
 
                                 <td class="py-3 px-6 text-center space-x-2 whitespace-nowrap border-l border-slate-100">
