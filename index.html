@@ -304,11 +304,11 @@
         </div>
     </div>
 
-    <!-- ================= Modal: แผนที่เส้นทาง (Route Map) ================= -->
+    <!-- ================= Modal: แผนที่เส้นทางถนน (Road Route Map) ================= -->
     <div id="mapModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-[120] flex items-center justify-center py-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-4 flex flex-col overflow-hidden max-h-[95vh]">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-sky-50 shrink-0">
-                <h3 class="text-xl font-bold text-sky-800"><i class="fa-solid fa-map-location-dot mr-2"></i> แผนที่เส้นทางพิกัด (หัว-ท้าย)</h3>
+                <h3 class="text-xl font-bold text-sky-800"><i class="fa-solid fa-map-location-dot mr-2"></i> แผนที่เส้นทางตามถนน (หัว-ท้าย)</h3>
                 <button onclick="closeMapModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             
@@ -322,8 +322,8 @@
                         </div>
                     </div>
                     <div class="text-right bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-lg">
-                        <span class="block text-xs text-indigo-500 font-bold mb-0.5">ระยะทางเส้นตรงโดยประมาณ</span>
-                        <span id="mapDistance" class="font-black text-2xl text-indigo-700">0.00</span> <span class="font-bold text-indigo-600">กม.</span>
+                        <span id="mapDistanceLabel" class="block text-xs text-indigo-500 font-bold mb-0.5">ระยะทางตามถนนโดยประมาณ</span>
+                        <span id="mapDistance" class="font-black text-2xl text-indigo-700">0.00</span> <span class="font-bold text-indigo-600">เมตร</span>
                     </div>
                 </div>
                 
@@ -372,7 +372,6 @@
                             <input type="number" step="any" id="inputOilPrice" value="32.94" class="w-24 border border-blue-300 rounded px-2 py-1 text-right focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-700" onchange="calculateCost()">
                         </div>
 
-                        <!-- ฟอร์มสำหรับ คสล. -->
                         <div id="costInputsConcrete" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-medium text-slate-700 mb-1">คอนกรีตผสมเสร็จ (บาท/ลบ.ม.)</label>
@@ -388,7 +387,6 @@
                             </div>
                         </div>
 
-                        <!-- ฟอร์มสำหรับ ยางมะตอย (แอสฟัลท์) -->
                         <div id="costInputsAsphalt" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-medium text-slate-700 mb-1">แอสฟัลท์ติกคอนกรีต (บาท/ตัน)</label>
@@ -400,7 +398,6 @@
                             </div>
                         </div>
 
-                        <!-- ฟอร์มสำหรับ ลูกรัง/หินคลุก/ดิน -->
                         <div id="costInputsGravel" class="hidden md:col-span-2 grid grid-cols-1 gap-4">
                             <div>
                                 <label class="block text-xs font-medium text-slate-700 mb-1" id="labelBaseMaterial">ราคาวัสดุ (ลูกรัง/หินคลุก/ดิน) (บาท/ลบ.ม.)</label>
@@ -567,7 +564,6 @@
                                 </div>`;
                         }
                         
-                        // เพิ่มปุ่ม ดูเส้นทางพิกัด หากมีทั้งพิกัดต้นและปลาย
                         if(hasStart && hasEnd) {
                             locationHTML += `
                                 <button onclick="openMapModal('${item.id}')" class="mt-1 w-full text-[11px] font-bold bg-sky-500 hover:bg-sky-600 text-white py-1.5 rounded flex items-center justify-center transition-colors shadow-sm">
@@ -650,9 +646,9 @@
             }
         }
 
-        // ================= ระบบแผนที่เส้นทาง (Leaflet JS Map) =================
+        // ================= ระบบแผนที่เส้นทาง (Leaflet JS + OSRM) =================
         function calculateDistance(lat1, lon1, lat2, lon2) {
-            var R = 6371; // Radius of the earth in km
+            var R = 6371; // km
             var dLat = (lat2 - lat1) * Math.PI / 180;
             var dLon = (lon2 - lon1) * Math.PI / 180;
             var a = 
@@ -660,11 +656,30 @@
                 Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
                 Math.sin(dLon/2) * Math.sin(dLon/2);
             var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-            var d = R * c; // Distance in km
-            return d;
+            return R * c; 
         }
 
-        function openMapModal(id) {
+        // ฟังก์ชันดึงข้อมูลเส้นทางจาก OSRM API (ฟรี)
+        async function fetchRoute(startLat, startLng, endLat, endLng) {
+            // OSRM รับพิกัดแบบ longitude,latitude
+            const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.code === 'Ok' && data.routes.length > 0) {
+                    const route = data.routes[0];
+                    const distanceMeters = route.distance;
+                    // Leaflet ใช้ latitude,longitude ต้องสลับค่าจากที่ได้มา
+                    const coordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                    return { coordinates, distanceMeters };
+                }
+            } catch (error) {
+                console.error("OSRM Routing Error:", error);
+            }
+            return null;
+        }
+
+        async function openMapModal(id) {
             const item = surveysData.find(s => s.id === id);
             if(!item) return;
 
@@ -674,6 +689,8 @@
             }
 
             document.getElementById('mapProjectName').innerText = item.project_name;
+            document.getElementById('mapDistance').innerText = "...";
+            document.getElementById('mapDistanceLabel').innerText = "กำลังคำนวณเส้นทาง...";
             document.getElementById('mapModal').classList.remove('hidden');
 
             const startLat = parseFloat(item.start_lat);
@@ -681,15 +698,11 @@
             const endLat = parseFloat(item.end_lat);
             const endLng = parseFloat(item.end_lng);
 
-            // คำนวณระยะทาง
-            const dist = calculateDistance(startLat, startLng, endLat, endLng);
-            document.getElementById('mapDistance').innerText = dist.toFixed(3);
-
             // Init Map (ทำเพียงครั้งเดียว)
             if (!routeMap) {
                 routeMap = L.map('mapContainer', { zoomControl: true });
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 }).addTo(routeMap);
             }
 
@@ -715,17 +728,34 @@
             const markerEnd = L.marker([endLat, endLng], {icon: endIcon}).bindPopup('<b class="text-blue-600">จุดสิ้นสุด</b>').addTo(routeMap);
             mapMarkers.push(markerStart, markerEnd);
 
-            // วาดเส้นประเชื่อมต่อ (Dashed Line)
-            const latlngs = [ [startLat, startLng], [endLat, endLng] ];
-            mapPolyline = L.polyline(latlngs, {color: '#ef4444', weight: 4, dashArray: '10, 10'}).addTo(routeMap);
+            // ดึงเส้นทางถนนจาก OSRM
+            const routeData = await fetchRoute(startLat, startLng, endLat, endLng);
+            
+            let latlngs = [];
+            let displayDistance = 0;
+
+            if (routeData) {
+                // ถ้าดึงสำเร็จ ให้วาดตามถนนจริง
+                latlngs = routeData.coordinates;
+                displayDistance = routeData.distanceMeters;
+                document.getElementById('mapDistanceLabel').innerText = "ระยะทางตามถนนโดยประมาณ";
+            } else {
+                // ถ้าไม่พบถนน ให้วาดเส้นตรงและบอกระยะทางเส้นตรง
+                latlngs = [ [startLat, startLng], [endLat, endLng] ];
+                displayDistance = calculateDistance(startLat, startLng, endLat, endLng) * 1000;
+                document.getElementById('mapDistanceLabel').innerText = "ระยะทางเส้นตรง (ไม่พบข้อมูลเส้นทางถนน)";
+            }
+
+            document.getElementById('mapDistance').innerText = displayDistance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            // วาดเส้นทึบ (Solid Line ไม่เอา dashArray)
+            mapPolyline = L.polyline(latlngs, {color: '#ef4444', weight: 4}).addTo(routeMap);
 
             // แก้ไขบัคแผนที่เทา ตอนเปิด Modal
             setTimeout(() => {
                 routeMap.invalidateSize();
-                
-                // หากจุดหัว-ท้าย อยู่ใกล้กันมาก ให้เซ็ต View แทนการ fitBounds เพื่อไม่ให้แผนที่ Zoom ใกล้เกินไป
-                if(dist < 0.01) {
-                    routeMap.setView([startLat, startLng], 17);
+                if(displayDistance < 10) {
+                    routeMap.setView([startLat, startLng], 18);
                 } else {
                     routeMap.fitBounds(mapPolyline.getBounds(), {padding: [50, 50]});
                 }
@@ -1077,8 +1107,8 @@
                         
                         <!-- ถนนหลัก -->
                         <div class="w-3/4 h-24 bg-slate-400 relative flex items-center justify-center shadow-lg">
-                            <!-- เส้นประกลางถนน -->
-                            <div class="w-full h-0 border-t-[3px] border-dashed border-yellow-300"></div>
+                            <!-- เส้นทึบกลางถนน (ไม่เอาเส้นประ) -->
+                            <div class="w-full h-0 border-t-[3px] border-yellow-300"></div>
                             
                             <!-- หูช้างซ้ายบน (หัว-ซ้าย) -->
                             ${area_fl > 0 ? `
