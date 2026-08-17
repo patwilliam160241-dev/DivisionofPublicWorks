@@ -253,6 +253,63 @@
         }
 
         // ================= ระบบจัดการไฟล์ =================
+        // ฟังก์ชันช่วยสร้าง HTML แถวของไฟล์
+        function createFileRowHTML(file, groupId = '', isHidden = false) {
+            const date = new Date(file.created_at).toLocaleDateString('th-TH');
+            const categoryName = file.categories ? file.categories.name : '- ไม่ระบุ -';
+            
+            let iconClass = 'fa-file text-slate-500';
+            if(file.file_name.endsWith('.pdf')) iconClass = 'fa-file-pdf text-red-500';
+            else if(file.file_name.match(/\.(jpg|jpeg|png|gif)$/i)) iconClass = 'fa-file-image text-green-500';
+            else if(file.file_name.match(/\.(doc|docx|xls|xlsx)$/i)) iconClass = 'fa-file-word text-blue-500';
+
+            const displayClass = isHidden ? 'hidden' : '';
+            const groupClass = groupId ? `group-item-${groupId}` : '';
+
+            return `
+                <tr class="hover:bg-slate-50 transition-colors ${displayClass} ${groupClass}">
+                    <td class="py-3 px-6 flex items-start pl-[40px]">
+                        <i class="fa-solid ${iconClass} text-lg mr-3 mt-1 shrink-0"></i> 
+                        <span class="break-words whitespace-normal">${file.file_name}</span>
+                    </td>
+                    <td class="py-3 px-6 text-slate-600">
+                        <span class="bg-slate-200 px-2 py-1 rounded text-xs">${categoryName}</span>
+                    </td>
+                    <td class="py-3 px-6 text-slate-500 whitespace-nowrap">${formatBytes(file.file_size)}</td>
+                    <td class="py-3 px-6 text-slate-500 whitespace-nowrap">${date}</td>
+                    <td class="py-3 px-6 text-center space-x-2 whitespace-nowrap">
+                        <a href="${file.file_url}" target="_blank" class="text-indigo-500 hover:text-indigo-700 p-2"><i class="fa-solid fa-download"></i></a>
+                        <button onclick="deleteFile('${file.id}', '${file.file_name}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // ฟังก์ชันกด ย่อ/ขยาย หมวดหมู่
+        function toggleGroup(groupId) {
+            const rows = document.querySelectorAll(`.group-item-${groupId}`);
+            const icon = document.getElementById(`icon-${groupId}`);
+            
+            let isExpanding = false;
+            
+            rows.forEach(row => {
+                if(row.classList.contains('hidden')) {
+                    row.classList.remove('hidden');
+                    isExpanding = true;
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+
+            if(isExpanding) {
+                icon.classList.remove('fa-plus');
+                icon.classList.add('fa-minus');
+            } else {
+                icon.classList.remove('fa-minus');
+                icon.classList.add('fa-plus');
+            }
+        }
+
         async function fetchFiles() {
             if (!supabaseClient) return;
             const tbody = document.getElementById('fileTableBody');
@@ -269,41 +326,79 @@
                 if (error) throw error;
 
                 document.getElementById('totalFilesCount').innerText = data.length;
-                tbody.innerHTML = '';
+                let htmlContent = '';
 
                 if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-slate-400">ไม่พบไฟล์ในแฟ้มนี้</td></tr>';
-                    return;
+                    htmlContent = '<tr><td colspan="5" class="text-center py-4 text-slate-400">ไม่พบไฟล์ในแฟ้มนี้</td></tr>';
+                } 
+                else if (currentCategoryId === 'all') {
+                    // ==========================================
+                    // โหมดดูทั้งหมด: จัดกลุ่มตามแฟ้ม (Accordion)
+                    // ==========================================
+                    const groupedData = {};
+                    const noCategoryData = [];
+
+                    // 1. แยกกลุ่มข้อมูล
+                    data.forEach(file => {
+                        if(file.category_id && file.categories) {
+                            if(!groupedData[file.category_id]) {
+                                groupedData[file.category_id] = {
+                                    name: file.categories.name,
+                                    files: []
+                                };
+                            }
+                            groupedData[file.category_id].files.push(file);
+                        } else {
+                            noCategoryData.push(file);
+                        }
+                    });
+
+                    // 2. สร้าง HTML สำหรับแต่ละกลุ่ม
+                    for (const catId in groupedData) {
+                        const group = groupedData[catId];
+                        
+                        // แถบหัวข้อหมวดหมู่ (กดเพื่อขยายได้)
+                        htmlContent += `
+                            <tr class="bg-indigo-50 border-b border-indigo-100 cursor-pointer hover:bg-indigo-100 transition-colors" onclick="toggleGroup('${catId}')">
+                                <td colspan="5" class="py-3 px-6 font-semibold text-indigo-800">
+                                    <i id="icon-${catId}" class="fa-solid fa-plus w-5 text-indigo-500"></i>
+                                    <i class="fa-solid fa-folder text-indigo-400 mr-2"></i> ${group.name} 
+                                    <span class="text-sm font-normal text-indigo-500 ml-2">(${group.files.length} ไฟล์)</span>
+                                </td>
+                            </tr>
+                        `;
+                        
+                        // รายการไฟล์ข้างใน (ซ่อนไว้ก่อนค่าเริ่มต้นคือ isHidden = true)
+                        group.files.forEach(file => {
+                            htmlContent += createFileRowHTML(file, catId, true);
+                        });
+                    }
+
+                    // 3. แสดงไฟล์ที่ไม่มีหมวดหมู่ (ถ้ามี)
+                    if(noCategoryData.length > 0) {
+                        htmlContent += `
+                            <tr class="bg-slate-100 border-b border-slate-200">
+                                <td colspan="5" class="py-3 px-6 font-semibold text-slate-700">
+                                    <i class="fa-solid fa-folder-open text-slate-400 mr-2"></i> ไม่ระบุแฟ้ม
+                                </td>
+                            </tr>
+                        `;
+                        noCategoryData.forEach(file => {
+                            htmlContent += createFileRowHTML(file, '', false);
+                        });
+                    }
+                } 
+                else {
+                    // ==========================================
+                    // โหมดดูรายบุคคล: แสดงรายการปกติ (ไม่มี Accordion)
+                    // ==========================================
+                    data.forEach(file => {
+                        htmlContent += createFileRowHTML(file, '', false);
+                    });
                 }
 
-                data.forEach(file => {
-                    const date = new Date(file.created_at).toLocaleDateString('th-TH');
-                    const categoryName = file.categories ? file.categories.name : '- ไม่ระบุ -';
-                    
-                    let iconClass = 'fa-file text-slate-500';
-                    if(file.file_name.endsWith('.pdf')) iconClass = 'fa-file-pdf text-red-500';
-                    else if(file.file_name.match(/\.(jpg|jpeg|png|gif)$/i)) iconClass = 'fa-file-image text-green-500';
-                    else if(file.file_name.match(/\.(doc|docx|xls|xlsx)$/i)) iconClass = 'fa-file-word text-blue-500';
+                tbody.innerHTML = htmlContent;
 
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-50 transition-colors';
-                    tr.innerHTML = `
-                        <td class="py-3 px-6 flex items-center">
-                            <i class="fa-solid ${iconClass} text-lg mr-3"></i> 
-                            <span class="break-words whitespace-normal">${file.file_name}</span>
-                        </td>
-                        <td class="py-3 px-6 text-slate-600">
-                            <span class="bg-slate-200 px-2 py-1 rounded text-xs">${categoryName}</span>
-                        </td>
-                        <td class="py-3 px-6 text-slate-500">${formatBytes(file.file_size)}</td>
-                        <td class="py-3 px-6 text-slate-500">${date}</td>
-                        <td class="py-3 px-6 text-center space-x-2">
-                            <a href="${file.file_url}" target="_blank" class="text-indigo-500 hover:text-indigo-700 p-2"><i class="fa-solid fa-download"></i></a>
-                            <button onclick="deleteFile('${file.id}', '${file.file_name}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
             } catch (err) {
                 console.error('Error:', err);
                 tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
@@ -319,7 +414,7 @@
             document.getElementById('fileInput').click();
         }
 
-        // แก้ไขฟังก์ชัน uploadFile เพื่อรองรับหลายไฟล์
+        // ฟังก์ชัน uploadFile แบบหลายไฟล์
         async function uploadFile(event) {
             const selectedCat = document.getElementById('uploadCategorySelect').value;
             if (!selectedCat) return;
@@ -335,10 +430,8 @@
             let successCount = 0;
             let failCount = 0;
 
-            // ปิดปุ่ม input ไม่ให้กดซ้ำระหว่างอัปโหลด
             document.getElementById('uploadBox').style.pointerEvents = 'none';
 
-            // วนลูปอัปโหลดทีละไฟล์
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 text.innerText = `กำลังอัปโหลดไฟล์ที่ ${i + 1} จาก ${files.length} (${file.name})...`;
@@ -348,14 +441,11 @@
                 const safeStorageName = `${Date.now()}_${randomString}.${fileExt}`;
 
                 try {
-                    // 1. โยนไฟล์เข้า Storage
                     const { error: storageError } = await supabaseClient.storage.from('uploads').upload(safeStorageName, file);
                     if (storageError) throw storageError;
 
-                    // 2. ขอ URL คืนมา
                     const { data: urlData } = supabaseClient.storage.from('uploads').getPublicUrl(safeStorageName);
 
-                    // 3. บันทึกลงตาราง
                     const { error: dbError } = await supabaseClient.from('files').insert([{ 
                         file_name: file.name, 
                         file_size: file.size, 
@@ -372,20 +462,17 @@
                 }
             }
 
-            // คืนค่า UI ให้กลับมาปกติ
             icon.className = 'fa-solid fa-cloud-arrow-up text-4xl text-indigo-300 mb-3';
             text.innerText = 'คลิกเพื่อเลือกไฟล์อัปโหลด (สามารถเลือกได้หลายไฟล์)';
             document.getElementById('fileInput').value = ''; 
             document.getElementById('uploadBox').style.pointerEvents = 'auto';
 
-            // แจ้งเตือนผลลัพธ์
             if (failCount === 0) {
                 alert(`อัปโหลดเสร็จสิ้น! สำเร็จทั้งหมด ${successCount} ไฟล์`);
             } else {
                 alert(`อัปโหลดเสร็จสิ้น!\nสำเร็จ: ${successCount} ไฟล์\nล้มเหลว: ${failCount} ไฟล์`);
             }
 
-            // รีเฟรชตาราง
             if (currentCategoryId === 'all' || currentCategoryId === selectedCat) {
                 fetchFiles(); 
             }
