@@ -14,7 +14,7 @@
         .inactive-category { hover:background-color: #1e293b; color: #cbd5e1; }
         
         /* Custom Scrollbar for Preview */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
@@ -149,7 +149,7 @@
                                     <th class="py-3 px-3 font-medium border-l border-slate-200" rowspan="2">ประเภทถนน</th>
                                     <th class="py-3 px-3 font-medium text-center border-l border-slate-200" rowspan="2">ช่วงระยะงาน</th>
                                     <th class="py-2 px-2 font-medium text-center border-l border-slate-200" colspan="3">ขนาดหลัก (ม.)</th>
-                                    <th class="py-2 px-2 font-medium text-center border-l border-slate-200 bg-amber-50/50" colspan="3">พื้นที่หูช้างรูปสามเหลี่ยม (ม.)</th>
+                                    <th class="py-3 px-2 font-medium text-center border-l border-slate-200 bg-amber-50/50 min-w-[120px]" rowspan="2">พื้นที่หูช้างรวม (ตร.ม.)</th>
                                     <th class="py-3 px-3 font-medium text-center border-l border-slate-200 min-w-[120px]" rowspan="2">หมายเหตุ</th>
                                     <th class="py-3 px-4 font-medium text-center border-l border-slate-200" rowspan="2">พิกัด (หัว-ท้าย)</th>
                                     <th class="py-3 px-4 font-medium text-center border-l border-slate-200" rowspan="2">จัดการ</th>
@@ -158,13 +158,10 @@
                                     <th class="py-1 px-1 border-l border-slate-200">กว้าง</th>
                                     <th class="py-1 px-1">ยาว</th>
                                     <th class="py-1 px-1">หนา</th>
-                                    <th class="py-1 px-1 border-l border-slate-200 bg-amber-50/50">กว้าง</th>
-                                    <th class="py-1 px-1 bg-amber-50/50">ยาว</th>
-                                    <th class="py-1 px-1 bg-amber-50/50">หนา</th>
                                 </tr>
                             </thead>
                             <tbody id="surveyTableBody" class="text-sm divide-y divide-slate-100">
-                                <tr><td colspan="12" class="text-center py-8 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
+                                <tr><td colspan="10" class="text-center py-8 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -307,7 +304,7 @@
                 <div class="bg-white p-5 rounded-xl border border-amber-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 shrink-0">
                     <div>
                         <h5 class="font-bold text-amber-800 text-lg flex items-center"><i class="fa-solid fa-calculator mr-2 text-amber-500"></i>สรุปพื้นที่หูช้างรูปสามเหลี่ยมทั้งหมด</h5>
-                        <p class="text-xs text-slate-500 mt-1">คำนวณจากสูตร: <span class="font-mono bg-slate-100 px-1 rounded">0.5 × กว้าง × ยาว</span> (นำมารวมกันทุกช่วงระยะงาน)</p>
+                        <p class="text-xs text-slate-500 mt-1">คำนวณจากสูตร: <span class="font-mono bg-slate-100 px-1 rounded">0.5 × กว้าง × ยาว</span> (นำมารวมกันทุกช่วงและทุกมุม)</p>
                     </div>
                     <div class="text-right bg-amber-50 px-6 py-3 rounded-lg border border-amber-100">
                         <span class="text-3xl font-black text-amber-600" id="previewArea">0.00</span>
@@ -402,7 +399,7 @@
         async function fetchSurveys() {
             if (!supabaseClient) return;
             const tbody = document.getElementById('surveyTableBody');
-            tbody.innerHTML = '<tr><td colspan="12" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
 
             try {
                 const { data, error } = await supabaseClient.from('survey_works').select('*').order('created_at', { ascending: false });
@@ -412,7 +409,7 @@
                 let htmlContent = '';
 
                 if (data.length === 0) {
-                    htmlContent = '<tr><td colspan="12" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลงานสำรวจ</td></tr>';
+                    htmlContent = '<tr><td colspan="10" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลงานสำรวจ</td></tr>';
                 } else {
                     data.forEach(item => {
                         const hasStart = item.start_lat && item.start_lng;
@@ -448,10 +445,11 @@
 
                         let segments = item.segments || [];
                         if (!Array.isArray(segments) || segments.length === 0) {
+                            // รองรับข้อมูลโครงสร้างเก่า
                             segments = [{
                                 name: '-', 
                                 w: item.width, l: item.length, t: item.thickness,
-                                ew: item.ear_width, el: item.ear_length, et: item.ear_thickness
+                                ew_fl: item.ear_width, el_fl: item.ear_length, et_fl: item.ear_thickness
                             }];
                         }
 
@@ -461,6 +459,14 @@
                             : `<span class="text-slate-300">-</span>`;
 
                         segments.forEach((seg, idx) => {
+                            // คำนวณพื้นที่หูช้างรวมของ Segment นี้ (4 มุม)
+                            const ew_fl = parseFloat(seg.ew_fl || seg.ew || 0); const el_fl = parseFloat(seg.el_fl || seg.el || 0);
+                            const ew_fr = parseFloat(seg.ew_fr || 0); const el_fr = parseFloat(seg.el_fr || 0);
+                            const ew_bl = parseFloat(seg.ew_bl || 0); const el_bl = parseFloat(seg.el_bl || 0);
+                            const ew_br = parseFloat(seg.ew_br || 0); const el_br = parseFloat(seg.el_br || 0);
+                            
+                            const totalEarArea = (0.5 * ew_fl * el_fl) + (0.5 * ew_fr * el_fr) + (0.5 * ew_bl * el_bl) + (0.5 * ew_br * el_br);
+
                             htmlContent += `<tr class="hover:bg-slate-50 transition-colors ${idx === 0 ? 'border-t-[3px] border-slate-200' : ''}">`;
                             
                             if (idx === 0) {
@@ -478,9 +484,7 @@
                                 <td class="py-2 px-2 text-center text-[13px] text-slate-700">${seg.l || '-'}</td>
                                 <td class="py-2 px-2 text-center text-[13px] text-slate-700">${seg.t || '-'}</td>
                                 
-                                <td class="py-2 px-2 text-center text-[13px] border-l border-slate-100 text-slate-700 bg-amber-50/30">${seg.ew || '-'}</td>
-                                <td class="py-2 px-2 text-center text-[13px] text-slate-700 bg-amber-50/30">${seg.el || '-'}</td>
-                                <td class="py-2 px-2 text-center text-[13px] text-slate-700 bg-amber-50/30">${seg.et || '-'}</td>
+                                <td class="py-2 px-2 text-center text-[13px] border-l border-slate-100 text-slate-700 bg-amber-50/30 font-bold text-amber-700">${totalEarArea > 0 ? totalEarArea.toFixed(2) : '-'}</td>
                             `;
 
                             if (idx === 0) {
@@ -506,13 +510,49 @@
                 tbody.innerHTML = htmlContent;
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="12" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล (ตรวจสอบว่าเพิ่มคอลัมน์ใหม่ใน Database หรือยัง)</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
             }
         }
 
         // ================= ระบบเพิ่ม Dynamic Segments =================
         function createSegmentHTML(seg, index) {
             const showDelete = index > 0;
+
+            const corners = [
+                { key: 'fl', label: 'หัว-ซ้าย' },
+                { key: 'fr', label: 'หัว-ขวา' },
+                { key: 'bl', label: 'ท้าย-ซ้าย' },
+                { key: 'br', label: 'ท้าย-ขวา' }
+            ];
+
+            let cornersHTML = '';
+            corners.forEach(c => {
+                // สำหรับข้อมูลเก่าที่มีแค่ ew, el, et จะถูกดึงไปใส่ในหัวซ้าย (fl)
+                const valW = seg[`ew_${c.key}`] !== undefined ? seg[`ew_${c.key}`] : (c.key === 'fl' ? (seg.ew || '') : '');
+                const valL = seg[`el_${c.key}`] !== undefined ? seg[`el_${c.key}`] : (c.key === 'fl' ? (seg.el || '') : '');
+                const valT = seg[`et_${c.key}`] !== undefined ? seg[`et_${c.key}`] : (c.key === 'fl' ? (seg.et || '') : '');
+
+                cornersHTML += `
+                <div class="border border-amber-200 bg-white p-2 rounded shadow-sm">
+                    <div class="text-[10px] font-bold text-slate-700 mb-1.5 border-b border-slate-100 pb-1 text-center">${c.label}</div>
+                    <div class="grid grid-cols-3 gap-1">
+                        <div>
+                            <label class="block text-[9px] text-slate-500 text-center mb-0.5">กว้าง</label>
+                            <input type="number" step="any" class="seg-ew-${c.key} w-full border border-slate-300 rounded px-1.5 py-1 text-xs focus:ring-1 focus:ring-amber-500 outline-none text-center" value="${valW}">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] text-slate-500 text-center mb-0.5">ยาว</label>
+                            <input type="number" step="any" class="seg-el-${c.key} w-full border border-slate-300 rounded px-1.5 py-1 text-xs focus:ring-1 focus:ring-amber-500 outline-none text-center" value="${valL}">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] text-slate-500 text-center mb-0.5">หนา</label>
+                            <input type="number" step="any" class="seg-et-${c.key} w-full border border-slate-300 rounded px-1.5 py-1 text-xs focus:ring-1 focus:ring-amber-500 outline-none text-center" value="${valT}">
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+
             return `
             <div class="segment-item bg-slate-50 border border-slate-200 p-4 rounded-xl relative shadow-sm transition-all">
                 ${showDelete ? `
@@ -528,39 +568,29 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- ขนาดหลัก -->
-                    <div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100">
-                        <h5 class="text-[11px] font-bold text-blue-800 mb-2 tracking-wide uppercase">ขนาดหลัก (เมตร)</h5>
-                        <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100 md:col-span-2">
+                        <h5 class="text-[11px] font-bold text-blue-800 mb-2 tracking-wide uppercase">ขนาดหลักถนน (เมตร)</h5>
+                        <div class="grid grid-cols-3 gap-3 max-w-lg">
                             <div>
                                 <label class="block text-[10px] text-slate-600 mb-1 font-medium">กว้าง</label>
-                                <input type="number" step="any" class="seg-w w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.w || ''}">
+                                <input type="number" step="any" class="seg-w w-full border border-slate-300 rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.w || ''}">
                             </div>
                             <div>
                                 <label class="block text-[10px] text-slate-600 mb-1 font-medium">ยาว</label>
-                                <input type="number" step="any" class="seg-l w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.l || ''}">
+                                <input type="number" step="any" class="seg-l w-full border border-slate-300 rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.l || ''}">
                             </div>
                             <div>
                                 <label class="block text-[10px] text-slate-600 mb-1 font-medium">หนา</label>
-                                <input type="number" step="any" class="seg-t w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.t || ''}">
+                                <input type="number" step="any" class="seg-t w-full border border-slate-300 rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.t || ''}">
                             </div>
                         </div>
                     </div>
-                    <!-- พื้นที่หูช้าง -->
-                    <div class="bg-amber-50/60 p-3 rounded-lg border border-amber-100">
-                        <h5 class="text-[11px] font-bold text-amber-800 mb-2 tracking-wide uppercase">พื้นที่หูช้างรูปสามเหลี่ยม (เมตร)</h5>
-                        <div class="grid grid-cols-3 gap-2">
-                            <div>
-                                <label class="block text-[10px] text-slate-600 mb-1 font-medium">กว้าง</label>
-                                <input type="number" step="any" class="seg-ew w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none bg-white" value="${seg.ew || ''}">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] text-slate-600 mb-1 font-medium">ยาว</label>
-                                <input type="number" step="any" class="seg-el w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none bg-white" value="${seg.el || ''}">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] text-slate-600 mb-1 font-medium">หนา</label>
-                                <input type="number" step="any" class="seg-et w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none bg-white" value="${seg.et || ''}">
-                            </div>
+
+                    <!-- พื้นที่หูช้าง 4 มุม -->
+                    <div class="bg-amber-50/60 p-3 rounded-lg border border-amber-100 md:col-span-2">
+                        <h5 class="text-[11px] font-bold text-amber-800 mb-2 tracking-wide uppercase">พื้นที่หูช้างรูปสามเหลี่ยม 4 มุม (เมตร)</h5>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                            ${cornersHTML}
                         </div>
                     </div>
                 </div>
@@ -571,7 +601,7 @@
         function addSegment() {
             const container = document.getElementById('segmentsContainer');
             const index = container.querySelectorAll('.segment-item').length;
-            const newSeg = { name: `ช่วงที่ ${index + 1}`, w: '', l: '', t: '', ew: '', el: '', et: '' };
+            const newSeg = { name: `ช่วงที่ ${index + 1}`, w: '', l: '', t: '' };
             container.insertAdjacentHTML('beforeend', createSegmentHTML(newSeg, index));
             
             setTimeout(() => {
@@ -593,9 +623,22 @@
                     w: item.querySelector('.seg-w').value,
                     l: item.querySelector('.seg-l').value,
                     t: item.querySelector('.seg-t').value,
-                    ew: item.querySelector('.seg-ew').value,
-                    el: item.querySelector('.seg-el').value,
-                    et: item.querySelector('.seg-et').value,
+                    
+                    ew_fl: item.querySelector('.seg-ew-fl').value,
+                    el_fl: item.querySelector('.seg-el-fl').value,
+                    et_fl: item.querySelector('.seg-et-fl').value,
+                    
+                    ew_fr: item.querySelector('.seg-ew-fr').value,
+                    el_fr: item.querySelector('.seg-el-fr').value,
+                    et_fr: item.querySelector('.seg-et-fr').value,
+                    
+                    ew_bl: item.querySelector('.seg-ew-bl').value,
+                    el_bl: item.querySelector('.seg-el-bl').value,
+                    et_bl: item.querySelector('.seg-et-bl').value,
+                    
+                    ew_br: item.querySelector('.seg-ew-br').value,
+                    el_br: item.querySelector('.seg-el-br').value,
+                    et_br: item.querySelector('.seg-et-br').value,
                 });
             });
             return data;
@@ -622,7 +665,7 @@
                     const legacySeg = {
                         name: 'ช่วงที่ 1',
                         w: item.width, l: item.length, t: item.thickness,
-                        ew: item.ear_width, el: item.ear_length, et: item.ear_thickness
+                        ew_fl: item.ear_width, el_fl: item.ear_length, et_fl: item.ear_thickness
                     };
                     container.insertAdjacentHTML('beforeend', createSegmentHTML(legacySeg, 0));
                 }
@@ -638,7 +681,7 @@
                 document.getElementById('surveyRoadType').value = '';
                 document.getElementById('surveyRemark').value = '';
                 
-                container.insertAdjacentHTML('beforeend', createSegmentHTML({ name: 'ช่วงที่ 1', w: '', l: '', t: '', ew: '', el: '', et: '' }, 0));
+                container.insertAdjacentHTML('beforeend', createSegmentHTML({ name: 'ช่วงที่ 1', w: '', l: '', t: '' }, 0));
                 
                 document.getElementById('surveyStartLat').value = '';
                 document.getElementById('surveyStartLng').value = '';
@@ -662,12 +705,11 @@
             let totalFlareArea = 0;
             let segments = item.segments || [];
             
-            // กรณีเป็นข้อมูลเก่าที่ไม่มี segments ให้สร้างข้อมูลจำลองจากคอลัมน์เดิม
             if(!Array.isArray(segments) || segments.length === 0) {
                  segments = [{
                     name: 'ช่วงที่ 1',
                     w: item.width, l: item.length, t: item.thickness,
-                    ew: item.ear_width, el: item.ear_length, et: item.ear_thickness
+                    ew_fl: item.ear_width, el_fl: item.ear_length, et_fl: item.ear_thickness
                 }];
             }
 
@@ -676,45 +718,70 @@
             segments.forEach((seg, index) => {
                 const w = parseFloat(seg.w || 0).toFixed(2);
                 const l = parseFloat(seg.l || 0).toFixed(2);
-                const ew = parseFloat(seg.ew || 0).toFixed(2);
-                const el = parseFloat(seg.el || 0).toFixed(2);
                 
-                // คำนวณพื้นที่หูช้างรูปสามเหลี่ยม (0.5 * กว้าง * ยาว) แล้วสะสมยอด
-                const flareArea = (0.5 * parseFloat(seg.ew || 0) * parseFloat(seg.el || 0));
-                totalFlareArea += flareArea;
+                // คำนวณหูช้าง 4 มุม
+                const ew_fl = parseFloat(seg.ew_fl || seg.ew || 0); const el_fl = parseFloat(seg.el_fl || seg.el || 0);
+                const ew_fr = parseFloat(seg.ew_fr || 0); const el_fr = parseFloat(seg.el_fr || 0);
+                const ew_bl = parseFloat(seg.ew_bl || 0); const el_bl = parseFloat(seg.el_bl || 0);
+                const ew_br = parseFloat(seg.ew_br || 0); const el_br = parseFloat(seg.el_br || 0);
+
+                const area_fl = 0.5 * ew_fl * el_fl;
+                const area_fr = 0.5 * ew_fr * el_fr;
+                const area_bl = 0.5 * ew_bl * el_bl;
+                const area_br = 0.5 * ew_br * el_br;
+                
+                const segEarTotalArea = area_fl + area_fr + area_bl + area_br;
+                totalFlareArea += segEarTotalArea;
 
                 segmentsHtml += `
                 <div class="bg-white border-2 border-slate-100 rounded-xl overflow-hidden shadow-sm">
                     <div class="bg-indigo-50/70 px-4 py-3 border-b border-slate-100 flex justify-between items-center">
                         <span class="font-bold text-indigo-800">${seg.name || `ช่วงที่ ${index+1}`}</span>
                     </div>
-                    <div class="relative w-full h-48 bg-emerald-50/40 flex items-center justify-center overflow-hidden">
+                    <div class="relative w-full h-56 bg-emerald-50/40 flex items-center justify-center overflow-hidden">
+                        
                         <!-- ถนนหลัก -->
-                        <div class="w-3/4 h-20 bg-slate-400 relative flex items-center justify-center shadow-lg">
+                        <div class="w-3/4 h-24 bg-slate-400 relative flex items-center justify-center shadow-lg">
                             <!-- เส้นประกลางถนน -->
                             <div class="w-full h-0 border-t-[3px] border-dashed border-yellow-300"></div>
                             
-                            <!-- หูช้างซ้ายบน -->
-                            <div class="absolute -top-4 -left-0 w-0 h-0 border-b-[16px] border-b-slate-400 border-r-[16px] border-r-transparent shadow-sm"></div>
-                            <!-- หูช้างซ้ายล่าง -->
-                            <div class="absolute -bottom-4 -left-0 w-0 h-0 border-t-[16px] border-t-slate-400 border-r-[16px] border-r-transparent shadow-sm"></div>
-                            <!-- หูช้างขวาบน -->
-                            <div class="absolute -top-4 -right-0 w-0 h-0 border-b-[16px] border-b-slate-400 border-l-[16px] border-l-transparent shadow-sm"></div>
-                            <!-- หูช้างขวาล่าง -->
-                            <div class="absolute -bottom-4 -right-0 w-0 h-0 border-t-[16px] border-t-slate-400 border-l-[16px] border-l-transparent shadow-sm"></div>
+                            <!-- หูช้างซ้ายบน (หัว-ซ้าย) -->
+                            ${area_fl > 0 ? `
+                                <div class="absolute -top-[16px] left-0 w-0 h-0 border-b-[16px] border-b-slate-400 border-r-[24px] border-r-transparent"></div>
+                                <div class="absolute -top-7 left-1 text-[9px] text-amber-700 bg-white/90 px-1 rounded shadow border border-amber-100 whitespace-nowrap">หัวซ้าย: ${ew_fl}x${el_fl}</div>
+                            ` : ''}
+                            
+                            <!-- หูช้างซ้ายล่าง (หัว-ขวา) -->
+                            ${area_fr > 0 ? `
+                                <div class="absolute -bottom-[16px] left-0 w-0 h-0 border-t-[16px] border-t-slate-400 border-r-[24px] border-r-transparent"></div>
+                                <div class="absolute -bottom-7 left-1 text-[9px] text-amber-700 bg-white/90 px-1 rounded shadow border border-amber-100 whitespace-nowrap">หัวขวา: ${ew_fr}x${el_fr}</div>
+                            ` : ''}
+                            
+                            <!-- หูช้างขวาบน (ท้าย-ซ้าย) -->
+                            ${area_bl > 0 ? `
+                                <div class="absolute -top-[16px] right-0 w-0 h-0 border-b-[16px] border-b-slate-400 border-l-[24px] border-l-transparent"></div>
+                                <div class="absolute -top-7 right-1 text-[9px] text-amber-700 bg-white/90 px-1 rounded shadow border border-amber-100 whitespace-nowrap">ท้ายซ้าย: ${ew_bl}x${el_bl}</div>
+                            ` : ''}
+                            
+                            <!-- หูช้างขวาล่าง (ท้าย-ขวา) -->
+                            ${area_br > 0 ? `
+                                <div class="absolute -bottom-[16px] right-0 w-0 h-0 border-t-[16px] border-t-slate-400 border-l-[24px] border-l-transparent"></div>
+                                <div class="absolute -bottom-7 right-1 text-[9px] text-amber-700 bg-white/90 px-1 rounded shadow border border-amber-100 whitespace-nowrap">ท้ายขวา: ${ew_br}x${el_br}</div>
+                            ` : ''}
                         </div>
                         
-                        <!-- ป้ายกำกับขนาด -->
+                        <!-- ป้ายกำกับขนาดถนนหลัก -->
                         <div class="absolute top-2 left-1/2 -translate-x-1/2 bg-white px-3 py-1.5 rounded-lg shadow text-xs font-bold text-indigo-700 border border-indigo-100 flex items-center gap-1.5">
                             <i class="fa-solid fa-arrows-left-right"></i> ยาว: ${l} ม.
                         </div>
                         <div class="absolute left-4 top-1/2 -translate-y-1/2 bg-white px-3 py-1.5 rounded-lg shadow text-xs font-bold text-indigo-700 border border-indigo-100 flex items-center gap-1.5">
                             <i class="fa-solid fa-arrows-up-down"></i> กว้าง: ${w} ม.
                         </div>
-                        <div class="absolute right-4 bottom-3 bg-white px-3 py-2 rounded-lg shadow text-xs font-bold text-amber-700 border border-amber-100">
-                            <div class="flex items-center gap-1.5 mb-1 text-[10px] text-amber-500 uppercase">พื้นที่หูช้างสามเหลี่ยม</div>
-                            <div class="flex items-center gap-1.5 mb-0.5"><i class="fa-solid fa-caret-up fa-rotate-90"></i> กว้าง: ${ew} ม.</div>
-                            <div class="flex items-center gap-1.5"><i class="fa-solid fa-caret-right"></i> ยาว: ${el} ม.</div>
+
+                        <!-- สรุปหูช้างของช่วงนี้ -->
+                        <div class="absolute right-4 bottom-3 bg-white px-3 py-2 rounded-lg shadow text-xs font-bold text-amber-700 border border-amber-100 text-right">
+                            <div class="flex items-center gap-1.5 mb-1 text-[10px] text-amber-500 uppercase">พื้นที่หูช้าง 4 มุม</div>
+                            <div class="text-base">${segEarTotalArea.toFixed(2)} <span class="text-[10px]">ตร.ม.</span></div>
                         </div>
                     </div>
                 </div>
@@ -788,9 +855,11 @@
                 width: firstSeg.w ? parseFloat(firstSeg.w) : 0,
                 length: firstSeg.l ? parseFloat(firstSeg.l) : 0,
                 thickness: firstSeg.t ? parseFloat(firstSeg.t) : 0,
-                ear_width: firstSeg.ew ? parseFloat(firstSeg.ew) : 0,
-                ear_length: firstSeg.el ? parseFloat(firstSeg.el) : 0,
-                ear_thickness: firstSeg.et ? parseFloat(firstSeg.et) : 0,
+                
+                // เก็บค่า fl เป็นค่าตั้งต้นสำหรับ backward compatibility
+                ear_width: firstSeg.ew_fl ? parseFloat(firstSeg.ew_fl) : 0,
+                ear_length: firstSeg.el_fl ? parseFloat(firstSeg.el_fl) : 0,
+                ear_thickness: firstSeg.et_fl ? parseFloat(firstSeg.et_fl) : 0,
                 
                 start_lat: document.getElementById('surveyStartLat').value ? parseFloat(document.getElementById('surveyStartLat').value) : null,
                 start_lng: document.getElementById('surveyStartLng').value ? parseFloat(document.getElementById('surveyStartLng').value) : null,
