@@ -492,17 +492,18 @@
                     </div>
                     
                     <div class="overflow-x-auto border border-slate-200 rounded-lg">
-                        <table class="w-full text-left border-collapse min-w-[900px]">
+                        <table class="w-full text-left border-collapse min-w-[950px]">
                             <thead>
                                 <tr class="bg-slate-100 text-[12px] text-slate-600 border-b border-slate-200 uppercase tracking-wide">
                                     <th class="py-3 px-3 text-center w-12">ลำดับ</th>
                                     <th class="py-3 px-3">รายการ</th>
-                                    <th class="py-3 px-3 text-center w-24">หน่วย</th>
+                                    <th class="py-3 px-3 text-center w-20">หน่วย</th>
                                     <th class="py-3 px-3 text-right w-24">จำนวน</th>
                                     <th class="py-3 px-3 text-right w-28">ราคา/หน่วย</th>
                                     <th class="py-3 px-3 text-right w-28">ราคาทุน</th>
                                     <th class="py-3 px-3 text-right w-24">Factor F</th>
                                     <th class="py-3 px-3 text-right w-32">ราคากลาง</th>
+                                    <th class="py-3 px-2 text-center w-12 no-print">จัดการ</th> <!-- คอลัมน์จัดการ -->
                                 </tr>
                             </thead>
                             <tbody id="boqTableBody" class="text-[13px] divide-y divide-slate-100">
@@ -514,6 +515,7 @@
                                     <td id="outputDirectCost" class="py-3 px-3 text-right font-mono font-bold text-emerald-700 text-sm">0.00</td>
                                     <td class="py-3 px-4 text-right font-bold text-emerald-800">ราคากลางสุทธิ:</td>
                                     <td id="outputTotalCost" class="py-3 px-3 text-right font-mono font-black text-emerald-700 text-[16px]">0.00</td>
+                                    <td class="no-print"></td> <!-- ช่องว่างสำหรับคอลัมน์จัดการ -->
                                 </tr>
                             </tfoot>
                         </table>
@@ -1185,6 +1187,7 @@
             modal.classList.remove('modal-active-print');
         }
 
+        // ================= ฟังก์ชันจัดการและ Render BOQ =================
         function renderBOQ() {
             let html = '';
             let totalDirectCost = 0;
@@ -1193,12 +1196,20 @@
 
             let rowNum = 1;
             boqItems.forEach((group, gIndex) => {
+                // แถวหัวข้อหมวดหมู่
                 html += `
-                    <tr class="bg-indigo-50/70 font-bold text-indigo-900 border-b border-indigo-100 print:bg-slate-100">
+                    <tr class="bg-indigo-50/70 font-bold text-indigo-900 border-b border-indigo-100 print:bg-slate-100 group">
                         <td class="py-2.5 px-3 text-center">${rowNum}</td>
-                        <td class="py-2.5 px-3" colspan="7">${group.group}</td>
+                        <td class="py-2.5 px-3" colspan="7">
+                            <input type="text" class="w-full bg-transparent font-bold outline-none focus:border-b border-indigo-300 print:border-none" value="${group.group}" onchange="updateBOQGroup(${gIndex}, this.value)">
+                        </td>
+                        <td class="py-2.5 px-2 text-center no-print align-middle">
+                            <button onclick="removeBOQGroup(${gIndex})" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-red-50 rounded p-1 shadow-sm border border-red-100" title="ลบหมวดงานนี้"><i class="fa-solid fa-trash text-xs"></i></button>
+                        </td>
                     </tr>
                 `;
+
+                // แถวรายการย่อย
                 group.items.forEach((item, iIndex) => {
                     const cost = item.qty * item.price;
                     const midCost = cost * f;
@@ -1206,33 +1217,109 @@
                     totalFactorFCost += midCost;
 
                     html += `
-                        <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="py-2 px-3"></td>
-                            <td class="py-2 px-3 text-slate-800">${item.name}</td>
-                            <td class="py-2 px-3 text-center text-slate-600">${item.unit}</td>
-                            <td class="py-2 px-3 text-right">
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="py-1.5 px-3"></td>
+                            <td class="py-1.5 px-3 text-slate-800">
+                                <input type="text" class="w-full border border-transparent hover:border-slate-300 rounded px-2 py-1 focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700 bg-transparent focus:bg-white print:p-0" value="${item.name}" onchange="updateBOQItem(${gIndex}, ${iIndex}, 'name', this.value)" placeholder="ชื่อรายการ">
+                            </td>
+                            <td class="py-1.5 px-3 text-center text-slate-600">
+                                <input type="text" class="w-full border border-transparent hover:border-slate-300 rounded px-1 py-1 text-center focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700 bg-transparent focus:bg-white print:p-0" value="${item.unit}" onchange="updateBOQItem(${gIndex}, ${iIndex}, 'unit', this.value)" placeholder="หน่วย">
+                            </td>
+                            <td class="py-1.5 px-3 text-right">
                                 <input type="number" step="any" class="w-full max-w-[80px] border border-slate-300 rounded px-2 py-1 text-right focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700 bg-white" value="${item.qty}" onchange="updateBOQItem(${gIndex}, ${iIndex}, 'qty', this.value)">
                             </td>
-                            <td class="py-2 px-3 text-right">
+                            <td class="py-1.5 px-3 text-right">
                                 <input type="number" step="any" class="w-full max-w-[90px] border border-slate-300 rounded px-2 py-1 text-right focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700 bg-white" value="${item.price}" onchange="updateBOQItem(${gIndex}, ${iIndex}, 'price', this.value)">
                             </td>
-                            <td class="py-2 px-3 text-right font-mono text-slate-700">${cost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td class="py-2 px-3 text-right text-slate-500">${f.toFixed(4)}</td>
-                            <td class="py-2 px-3 text-right font-mono font-bold text-emerald-700">${midCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-1.5 px-3 text-right font-mono text-slate-700">${cost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-1.5 px-3 text-right text-slate-500">${f.toFixed(4)}</td>
+                            <td class="py-1.5 px-3 text-right font-mono font-bold text-emerald-700">${midCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-1.5 px-2 text-center no-print align-middle">
+                                <button onclick="removeBOQItem(${gIndex}, ${iIndex})" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-red-50 rounded p-1 shadow-sm border border-slate-200" title="ลบรายการนี้"><i class="fa-solid fa-xmark text-xs"></i></button>
+                            </td>
                         </tr>
                     `;
                 });
+
+                // ปุ่มเพิ่มรายการย่อยในหมวด (ไม่แสดงตอนพิมพ์)
+                html += `
+                    <tr class="no-print">
+                        <td class="py-1 px-3"></td>
+                        <td class="py-2 px-3" colspan="8">
+                            <button onclick="addBOQItem(${gIndex})" class="text-[11px] text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded transition-colors flex items-center shadow-sm">
+                                <i class="fa-solid fa-plus mr-1"></i> เพิ่มรายการ
+                            </button>
+                        </td>
+                    </tr>
+                `;
                 rowNum++;
             });
+
+            // ปุ่มเพิ่มหมวดงานใหม่ต่อท้ายตาราง (ไม่แสดงตอนพิมพ์)
+            html += `
+                <tr class="no-print border-t-[3px] border-slate-200">
+                    <td class="py-4 px-3 text-center" colspan="9">
+                        <button onclick="addBOQGroup()" class="text-sm text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-6 py-2.5 rounded-lg transition-colors flex items-center justify-center w-full shadow-sm font-bold">
+                            <i class="fa-solid fa-layer-group mr-2"></i> เพิ่มหมวดงานใหม่
+                        </button>
+                    </td>
+                </tr>
+            `;
 
             document.getElementById('boqTableBody').innerHTML = html;
             document.getElementById('outputDirectCost').innerText = totalDirectCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('outputTotalCost').innerText = totalFactorFCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
+        // อัปเดตข้อมูลเมื่อมีการพิมพ์แก้ไข
         function updateBOQItem(gIndex, iIndex, field, value) {
-            boqItems[gIndex].items[iIndex][field] = parseFloat(value) || 0;
-            renderBOQ(); // re-render ตารางใหม่ทันทีที่ตัวเลขถูกเปลี่ยน
+            if (field === 'qty' || field === 'price') {
+                boqItems[gIndex].items[iIndex][field] = parseFloat(value) || 0;
+            } else {
+                boqItems[gIndex].items[iIndex][field] = value;
+            }
+            renderBOQ(); // Re-render เพื่อคำนวณราคาทันที
+        }
+
+        function updateBOQGroup(gIndex, value) {
+            boqItems[gIndex].group = value;
+        }
+
+        // ฟังก์ชันเพิ่มรายการย่อย
+        function addBOQItem(gIndex) {
+            boqItems[gIndex].items.push({ 
+                name: '', 
+                unit: 'ตร.ม.', 
+                qty: 0, 
+                price: 0 
+            });
+            renderBOQ();
+        }
+
+        // ฟังก์ชันลบรายการย่อย
+        function removeBOQItem(gIndex, iIndex) {
+            if(confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) {
+                boqItems[gIndex].items.splice(iIndex, 1);
+                renderBOQ();
+            }
+        }
+
+        // ฟังก์ชันเพิ่มหมวดงานหลัก
+        function addBOQGroup() {
+            const nextNum = boqItems.length + 1;
+            boqItems.push({
+                group: `${nextNum}. หมวดงานใหม่`,
+                items: [{ name: '', unit: 'ตร.ม.', qty: 0, price: 0 }]
+            });
+            renderBOQ();
+        }
+
+        // ฟังก์ชันลบหมวดงานหลัก
+        function removeBOQGroup(gIndex) {
+            if(confirm('ต้องการลบหมวดงานนี้ พร้อมรายการย่อยทั้งหมด ใช่หรือไม่?')) {
+                boqItems.splice(gIndex, 1);
+                renderBOQ();
+            }
         }
 
         // ================= ระบบเพิ่ม Dynamic Segments (Form Survey) =================
