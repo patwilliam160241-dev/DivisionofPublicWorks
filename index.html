@@ -29,17 +29,14 @@
 
         /* ================= CSS สำหรับการพิมพ์ (Print) ================= */
         @media print {
-            /* ซ่อนหน้าอื่นๆ ทั้งหมด ยกเว้น Modal Preview */
             body > div:not(#previewModal) { display: none !important; }
 
-            /* รีเซ็ตหน้าให้แสดงผลแบบเลื่อนลงมาได้เต็มที่ ไม่โดนตัด */
             body, html {
                 height: auto !important;
                 overflow: visible !important;
                 background-color: white !important;
             }
 
-            /* ปลดล็อก Modal จาก Fixed เป็น Static เพื่อให้ปริ้นได้หลายหน้า */
             #previewModal {
                 position: static !important;
                 background: white !important;
@@ -47,7 +44,6 @@
                 padding: 0 !important;
             }
 
-            /* ลบเงา ความสูงที่จำกัด และปรับให้คอนเทนต์แสดงเต็ม */
             #previewModal > div {
                 max-width: 100% !important;
                 width: 100% !important;
@@ -59,12 +55,10 @@
                 border: none !important;
             }
 
-            /* ลบสีพื้นหลังสีเทาออกตอนปริ้นให้ดูสะอาดขึ้น */
             #previewModal .bg-slate-50\/50 {
                 background-color: white !important;
             }
 
-            /* ปลดล็อก Scrollbar ให้เนื้อหาไหลลงมาเพื่อปริ้น */
             #previewSegmentsList {
                 overflow: visible !important;
                 max-height: none !important;
@@ -72,16 +66,13 @@
                 padding-right: 0 !important;
             }
 
-            /* ซ่อนปุ่มและส่วนที่ไม่ต้องการให้โชว์ในกระดาษ */
             .no-print { display: none !important; }
 
-            /* บังคับให้เบราว์เซอร์ปริ้นสีพื้นหลัง (เช่น สีถนน สีหูช้าง) */
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            /* ป้องกันการปริ้นแล้วรูปถนนโดนตัดครึ่งหน้า */
             .page-break-avoid {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
@@ -672,16 +663,16 @@
                             locationHTML += `
                                 <div class="bg-emerald-50 border border-emerald-100 rounded p-1 shadow-sm text-[10px]">
                                     <div class="font-bold text-emerald-700">เริ่ม:</div>
-                                    <span class="font-mono">N:${item.start_lat}</span><br>
-                                    <span class="font-mono">E:${item.start_lng}</span>
+                                    <span class="font-mono">N:${parseFloat(item.start_lat).toFixed(6)}</span><br>
+                                    <span class="font-mono">E:${parseFloat(item.start_lng).toFixed(6)}</span>
                                 </div>`;
                         }
                         if(hasEnd) {
                             locationHTML += `
                                 <div class="bg-blue-50 border border-blue-100 rounded p-1 shadow-sm text-[10px]">
                                     <div class="font-bold text-blue-700">สิ้นสุด:</div>
-                                    <span class="font-mono">N:${item.end_lat}</span><br>
-                                    <span class="font-mono">E:${item.end_lng}</span>
+                                    <span class="font-mono">N:${parseFloat(item.end_lat).toFixed(6)}</span><br>
+                                    <span class="font-mono">E:${parseFloat(item.end_lng).toFixed(6)}</span>
                                 </div>`;
                         }
                         
@@ -866,7 +857,7 @@
 
             markerStart.on('dragend', async function () {
                 const pos = markerStart.getLatLng();
-                currentMapStart = { lat: pos.lat, lng: pos.lng };
+                currentMapStart = { lat: parseFloat(pos.lat.toFixed(6)), lng: parseFloat(pos.lng.toFixed(6)) };
                 mapPositionChanged = true;
                 document.getElementById('saveMapPositionBtn').classList.remove('hidden');
                 await updateRouteFromMarkers();
@@ -874,7 +865,7 @@
 
             markerEnd.on('dragend', async function () {
                 const pos = markerEnd.getLatLng();
-                currentMapEnd = { lat: pos.lat, lng: pos.lng };
+                currentMapEnd = { lat: parseFloat(pos.lat.toFixed(6)), lng: parseFloat(pos.lng.toFixed(6)) };
                 mapPositionChanged = true;
                 document.getElementById('saveMapPositionBtn').classList.remove('hidden');
                 await updateRouteFromMarkers();
@@ -947,10 +938,10 @@
                 const { error } = await supabaseClient
                     .from('survey_works')
                     .update({
-                        start_lat: currentMapStart.lat,
-                        start_lng: currentMapStart.lng,
-                        end_lat: currentMapEnd.lat,
-                        end_lng: currentMapEnd.lng
+                        start_lat: parseFloat(currentMapStart.lat.toFixed(6)),
+                        start_lng: parseFloat(currentMapStart.lng.toFixed(6)),
+                        end_lat: parseFloat(currentMapEnd.lat.toFixed(6)),
+                        end_lng: parseFloat(currentMapEnd.lng.toFixed(6))
                     })
                     .eq('id', currentMapSurveyId);
 
@@ -958,10 +949,10 @@
 
                 const item = surveysData.find(s => s.id === currentMapSurveyId);
                 if (item) {
-                    item.start_lat = currentMapStart.lat;
-                    item.start_lng = currentMapStart.lng;
-                    item.end_lat = currentMapEnd.lat;
-                    item.end_lng = currentMapEnd.lng;
+                    item.start_lat = parseFloat(currentMapStart.lat.toFixed(6));
+                    item.start_lng = parseFloat(currentMapStart.lng.toFixed(6));
+                    item.end_lat = parseFloat(currentMapEnd.lat.toFixed(6));
+                    item.end_lng = parseFloat(currentMapEnd.lng.toFixed(6));
                 }
 
                 mapPositionChanged = false;
@@ -1341,10 +1332,10 @@
                     container.insertAdjacentHTML('beforeend', createSegmentHTML(legacySeg, 0));
                 }
                 
-                document.getElementById('surveyStartLat').value = item.start_lat || '';
-                document.getElementById('surveyStartLng').value = item.start_lng || '';
-                document.getElementById('surveyEndLat').value = item.end_lat || '';
-                document.getElementById('surveyEndLng').value = item.end_lng || '';
+                document.getElementById('surveyStartLat').value = item.start_lat ? parseFloat(item.start_lat).toFixed(6) : '';
+                document.getElementById('surveyStartLng').value = item.start_lng ? parseFloat(item.start_lng).toFixed(6) : '';
+                document.getElementById('surveyEndLat').value = item.end_lat ? parseFloat(item.end_lat).toFixed(6) : '';
+                document.getElementById('surveyEndLng').value = item.end_lng ? parseFloat(item.end_lng).toFixed(6) : '';
             } else {
                 document.getElementById('surveyModalTitle').innerText = 'เพิ่มข้อมูลงานสำรวจ';
                 document.getElementById('surveyId').value = '';
@@ -1523,10 +1514,10 @@
                 ear_length: firstSeg.el_fl ? parseFloat(firstSeg.el_fl) : 0,
                 ear_thickness: firstSeg.et_fl ? parseFloat(firstSeg.et_fl) : 0,
                 
-                start_lat: document.getElementById('surveyStartLat').value ? parseFloat(document.getElementById('surveyStartLat').value) : null,
-                start_lng: document.getElementById('surveyStartLng').value ? parseFloat(document.getElementById('surveyStartLng').value) : null,
-                end_lat: document.getElementById('surveyEndLat').value ? parseFloat(document.getElementById('surveyEndLat').value) : null,
-                end_lng: document.getElementById('surveyEndLng').value ? parseFloat(document.getElementById('surveyEndLng').value) : null
+                start_lat: document.getElementById('surveyStartLat').value ? parseFloat(parseFloat(document.getElementById('surveyStartLat').value).toFixed(6)) : null,
+                start_lng: document.getElementById('surveyStartLng').value ? parseFloat(parseFloat(document.getElementById('surveyStartLng').value).toFixed(6)) : null,
+                end_lat: document.getElementById('surveyEndLat').value ? parseFloat(parseFloat(document.getElementById('surveyEndLat').value).toFixed(6)) : null,
+                end_lng: document.getElementById('surveyEndLng').value ? parseFloat(parseFloat(document.getElementById('surveyEndLng').value).toFixed(6)) : null
             };
 
             try {
