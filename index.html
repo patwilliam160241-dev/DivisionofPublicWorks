@@ -62,7 +62,6 @@
                     </button>
                 </div>
                 <nav class="flex-1 overflow-y-auto p-4 space-y-2 pt-0" id="categoryMenu">
-                    <!-- รายชื่อหมวดหมู่จะถูกแทรกที่นี่ -->
                 </nav>
             </div>
 
@@ -81,7 +80,7 @@
 
             <!-- ================= วิว: ระบบจัดการไฟล์ ================= -->
             <div id="fileManagerView" class="flex-1 overflow-auto p-8">
-                <!-- เนื้อหาระบบไฟล์คงเดิม -->
+                <!-- ระบบไฟล์เหมือนเดิม -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-8">
                     <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">
                         <h2 class="text-lg font-semibold">อัปโหลดไฟล์ใหม่</h2>
@@ -128,7 +127,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                     <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                         <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-list mr-2 text-emerald-600"></i>รายการงานสำรวจ</h2>
-                        <button onclick="openSurveyModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium">
+                        <button onclick="openSurveyModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium shadow-sm">
                             <i class="fa-solid fa-plus mr-2"></i> เพิ่มข้อมูลงานสำรวจ
                         </button>
                     </div>
@@ -136,28 +135,26 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-100 text-slate-600 text-sm border-b border-slate-200">
-                                    <th class="py-3 px-4 font-medium min-w-[150px]">ชื่อโครงการ</th>
-                                    <th class="py-3 px-3 font-medium border-l border-slate-200">ประเภทถนน</th>
-                                    <th class="py-3 px-3 font-medium text-center border-l border-slate-200" colspan="3">ขนาดหลัก (ม.)</th>
-                                    <th class="py-3 px-3 font-medium text-center border-l border-slate-200" colspan="3">หูช้าง (ม.)</th>
-                                    <th class="py-3 px-4 font-medium text-center border-l border-slate-200">พิกัด (หัว-ท้าย)</th>
-                                    <th class="py-3 px-4 font-medium text-center border-l border-slate-200">จัดการ</th>
+                                    <th class="py-3 px-4 font-medium min-w-[150px]" rowspan="2">ชื่อโครงการ</th>
+                                    <th class="py-3 px-3 font-medium border-l border-slate-200" rowspan="2">ประเภทถนน</th>
+                                    <th class="py-3 px-3 font-medium text-center border-l border-slate-200" rowspan="2">ช่วงระยะงาน</th>
+                                    <th class="py-2 px-2 font-medium text-center border-l border-slate-200" colspan="3">ขนาดหลัก (ม.)</th>
+                                    <th class="py-2 px-2 font-medium text-center border-l border-slate-200" colspan="3">หูช้าง (ม.)</th>
+                                    <th class="py-3 px-3 font-medium text-center border-l border-slate-200 min-w-[120px]" rowspan="2">หมายเหตุ</th>
+                                    <th class="py-3 px-4 font-medium text-center border-l border-slate-200" rowspan="2">พิกัด (หัว-ท้าย)</th>
+                                    <th class="py-3 px-4 font-medium text-center border-l border-slate-200" rowspan="2">จัดการ</th>
                                 </tr>
-                                <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200 text-center">
-                                    <th class="py-2 px-4"></th>
-                                    <th class="py-2 px-3 border-l border-slate-200"></th>
-                                    <th class="py-2 px-2 border-l border-slate-200">กว้าง</th>
-                                    <th class="py-2 px-2">ยาว</th>
-                                    <th class="py-2 px-2">หนา</th>
-                                    <th class="py-2 px-2 border-l border-slate-200">กว้าง</th>
-                                    <th class="py-2 px-2">ยาว</th>
-                                    <th class="py-2 px-2">หนา</th>
-                                    <th class="py-2 px-4 border-l border-slate-200"></th>
-                                    <th class="py-2 px-4 border-l border-slate-200"></th>
+                                <tr class="bg-slate-50 text-slate-500 text-[11px] border-b border-slate-200 text-center">
+                                    <th class="py-1 px-1 border-l border-slate-200">กว้าง</th>
+                                    <th class="py-1 px-1">ยาว</th>
+                                    <th class="py-1 px-1">หนา</th>
+                                    <th class="py-1 px-1 border-l border-slate-200">กว้าง</th>
+                                    <th class="py-1 px-1">ยาว</th>
+                                    <th class="py-1 px-1">หนา</th>
                                 </tr>
                             </thead>
                             <tbody id="surveyTableBody" class="text-sm divide-y divide-slate-100">
-                                <tr><td colspan="10" class="text-center py-4 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
+                                <tr><td colspan="12" class="text-center py-8 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -167,127 +164,114 @@
     </div>
 
     <!-- ================= Modal: เพิ่ม/แก้ไข งานสำรวจ ================= -->
-    <div id="surveyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-4 overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+    <div id="surveyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center py-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl mx-4 flex flex-col h-[95vh]">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0 rounded-t-xl">
                 <h3 id="surveyModalTitle" class="text-xl font-bold text-slate-800">เพิ่มข้อมูลงานสำรวจ</h3>
-                <button onclick="closeSurveyModal()" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button onclick="closeSurveyModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <div class="p-6 overflow-y-auto space-y-6">
+            
+            <div class="p-6 overflow-y-auto flex-1 space-y-6 bg-slate-50/50">
                 <input type="hidden" id="surveyId">
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">ชื่อโครงการ <span class="text-red-500">*</span></label>
-                        <input type="text" id="surveyProjectName" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="ระบุชื่อโครงการ">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">ประเภทงานถนน <span class="text-red-500">*</span></label>
-                        <select id="surveyRoadType" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                            <option value="">-- เลือกประเภท --</option>
-                            <option value="คอนกรีตเสริมเหล็ก (คสล.)">คอนกรีตเสริมเหล็ก (คสล.)</option>
-                            <option value="แอสฟัลท์ติกคอนกรีต">แอสฟัลท์ติกคอนกรีต</option>
-                            <option value="ลูกรัง">ลูกรัง</option>
-                            <option value="หินคลุก">หินคลุก</option>
-                            <option value="ดิน">ดิน</option>
-                            <option value="อื่นๆ">อื่นๆ</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- ขนาดหลัก -->
-                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                        <h4 class="font-semibold text-blue-800 mb-3 border-b border-blue-200 pb-2">ขนาดหลัก</h4>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-xs text-slate-600 mb-1">กว้าง (เมตร)</label>
-                                <input type="number" step="0.01" id="surveyWidth" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-slate-600 mb-1">ยาว (เมตร)</label>
-                                <input type="number" step="0.01" id="surveyLength" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-slate-600 mb-1">หนา (เมตร)</label>
-                                <input type="number" step="0.01" id="surveyThickness" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">ชื่อโครงการ <span class="text-red-500">*</span></label>
+                            <input type="text" id="surveyProjectName" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="ระบุชื่อโครงการ">
                         </div>
-                    </div>
-
-                    <!-- หูช้าง -->
-                    <div class="bg-amber-50 p-4 rounded-lg border border-amber-100">
-                        <h4 class="font-semibold text-amber-800 mb-3 border-b border-amber-200 pb-2">หูช้าง</h4>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-xs text-slate-600 mb-1">กว้าง (เมตร)</label>
-                                <input type="number" step="0.01" id="surveyEarWidth" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-amber-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-slate-600 mb-1">ยาว (เมตร)</label>
-                                <input type="number" step="0.01" id="surveyEarLength" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-amber-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-slate-600 mb-1">หนา (เมตร)</label>
-                                <input type="number" step="0.01" id="surveyEarThickness" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-amber-500 focus:outline-none">
-                            </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">ประเภทงานถนน <span class="text-red-500">*</span></label>
+                            <select id="surveyRoadType" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <option value="">-- เลือกประเภท --</option>
+                                <option value="คอนกรีตเสริมเหล็ก (คสล.)">คอนกรีตเสริมเหล็ก (คสล.)</option>
+                                <option value="แอสฟัลท์ติกคอนกรีต">แอสฟัลท์ติกคอนกรีต</option>
+                                <option value="ลูกรัง">ลูกรัง</option>
+                                <option value="หินคลุก">หินคลุก</option>
+                                <option value="ดิน">ดิน</option>
+                                <option value="อื่นๆ">อื่นๆ</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
-                <!-- ตำแหน่งที่ตั้งพิกัด GPS หัว-ท้าย -->
-                <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
-                    <h4 class="font-semibold text-emerald-800 mb-3 border-b border-emerald-200 pb-2">
-                        <i class="fa-solid fa-location-dot mr-1"></i> ตำแหน่งที่ตั้ง (พิกัด GPS หัว-ท้าย)
-                    </h4>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- จุดเริ่มต้น (หัว) -->
-                        <div class="bg-white p-3 rounded border border-slate-200">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-sm font-semibold text-slate-700">จุดเริ่มต้น (หัว)</span>
-                                <button type="button" onclick="getCurrentGPS('start')" id="gpsStartBtn" class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded shadow transition-colors flex items-center">
-                                    <i class="fa-solid fa-crosshairs mr-1"></i> ดึงพิกัด
-                                </button>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500">ละติจูด (N)</label>
-                                    <input type="number" step="any" id="surveyStartLat" class="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500">ลองจิจูด (E)</label>
-                                    <input type="number" step="any" id="surveyStartLng" class="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
-                                </div>
-                            </div>
-                        </div>
+                <!-- Section: ช่วงระยะงาน (Dynamic) -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-bold text-slate-800 flex items-center">
+                            <i class="fa-solid fa-ruler-combined mr-2 text-indigo-500"></i> รายละเอียดขนาด / ช่วงระยะงาน
+                        </h4>
+                        <button type="button" onclick="addSegment()" class="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors font-medium flex items-center">
+                            <i class="fa-solid fa-plus mr-1"></i> เพิ่มช่วงระยะงาน
+                        </button>
+                    </div>
+                    <!-- กล่องสำหรับเก็บฟอร์มช่วงระยะงาน -->
+                    <div id="segmentsContainer" class="space-y-4">
+                        <!-- ถูกสร้างผ่าน JavaScript -->
+                    </div>
+                </div>
 
-                        <!-- จุดสิ้นสุด (ท้าย) -->
-                        <div class="bg-white p-3 rounded border border-slate-200">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-sm font-semibold text-slate-700">จุดสิ้นสุด (ท้าย)</span>
-                                <button type="button" onclick="getCurrentGPS('end')" id="gpsEndBtn" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded shadow transition-colors flex items-center">
-                                    <i class="fa-solid fa-crosshairs mr-1"></i> ดึงพิกัด
-                                </button>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500">ละติจูด (N)</label>
-                                    <input type="number" step="any" id="surveyEndLat" class="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- ตำแหน่งที่ตั้งพิกัด GPS หัว-ท้าย -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-slate-800 mb-4 flex items-center">
+                            <i class="fa-solid fa-location-dot mr-2 text-emerald-500"></i> ตำแหน่งพิกัด (GPS)
+                        </h4>
+                        <div class="space-y-4">
+                            <!-- จุดเริ่มต้น (หัว) -->
+                            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-semibold text-emerald-800">จุดเริ่มต้น (หัว)</span>
+                                    <button type="button" onclick="getCurrentGPS('start')" id="gpsStartBtn" class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded shadow transition-colors flex items-center">
+                                        <i class="fa-solid fa-crosshairs mr-1"></i> ดึงพิกัด
+                                    </button>
                                 </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500">ลองจิจูด (E)</label>
-                                    <input type="number" step="any" id="surveyEndLng" class="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500">ละติจูด (N)</label>
+                                        <input type="number" step="any" id="surveyStartLat" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500">ลองจิจูด (E)</label>
+                                        <input type="number" step="any" id="surveyStartLng" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- จุดสิ้นสุด (ท้าย) -->
+                            <div class="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-semibold text-blue-800">จุดสิ้นสุด (ท้าย)</span>
+                                    <button type="button" onclick="getCurrentGPS('end')" id="gpsEndBtn" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded shadow transition-colors flex items-center">
+                                        <i class="fa-solid fa-crosshairs mr-1"></i> ดึงพิกัด
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500">ละติจูด (N)</label>
+                                        <input type="number" step="any" id="surveyEndLat" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500">ลองจิจูด (E)</label>
+                                        <input type="number" step="any" id="surveyEndLng" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
+                    <!-- หมายเหตุ -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+                        <h4 class="font-bold text-slate-800 mb-4 flex items-center">
+                            <i class="fa-solid fa-comment-dots mr-2 text-amber-500"></i> หมายเหตุ
+                        </h4>
+                        <textarea id="surveyRemark" class="w-full flex-1 border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none text-sm" placeholder="ระบุหมายเหตุเพิ่มเติม (ถ้ามี)..."></textarea>
+                    </div>
+                </div>
             </div>
-            <div class="p-6 border-t border-slate-200 flex justify-end gap-3 bg-slate-50 shrink-0">
-                <button onclick="closeSurveyModal()" class="px-5 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">ยกเลิก</button>
-                <button onclick="saveSurvey()" class="px-5 py-2 text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 font-medium">บันทึกข้อมูล</button>
+
+            <div class="p-5 border-t border-slate-200 flex justify-end gap-3 bg-white shrink-0 rounded-b-xl">
+                <button onclick="closeSurveyModal()" class="px-6 py-2.5 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium">ยกเลิก</button>
+                <button onclick="saveSurvey()" class="px-6 py-2.5 text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors font-medium shadow-sm">บันทึกข้อมูล</button>
             </div>
         </div>
     </div>
@@ -366,11 +350,11 @@
             }
         }
 
-        // ================= ระบบจัดการงานสำรวจ + พิกัด หัว-ท้าย =================
+        // ================= ระบบจัดการงานสำรวจ =================
         async function fetchSurveys() {
             if (!supabaseClient) return;
             const tbody = document.getElementById('surveyTableBody');
-            tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="12" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
 
             try {
                 const { data, error } = await supabaseClient.from('survey_works').select('*').order('created_at', { ascending: false });
@@ -380,91 +364,222 @@
                 let htmlContent = '';
 
                 if (data.length === 0) {
-                    htmlContent = '<tr><td colspan="10" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลงานสำรวจ</td></tr>';
+                    htmlContent = '<tr><td colspan="12" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลงานสำรวจ</td></tr>';
                 } else {
                     data.forEach(item => {
-                        // ปรับการแสดงผลพิกัดเป็น 2 ส่วน (เริ่ม - สิ้นสุด)
                         const hasStart = item.start_lat && item.start_lng;
                         const hasEnd = item.end_lat && item.end_lng;
                         
-                        let locationHTML = `<div class="flex flex-col gap-2 min-w-[140px] text-left">`;
-                        
+                        let locationHTML = `<div class="flex flex-col gap-1.5 min-w-[130px] text-left">`;
                         if(hasStart) {
                             locationHTML += `
-                                <div class="bg-emerald-50 border border-emerald-100 rounded p-1.5 shadow-sm text-[10px]">
-                                    <div class="font-bold text-emerald-700 mb-0.5">เริ่ม:</div>
+                                <div class="bg-emerald-50 border border-emerald-100 rounded p-1 shadow-sm text-[10px]">
+                                    <div class="font-bold text-emerald-700">เริ่ม:</div>
                                     <span class="font-mono">N:${item.start_lat}</span><br>
                                     <span class="font-mono">E:${item.start_lng}</span>
-                                    <a href="https://www.google.com/maps?q=${item.start_lat},${item.start_lng}" target="_blank" class="block text-blue-600 hover:text-blue-800 mt-1">
+                                    <a href="https://www.google.com/maps?q=${item.start_lat},${item.start_lng}" target="_blank" class="block text-blue-600 hover:text-blue-800 mt-0.5">
                                         <i class="fa-solid fa-map-location-dot"></i> แผนที่
                                     </a>
                                 </div>`;
                         }
                         if(hasEnd) {
                             locationHTML += `
-                                <div class="bg-blue-50 border border-blue-100 rounded p-1.5 shadow-sm text-[10px]">
-                                    <div class="font-bold text-blue-700 mb-0.5">สิ้นสุด:</div>
+                                <div class="bg-blue-50 border border-blue-100 rounded p-1 shadow-sm text-[10px]">
+                                    <div class="font-bold text-blue-700">สิ้นสุด:</div>
                                     <span class="font-mono">N:${item.end_lat}</span><br>
                                     <span class="font-mono">E:${item.end_lng}</span>
-                                    <a href="https://www.google.com/maps?q=${item.end_lat},${item.end_lng}" target="_blank" class="block text-blue-600 hover:text-blue-800 mt-1">
+                                    <a href="https://www.google.com/maps?q=${item.end_lat},${item.end_lng}" target="_blank" class="block text-blue-600 hover:text-blue-800 mt-0.5">
                                         <i class="fa-solid fa-map-location-dot"></i> แผนที่
                                     </a>
                                 </div>`;
                         }
                         if(!hasStart && !hasEnd) {
-                            locationHTML += `<span class="text-xs text-slate-400 text-center">- ไม่ระบุพิกัด -</span>`;
+                            locationHTML += `<span class="text-[10px] text-slate-400 text-center">- ไม่ระบุพิกัด -</span>`;
                         }
                         locationHTML += `</div>`;
 
-                        htmlContent += `
-                            <tr class="hover:bg-slate-50 transition-colors">
-                                <td class="py-3 px-4 font-medium text-slate-800 break-words">${item.project_name}</td>
-                                <td class="py-3 px-3 text-sm text-slate-600 border-l border-slate-100 whitespace-nowrap">
-                                    <span class="bg-slate-200 px-2 py-1 rounded text-xs">${item.road_type || '-'}</span>
-                                </td>
-                                
-                                <td class="py-3 px-2 text-center border-l border-slate-100 text-blue-600">${item.width || '-'}</td>
-                                <td class="py-3 px-2 text-center text-blue-600">${item.length || '-'}</td>
-                                <td class="py-3 px-2 text-center text-blue-600">${item.thickness || '-'}</td>
-                                
-                                <td class="py-3 px-2 text-center border-l border-slate-100 text-amber-600">${item.ear_width || '-'}</td>
-                                <td class="py-3 px-2 text-center text-amber-600">${item.ear_length || '-'}</td>
-                                <td class="py-3 px-2 text-center text-amber-600">${item.ear_thickness || '-'}</td>
-                                
-                                <td class="py-3 px-4 text-center border-l border-slate-100">
-                                    ${locationHTML}
-                                </td>
+                        // ดึงข้อมูล Segments หรือใช้ข้อมูลเก่าหากไม่มี
+                        let segments = item.segments || [];
+                        if (!Array.isArray(segments) || segments.length === 0) {
+                            segments = [{
+                                name: '-', 
+                                w: item.width, l: item.length, t: item.thickness,
+                                ew: item.ear_width, el: item.ear_length, et: item.ear_thickness
+                            }];
+                        }
 
-                                <td class="py-3 px-4 text-center space-x-2 border-l border-slate-100">
-                                    <button onclick="openSurveyModal('${item.id}')" class="text-slate-500 hover:text-blue-600 p-2"><i class="fa-solid fa-pen-to-square"></i></button>
-                                    <button onclick="deleteSurvey('${item.id}', '${item.project_name}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        `;
+                        const rowCount = segments.length;
+                        const remarkText = item.remark 
+                            ? `<div class="whitespace-pre-wrap text-xs text-slate-600 line-clamp-3 text-left leading-relaxed" title="${item.remark}">${item.remark}</div>` 
+                            : `<span class="text-slate-300">-</span>`;
+
+                        segments.forEach((seg, idx) => {
+                            htmlContent += `<tr class="hover:bg-slate-50 transition-colors ${idx === 0 ? 'border-t-[3px] border-slate-200' : ''}">`;
+                            
+                            if (idx === 0) {
+                                htmlContent += `
+                                    <td class="py-3 px-4 font-medium text-slate-800 break-words align-top" rowspan="${rowCount}">${item.project_name}</td>
+                                    <td class="py-3 px-3 align-top border-l border-slate-100" rowspan="${rowCount}">
+                                        <span class="bg-slate-200 px-2 py-1 rounded text-xs text-slate-700 whitespace-nowrap block text-center">${item.road_type || '-'}</span>
+                                    </td>
+                                `;
+                            }
+
+                            // ข้อมูลช่วงระยะงานและขนาด
+                            htmlContent += `
+                                <td class="py-2 px-3 text-xs font-medium text-indigo-700 border-l border-slate-100 align-middle">${seg.name || '-'}</td>
+                                <td class="py-2 px-2 text-center text-[13px] border-l border-slate-100 text-slate-700">${seg.w || '-'}</td>
+                                <td class="py-2 px-2 text-center text-[13px] text-slate-700">${seg.l || '-'}</td>
+                                <td class="py-2 px-2 text-center text-[13px] text-slate-700">${seg.t || '-'}</td>
+                                
+                                <td class="py-2 px-2 text-center text-[13px] border-l border-slate-100 text-slate-700">${seg.ew || '-'}</td>
+                                <td class="py-2 px-2 text-center text-[13px] text-slate-700">${seg.el || '-'}</td>
+                                <td class="py-2 px-2 text-center text-[13px] text-slate-700">${seg.et || '-'}</td>
+                            `;
+
+                            if (idx === 0) {
+                                htmlContent += `
+                                    <td class="py-3 px-3 align-top border-l border-slate-100 min-w-[120px]" rowspan="${rowCount}">
+                                        ${remarkText}
+                                    </td>
+                                    <td class="py-3 px-3 align-top border-l border-slate-100" rowspan="${rowCount}">
+                                        ${locationHTML}
+                                    </td>
+                                    <td class="py-3 px-3 align-top border-l border-slate-100 text-center space-x-1 whitespace-nowrap" rowspan="${rowCount}">
+                                        <button onclick="openSurveyModal('${item.id}')" class="text-slate-500 hover:text-blue-600 bg-white hover:bg-blue-50 border border-slate-200 p-2 rounded shadow-sm transition-colors"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button onclick="deleteSurvey('${item.id}', '${item.project_name}')" class="text-red-500 hover:text-red-700 bg-white hover:bg-red-50 border border-slate-200 p-2 rounded shadow-sm transition-colors"><i class="fa-solid fa-trash"></i></button>
+                                    </td>
+                                `;
+                            }
+                            htmlContent += `</tr>`;
+                        });
                     });
                 }
                 tbody.innerHTML = htmlContent;
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล (ตรวจสอบว่าเพิ่ม Column ใน Database หรือยัง)</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="12" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล (ตรวจสอบว่าเพิ่มคอลัมน์ใหม่ใน Database หรือยัง)</td></tr>';
             }
+        }
+
+        // ================= ระบบเพิ่ม Dynamic Segments =================
+        function createSegmentHTML(seg, index) {
+            const showDelete = index > 0; // ไม่อนุญาตให้ลบอันแรก
+            return `
+            <div class="segment-item bg-slate-50 border border-slate-200 p-4 rounded-xl relative shadow-sm transition-all">
+                ${showDelete ? `
+                <button type="button" onclick="removeSegment(this)" class="absolute top-3 right-3 text-red-400 hover:text-red-600 bg-white hover:bg-red-50 w-8 h-8 rounded-full shadow-sm flex items-center justify-center transition-colors border border-red-100" title="ลบช่วงระยะงานนี้">
+                    <i class="fa-solid fa-trash text-sm"></i>
+                </button>
+                ` : ''}
+                
+                <div class="mb-4 ${showDelete ? 'pr-12' : ''}">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ช่วงระยะงาน <span class="text-slate-400 font-normal ml-1">(เช่น ช่วงที่ 1, กม. 0+000 ถึง 1+000)</span></label>
+                    <input type="text" class="seg-name w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white" value="${seg.name || ''}" placeholder="ระบุช่วงระยะงาน">
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- ขนาดหลัก -->
+                    <div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100">
+                        <h5 class="text-[11px] font-bold text-blue-800 mb-2 tracking-wide uppercase">ขนาดหลัก (เมตร)</h5>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-600 mb-1 font-medium">กว้าง</label>
+                                <input type="number" step="any" class="seg-w w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.w || ''}">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-600 mb-1 font-medium">ยาว</label>
+                                <input type="number" step="any" class="seg-l w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.l || ''}">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-600 mb-1 font-medium">หนา</label>
+                                <input type="number" step="any" class="seg-t w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.t || ''}">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- หูช้าง -->
+                    <div class="bg-amber-50/60 p-3 rounded-lg border border-amber-100">
+                        <h5 class="text-[11px] font-bold text-amber-800 mb-2 tracking-wide uppercase">หูช้าง (เมตร)</h5>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-600 mb-1 font-medium">กว้าง</label>
+                                <input type="number" step="any" class="seg-ew w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none bg-white" value="${seg.ew || ''}">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-600 mb-1 font-medium">ยาว</label>
+                                <input type="number" step="any" class="seg-el w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none bg-white" value="${seg.el || ''}">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-600 mb-1 font-medium">หนา</label>
+                                <input type="number" step="any" class="seg-et w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none bg-white" value="${seg.et || ''}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function addSegment() {
+            const container = document.getElementById('segmentsContainer');
+            const index = container.querySelectorAll('.segment-item').length;
+            const newSeg = { name: `ช่วงที่ ${index + 1}`, w: '', l: '', t: '', ew: '', el: '', et: '' };
+            container.insertAdjacentHTML('beforeend', createSegmentHTML(newSeg, index));
+            
+            // เลื่อนจอไปที่ช่องใหม่
+            setTimeout(() => {
+                const items = container.querySelectorAll('.segment-item');
+                items[items.length - 1].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function removeSegment(btn) {
+            btn.closest('.segment-item').remove();
+        }
+
+        function getSegmentsData() {
+            const items = document.querySelectorAll('.segment-item');
+            const data = [];
+            items.forEach(item => {
+                data.push({
+                    name: item.querySelector('.seg-name').value.trim(),
+                    w: item.querySelector('.seg-w').value,
+                    l: item.querySelector('.seg-l').value,
+                    t: item.querySelector('.seg-t').value,
+                    ew: item.querySelector('.seg-ew').value,
+                    el: item.querySelector('.seg-el').value,
+                    et: item.querySelector('.seg-et').value,
+                });
+            });
+            return data;
         }
 
         function openSurveyModal(id = null) {
             document.getElementById('surveyModal').classList.remove('hidden');
+            const container = document.getElementById('segmentsContainer');
+            container.innerHTML = ''; 
             
             if (id) {
-                document.getElementById('surveyModalTitle').innerText = 'แก้ไขข้อมูลงานสำรวจ';
                 const item = surveysData.find(s => s.id === id);
+                document.getElementById('surveyModalTitle').innerText = 'แก้ไขข้อมูลงานสำรวจ';
                 document.getElementById('surveyId').value = item.id;
                 document.getElementById('surveyProjectName').value = item.project_name;
                 document.getElementById('surveyRoadType').value = item.road_type || '';
-                document.getElementById('surveyWidth').value = item.width || '';
-                document.getElementById('surveyLength').value = item.length || '';
-                document.getElementById('surveyThickness').value = item.thickness || '';
-                document.getElementById('surveyEarWidth').value = item.ear_width || '';
-                document.getElementById('surveyEarLength').value = item.ear_length || '';
-                document.getElementById('surveyEarThickness').value = item.ear_thickness || '';
+                document.getElementById('surveyRemark').value = item.remark || '';
+                
+                // โหลด Segments หรือสร้างจากข้อมูลเก่า
+                if (item.segments && Array.isArray(item.segments) && item.segments.length > 0) {
+                    item.segments.forEach((seg, index) => {
+                        container.insertAdjacentHTML('beforeend', createSegmentHTML(seg, index));
+                    });
+                } else {
+                    const legacySeg = {
+                        name: 'ช่วงที่ 1',
+                        w: item.width, l: item.length, t: item.thickness,
+                        ew: item.ear_width, el: item.ear_length, et: item.ear_thickness
+                    };
+                    container.insertAdjacentHTML('beforeend', createSegmentHTML(legacySeg, 0));
+                }
                 
                 document.getElementById('surveyStartLat').value = item.start_lat || '';
                 document.getElementById('surveyStartLng').value = item.start_lng || '';
@@ -475,12 +590,10 @@
                 document.getElementById('surveyId').value = '';
                 document.getElementById('surveyProjectName').value = '';
                 document.getElementById('surveyRoadType').value = '';
-                document.getElementById('surveyWidth').value = '';
-                document.getElementById('surveyLength').value = '';
-                document.getElementById('surveyThickness').value = '';
-                document.getElementById('surveyEarWidth').value = '';
-                document.getElementById('surveyEarLength').value = '';
-                document.getElementById('surveyEarThickness').value = '';
+                document.getElementById('surveyRemark').value = '';
+                
+                // สร้าง 1 ช่องว่างเริ่มต้น
+                container.insertAdjacentHTML('beforeend', createSegmentHTML({ name: 'ช่วงที่ 1', w: '', l: '', t: '', ew: '', el: '', et: '' }, 0));
                 
                 document.getElementById('surveyStartLat').value = '';
                 document.getElementById('surveyStartLng').value = '';
@@ -493,7 +606,7 @@
             document.getElementById('surveyModal').classList.add('hidden');
         }
 
-        // ฟังก์ชันดึง GPS อัตโนมัติ เลือกว่าจะใส่ จุดเริ่มต้น (start) หรือ จุดสิ้นสุด (end)
+        // ================= GPS Function =================
         function getCurrentGPS(target) {
             const btn = document.getElementById(target === 'start' ? 'gpsStartBtn' : 'gpsEndBtn');
             const originalHTML = btn.innerHTML;
@@ -528,6 +641,7 @@
             }
         }
 
+        // ================= บันทึกข้อมูล =================
         async function saveSurvey() {
             const id = document.getElementById('surveyId').value;
             const projectName = document.getElementById('surveyProjectName').value.trim();
@@ -538,15 +652,21 @@
                 return;
             }
 
+            const segmentsData = getSegmentsData();
+            const firstSeg = segmentsData.length > 0 ? segmentsData[0] : {};
+
             const payload = {
                 project_name: projectName,
                 road_type: roadType,
-                width: document.getElementById('surveyWidth').value || 0,
-                length: document.getElementById('surveyLength').value || 0,
-                thickness: document.getElementById('surveyThickness').value || 0,
-                ear_width: document.getElementById('surveyEarWidth').value || 0,
-                ear_length: document.getElementById('surveyEarLength').value || 0,
-                ear_thickness: document.getElementById('surveyEarThickness').value || 0,
+                remark: document.getElementById('surveyRemark').value.trim(),
+                segments: segmentsData,
+                // ยังคงบันทึกข้อมูลช่วงแรกกลับไปที่คอลัมน์เดิมด้วย เพื่อความเข้ากันได้กับโครงสร้าง Database เดิม
+                width: firstSeg.w ? parseFloat(firstSeg.w) : 0,
+                length: firstSeg.l ? parseFloat(firstSeg.l) : 0,
+                thickness: firstSeg.t ? parseFloat(firstSeg.t) : 0,
+                ear_width: firstSeg.ew ? parseFloat(firstSeg.ew) : 0,
+                ear_length: firstSeg.el ? parseFloat(firstSeg.el) : 0,
+                ear_thickness: firstSeg.et ? parseFloat(firstSeg.et) : 0,
                 
                 start_lat: document.getElementById('surveyStartLat').value ? parseFloat(document.getElementById('surveyStartLat').value) : null,
                 start_lng: document.getElementById('surveyStartLng').value ? parseFloat(document.getElementById('surveyStartLng').value) : null,
@@ -566,7 +686,7 @@
                 fetchSurveys();
             } catch (err) {
                 console.error(err);
-                alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาตรวจสอบว่าได้สร้าง Column ใหม่ใน Database แล้วหรือยัง');
+                alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาตรวจสอบว่าได้สร้าง Column "segments" (JSONB) และ "remark" (TEXT) ใน Database ตามคำแนะนำหรือยัง');
             }
         }
 
