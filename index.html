@@ -44,15 +44,27 @@
                 <span class="text-white font-bold text-lg">กองช่าง</span>
             </div>
             
-            <div class="p-4 shrink-0">
-                <button onclick="createCategory()" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
-                    <i class="fa-solid fa-plus mr-2"></i> สร้างแฟ้มบุคคล
+            <!-- เมนูสลับระบบ -->
+            <div class="p-4 shrink-0 border-b border-slate-800">
+                <button onclick="switchView('files')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg transition-colors flex items-center justify-center mb-2">
+                    <i class="fa-solid fa-folder-open mr-2"></i> ระบบจัดการไฟล์
+                </button>
+                <button onclick="switchView('survey')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
+                    <i class="fa-solid fa-map-location-dot mr-2"></i> งานสำรวจ
                 </button>
             </div>
 
-            <nav class="flex-1 overflow-y-auto p-4 space-y-2" id="categoryMenu">
-                <!-- รายชื่อหมวดหมู่จะถูกแทรกที่นี่ -->
-            </nav>
+            <!-- ส่วนของหมวดหมู่ไฟล์ (จะซ่อนเมื่องานสำรวจทำงาน) -->
+            <div id="sidebarFileControls" class="flex flex-col flex-1 overflow-hidden">
+                <div class="p-4 shrink-0">
+                    <button onclick="createCategory()" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
+                        <i class="fa-solid fa-plus mr-2"></i> สร้างแฟ้มบุคคล
+                    </button>
+                </div>
+                <nav class="flex-1 overflow-y-auto p-4 space-y-2 pt-0" id="categoryMenu">
+                    <!-- รายชื่อหมวดหมู่จะถูกแทรกที่นี่ -->
+                </nav>
+            </div>
 
             <div class="p-4 border-t border-slate-800 shrink-0">
                 <button onclick="logout()" class="flex items-center px-4 py-2 w-full hover:bg-red-500 hover:text-white rounded-lg transition-colors text-slate-400">
@@ -67,12 +79,12 @@
                 <h1 id="currentCategoryTitle" class="text-xl font-semibold text-slate-800">ไฟล์ทั้งหมด</h1>
             </header>
 
-            <div class="flex-1 overflow-auto p-8">
+            <!-- ================= วิว: ระบบจัดการไฟล์ ================= -->
+            <div id="fileManagerView" class="flex-1 overflow-auto p-8">
                 <!-- อัปโหลดไฟล์ -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-8">
                     <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">
                         <h2 class="text-lg font-semibold">อัปโหลดไฟล์ใหม่</h2>
-                        
                         <!-- เลือกหมวดหมู่ก่อนอัปโหลด -->
                         <div class="flex items-center gap-2">
                             <label class="text-sm text-slate-600">จัดเก็บในแฟ้ม:</label>
@@ -81,8 +93,6 @@
                             </select>
                         </div>
                     </div>
-
-                    <!-- เพิ่ม attribute 'multiple' เพื่อให้เลือกได้หลายไฟล์ -->
                     <input type="file" id="fileInput" class="hidden" multiple onchange="uploadFile(event)">
                     <div onclick="triggerUpload()" id="uploadBox" class="border-2 border-dashed border-slate-300 rounded-xl p-10 text-center hover:bg-slate-50 hover:border-indigo-400 transition-colors cursor-pointer relative">
                         <i id="uploadIcon" class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-300 mb-3"></i>
@@ -114,7 +124,104 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ================= วิว: ระบบงานสำรวจ (เพิ่มใหม่) ================= -->
+            <div id="surveyWorkView" class="hidden flex-1 overflow-auto p-8">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                        <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-list mr-2 text-emerald-600"></i>รายการงานสำรวจ</h2>
+                        <button onclick="openSurveyModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium">
+                            <i class="fa-solid fa-plus mr-2"></i> เพิ่มข้อมูลงานสำรวจ
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 text-sm border-b border-slate-200">
+                                    <th class="py-3 px-6 font-medium">ชื่อโครงการ</th>
+                                    <th class="py-3 px-4 font-medium text-center border-l border-slate-200" colspan="3">ขนาดหลัก (ม.)</th>
+                                    <th class="py-3 px-4 font-medium text-center border-l border-slate-200" colspan="3">หูช้าง (ม.)</th>
+                                    <th class="py-3 px-6 font-medium text-center border-l border-slate-200" rowspan="2">จัดการ</th>
+                                </tr>
+                                <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200 text-center">
+                                    <th class="py-2 px-6"></th>
+                                    <th class="py-2 px-2 border-l border-slate-200">กว้าง</th>
+                                    <th class="py-2 px-2">ยาว</th>
+                                    <th class="py-2 px-2">หนา</th>
+                                    <th class="py-2 px-2 border-l border-slate-200">กว้าง</th>
+                                    <th class="py-2 px-2">ยาว</th>
+                                    <th class="py-2 px-2">หนา</th>
+                                </tr>
+                            </thead>
+                            <tbody id="surveyTableBody" class="text-sm divide-y divide-slate-100">
+                                <tr><td colspan="8" class="text-center py-4 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </main>
+    </div>
+
+    <!-- ================= Modal: เพิ่ม/แก้ไข งานสำรวจ ================= -->
+    <div id="surveyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <h3 id="surveyModalTitle" class="text-xl font-bold text-slate-800">เพิ่มข้อมูลงานสำรวจ</h3>
+                <button onclick="closeSurveyModal()" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto">
+                <input type="hidden" id="surveyId">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">ชื่อโครงการ</label>
+                    <input type="text" id="surveyProjectName" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="ระบุชื่อโครงการ">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- ขนาดหลัก -->
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <h4 class="font-semibold text-blue-800 mb-3 border-b border-blue-200 pb-2">ขนาดหลัก</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs text-slate-600 mb-1">กว้าง (เมตร)</label>
+                                <input type="number" step="0.01" id="surveyWidth" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-600 mb-1">ยาว (เมตร)</label>
+                                <input type="number" step="0.01" id="surveyLength" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-600 mb-1">หนา (เมตร)</label>
+                                <input type="number" step="0.01" id="surveyThickness" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- หูช้าง -->
+                    <div class="bg-amber-50 p-4 rounded-lg border border-amber-100">
+                        <h4 class="font-semibold text-amber-800 mb-3 border-b border-amber-200 pb-2">หูช้าง</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs text-slate-600 mb-1">กว้าง (เมตร)</label>
+                                <input type="number" step="0.01" id="surveyEarWidth" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-600 mb-1">ยาว (เมตร)</label>
+                                <input type="number" step="0.01" id="surveyEarLength" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-600 mb-1">หนา (เมตร)</label>
+                                <input type="number" step="0.01" id="surveyEarThickness" class="w-full border border-slate-300 rounded px-3 py-1.5 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-slate-200 flex justify-end gap-3 bg-slate-50 shrink-0">
+                <button onclick="closeSurveyModal()" class="px-5 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">ยกเลิก</button>
+                <button onclick="saveSurvey()" class="px-5 py-2 text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 font-medium">บันทึกข้อมูล</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -130,6 +237,7 @@
 
         let currentCategoryId = 'all'; 
         let categoriesData = []; 
+        let surveysData = []; // เก็บข้อมูลงานสำรวจ
 
         // ================= ระบบ Login =================
         document.getElementById('passwordInput').addEventListener('keypress', function (e) {
@@ -145,6 +253,7 @@
                     document.getElementById('dashboardPage').classList.remove('hidden');
                     if(supabaseClient) {
                         loadCategories();
+                        fetchSurveys(); // โหลดข้อมูลงานสำรวจเตรียมไว้
                     }
                 }, 300);
             } else {
@@ -167,7 +276,157 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // ================= ระบบจัดการหมวดหมู่ =================
+        // ================= ระบบสลับหน้าจอ (ใหม่) =================
+        function switchView(view) {
+            const fileView = document.getElementById('fileManagerView');
+            const surveyView = document.getElementById('surveyWorkView');
+            const sidebarFileControls = document.getElementById('sidebarFileControls');
+            const title = document.getElementById('currentCategoryTitle');
+
+            if (view === 'files') {
+                fileView.classList.remove('hidden');
+                surveyView.classList.add('hidden');
+                sidebarFileControls.classList.remove('hidden');
+                // อัปเดต Title คืนตามหมวดหมู่
+                const currentCat = categoriesData.find(c => c.id === currentCategoryId);
+                title.innerText = currentCategoryId === 'all' ? 'ไฟล์ทั้งหมด' : `หมวดหมู่: ${currentCat ? currentCat.name : ''}`;
+            } else if (view === 'survey') {
+                fileView.classList.add('hidden');
+                surveyView.classList.remove('hidden');
+                sidebarFileControls.classList.add('hidden');
+                title.innerHTML = '<i class="fa-solid fa-map-location-dot text-emerald-500 mr-2"></i> หมวดหมู่งานสำรวจ';
+                fetchSurveys(); // รีเฟรชข้อมูลเมื่อสลับหน้า
+            }
+        }
+
+        // ================= ระบบจัดการงานสำรวจ (ใหม่) =================
+        async function fetchSurveys() {
+            if (!supabaseClient) return;
+            const tbody = document.getElementById('surveyTableBody');
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+
+            try {
+                const { data, error } = await supabaseClient.from('survey_works').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+
+                surveysData = data;
+                let htmlContent = '';
+
+                if (data.length === 0) {
+                    htmlContent = '<tr><td colspan="8" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลงานสำรวจ</td></tr>';
+                } else {
+                    data.forEach(item => {
+                        htmlContent += `
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="py-3 px-6 font-medium text-slate-800">${item.project_name}</td>
+                                
+                                <td class="py-3 px-2 text-center border-l border-slate-100 text-blue-600">${item.width || '-'}</td>
+                                <td class="py-3 px-2 text-center text-blue-600">${item.length || '-'}</td>
+                                <td class="py-3 px-2 text-center text-blue-600">${item.thickness || '-'}</td>
+                                
+                                <td class="py-3 px-2 text-center border-l border-slate-100 text-amber-600">${item.ear_width || '-'}</td>
+                                <td class="py-3 px-2 text-center text-amber-600">${item.ear_length || '-'}</td>
+                                <td class="py-3 px-2 text-center text-amber-600">${item.ear_thickness || '-'}</td>
+                                
+                                <td class="py-3 px-6 text-center space-x-2 whitespace-nowrap border-l border-slate-100">
+                                    <button onclick="openSurveyModal('${item.id}')" class="text-slate-500 hover:text-blue-600 p-2"><i class="fa-solid fa-pen-to-square"></i></button>
+                                    <button onclick="deleteSurvey('${item.id}', '${item.project_name}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+                tbody.innerHTML = htmlContent;
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
+            }
+        }
+
+        function openSurveyModal(id = null) {
+            document.getElementById('surveyModal').classList.remove('hidden');
+            
+            if (id) {
+                // โหมดแก้ไข
+                document.getElementById('surveyModalTitle').innerText = 'แก้ไขข้อมูลงานสำรวจ';
+                const item = surveysData.find(s => s.id === id);
+                document.getElementById('surveyId').value = item.id;
+                document.getElementById('surveyProjectName').value = item.project_name;
+                document.getElementById('surveyWidth').value = item.width || '';
+                document.getElementById('surveyLength').value = item.length || '';
+                document.getElementById('surveyThickness').value = item.thickness || '';
+                document.getElementById('surveyEarWidth').value = item.ear_width || '';
+                document.getElementById('surveyEarLength').value = item.ear_length || '';
+                document.getElementById('surveyEarThickness').value = item.ear_thickness || '';
+            } else {
+                // โหมดเพิ่มใหม่ (เคลียร์ค่า)
+                document.getElementById('surveyModalTitle').innerText = 'เพิ่มข้อมูลงานสำรวจ';
+                document.getElementById('surveyId').value = '';
+                document.getElementById('surveyProjectName').value = '';
+                document.getElementById('surveyWidth').value = '';
+                document.getElementById('surveyLength').value = '';
+                document.getElementById('surveyThickness').value = '';
+                document.getElementById('surveyEarWidth').value = '';
+                document.getElementById('surveyEarLength').value = '';
+                document.getElementById('surveyEarThickness').value = '';
+            }
+        }
+
+        function closeSurveyModal() {
+            document.getElementById('surveyModal').classList.add('hidden');
+        }
+
+        async function saveSurvey() {
+            const id = document.getElementById('surveyId').value;
+            const projectName = document.getElementById('surveyProjectName').value.trim();
+            
+            if (!projectName) {
+                alert('กรุณาระบุชื่อโครงการ');
+                return;
+            }
+
+            const payload = {
+                project_name: projectName,
+                width: document.getElementById('surveyWidth').value || 0,
+                length: document.getElementById('surveyLength').value || 0,
+                thickness: document.getElementById('surveyThickness').value || 0,
+                ear_width: document.getElementById('surveyEarWidth').value || 0,
+                ear_length: document.getElementById('surveyEarLength').value || 0,
+                ear_thickness: document.getElementById('surveyEarThickness').value || 0,
+            };
+
+            try {
+                if (id) {
+                    // Update
+                    const { error } = await supabaseClient.from('survey_works').update(payload).eq('id', id);
+                    if (error) throw error;
+                } else {
+                    // Insert
+                    const { error } = await supabaseClient.from('survey_works').insert([payload]);
+                    if (error) throw error;
+                }
+                closeSurveyModal();
+                fetchSurveys();
+            } catch (err) {
+                console.error(err);
+                alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+            }
+        }
+
+        async function deleteSurvey(id, projectName) {
+            if (!confirm(`คุณต้องการลบข้อมูลโครงการ "${projectName}" ใช่หรือไม่?`)) return;
+            try {
+                const { error } = await supabaseClient.from('survey_works').delete().eq('id', id);
+                if (error) throw error;
+                fetchSurveys();
+            } catch (err) {
+                console.error(err);
+                alert('เกิดข้อผิดพลาดในการลบข้อมูล');
+            }
+        }
+
+
+        // ================= ระบบจัดการหมวดหมู่และไฟล์ (ของเดิม) =================
         async function loadCategories() {
             try {
                 const { data, error } = await supabaseClient.from('categories').select('*').order('created_at', { ascending: true });
@@ -252,8 +511,6 @@
             }
         }
 
-        // ================= ระบบจัดการไฟล์ =================
-        // ฟังก์ชันช่วยสร้าง HTML แถวของไฟล์
         function createFileRowHTML(file, groupId = '', isHidden = false) {
             const date = new Date(file.created_at).toLocaleDateString('th-TH');
             const categoryName = file.categories ? file.categories.name : '- ไม่ระบุ -';
@@ -285,7 +542,6 @@
             `;
         }
 
-        // ฟังก์ชันกด ย่อ/ขยาย หมวดหมู่
         function toggleGroup(groupId) {
             const rows = document.querySelectorAll(`.group-item-${groupId}`);
             const icon = document.getElementById(`icon-${groupId}`);
@@ -332,13 +588,9 @@
                     htmlContent = '<tr><td colspan="5" class="text-center py-4 text-slate-400">ไม่พบไฟล์ในแฟ้มนี้</td></tr>';
                 } 
                 else if (currentCategoryId === 'all') {
-                    // ==========================================
-                    // โหมดดูทั้งหมด: จัดกลุ่มตามแฟ้ม (Accordion)
-                    // ==========================================
                     const groupedData = {};
                     const noCategoryData = [];
 
-                    // 1. แยกกลุ่มข้อมูล
                     data.forEach(file => {
                         if(file.category_id && file.categories) {
                             if(!groupedData[file.category_id]) {
@@ -353,11 +605,8 @@
                         }
                     });
 
-                    // 2. สร้าง HTML สำหรับแต่ละกลุ่ม
                     for (const catId in groupedData) {
                         const group = groupedData[catId];
-                        
-                        // แถบหัวข้อหมวดหมู่ (กดเพื่อขยายได้)
                         htmlContent += `
                             <tr class="bg-indigo-50 border-b border-indigo-100 cursor-pointer hover:bg-indigo-100 transition-colors" onclick="toggleGroup('${catId}')">
                                 <td colspan="5" class="py-3 px-6 font-semibold text-indigo-800">
@@ -367,14 +616,11 @@
                                 </td>
                             </tr>
                         `;
-                        
-                        // รายการไฟล์ข้างใน (ซ่อนไว้ก่อนค่าเริ่มต้นคือ isHidden = true)
                         group.files.forEach(file => {
                             htmlContent += createFileRowHTML(file, catId, true);
                         });
                     }
 
-                    // 3. แสดงไฟล์ที่ไม่มีหมวดหมู่ (ถ้ามี)
                     if(noCategoryData.length > 0) {
                         htmlContent += `
                             <tr class="bg-slate-100 border-b border-slate-200">
@@ -389,9 +635,6 @@
                     }
                 } 
                 else {
-                    // ==========================================
-                    // โหมดดูรายบุคคล: แสดงรายการปกติ (ไม่มี Accordion)
-                    // ==========================================
                     data.forEach(file => {
                         htmlContent += createFileRowHTML(file, '', false);
                     });
@@ -414,7 +657,6 @@
             document.getElementById('fileInput').click();
         }
 
-        // ฟังก์ชัน uploadFile แบบหลายไฟล์
         async function uploadFile(event) {
             const selectedCat = document.getElementById('uploadCategorySelect').value;
             if (!selectedCat) return;
