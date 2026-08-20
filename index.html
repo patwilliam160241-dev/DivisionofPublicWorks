@@ -472,8 +472,16 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2 bg-blue-50 p-3 rounded border border-blue-100 flex justify-between items-center">
-                            <label class="text-sm font-semibold text-blue-800">ราคาน้ำมันดีเซล ณ วันนี้ (บาท/ลิตร)</label>
-                            <input type="number" step="any" id="inputOilPrice" value="32.94" class="w-24 border border-blue-300 rounded px-2 py-1 text-right focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-700" onchange="calculateCost()">
+                            <div>
+                                <label class="text-sm font-semibold text-blue-800 block">ราคาน้ำมันดีเซล B7 ณ วันนี้ (บาท/ลิตร)</label>
+                                <span class="text-[10px] text-blue-600 block">*ดึงราคา ปตท. อัตโนมัติ (ฐาน กทม. + ค่าขนส่งอุทัยธานี ~0.45 บ.)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="updateOilPrice()" id="syncOilBtn" class="text-blue-500 hover:text-blue-700 bg-white border border-blue-200 px-2 py-1 rounded shadow-sm transition-colors" title="อัปเดตราคาน้ำมันล่าสุด">
+                                    <i class="fa-solid fa-rotate"></i>
+                                </button>
+                                <input type="number" step="any" id="inputOilPrice" value="32.94" class="w-24 border border-blue-300 rounded px-2 py-1 text-right focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-700" onchange="calculateCost()">
+                            </div>
                         </div>
 
                         <div id="costInputsConcrete" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1079,6 +1087,50 @@
             closeLocationPicker();
         }
 
+        // ================= ระบบดึงราคาน้ำมันอัตโนมัติ (PTT B7) =================
+        async function updateOilPrice() {
+            const btn = document.getElementById('syncOilBtn');
+            if(btn) {
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                btn.disabled = true;
+            }
+            
+            try {
+                // ใช้ API ราคาน้ำมันฟรี (อิงฐานราคา กทม.)
+                const res = await fetch('https://api.chnwt.dev/thai-oil-api/latest');
+                if(!res.ok) throw new Error('API Error');
+                const data = await res.json();
+                
+                let b7Price = null;
+                if(data?.response?.stations?.ptt?.prices) {
+                    const prices = data.response.stations.ptt.prices;
+                    // ค้นหา key ที่เป็น Diesel B7 หรือเกี่ยวกับ B7
+                    const key = Object.keys(prices).find(k => k.toLowerCase().includes('b7') && k.toLowerCase().includes('diesel'));
+                    if(key) {
+                        b7Price = prices[key].price;
+                    }
+                }
+                
+                if(b7Price) {
+                    // อุทัยธานีมีค่าขนส่งเพิ่มเติมจากราคา กทม. ประมาณ 0.40 - 0.50 บาท/ลิตร
+                    // ใช้ +0.45 เป็นค่าเฉลี่ยโดยประมาณ
+                    const uthaiFreight = 0.45;
+                    const finalPrice = (parseFloat(b7Price) + uthaiFreight).toFixed(2);
+                    
+                    document.getElementById('inputOilPrice').value = finalPrice;
+                    calculateCost(); // อัปเดตยอดรวมทันที
+                }
+            } catch(e) {
+                console.error('ไม่สามารถดึงราคาน้ำมันอัตโนมัติได้:', e);
+                // ปล่อยให้ใช้ค่าเดิมที่มีใน input ต่อไป
+            } finally {
+                if(btn) {
+                    btn.innerHTML = '<i class="fa-solid fa-rotate"></i>';
+                    btn.disabled = false;
+                }
+            }
+        }
+
         // ================= ระบบประเมินราคาก่อสร้าง (Cost Calculation) =================
         function openCostModal(id) {
             const item = surveysData.find(s => s.id === id);
@@ -1143,6 +1195,9 @@
 
             calculateCost();
             document.getElementById('costModal').classList.remove('hidden');
+
+            // ทริกเกอร์อัปเดตราคาน้ำมันอัตโนมัติ
+            updateOilPrice();
         }
 
         function closeCostModal() {
