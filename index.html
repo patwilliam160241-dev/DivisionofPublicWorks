@@ -89,7 +89,12 @@
                 <i class="fa-solid fa-folder-open text-3xl"></i>
             </div>
             <h2 class="text-2xl font-bold mb-2">ข้อมูลการทำงาน</h2>
-            <p class="text-slate-500 mb-6">กรุณาใส่รหัสผ่านเพื่อเข้าสู่ระบบ</p>
+            <p class="text-slate-500 mb-6">กรุณาระบุชื่อและรหัสผ่านเพื่อเข้าสู่ระบบ</p>
+            
+            <div class="mb-4 text-left">
+                <input type="text" id="usernameInput" placeholder="ระบุชื่อของคุณ..." 
+                       class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+            </div>
             <div class="mb-4 text-left">
                 <input type="password" id="passwordInput" placeholder="กรอกรหัสผ่าน..." 
                        class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
@@ -595,15 +600,47 @@
         let pickerMarker = null;
         let currentPickerTarget = 'start'; 
 
-        // ================= ระบบ Login =================
+        // ================= ระบบ Login / บันทึก Log =================
         document.getElementById('passwordInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') { e.preventDefault(); checkPassword(); }
         });
 
-        function checkPassword() {
-            if (document.getElementById('passwordInput').value === '4508') {
+        // ให้สามารถกด Enter จากช่องใส่ชื่อแล้วข้ามมาช่องรหัสผ่าน หรือล็อกอินได้
+        document.getElementById('usernameInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') { 
+                e.preventDefault(); 
+                document.getElementById('passwordInput').focus(); 
+            }
+        });
+
+        async function checkPassword() {
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+
+            if (!username) {
+                alert('กรุณาระบุชื่อผู้ใช้งานก่อนเข้าสู่ระบบ');
+                document.getElementById('usernameInput').focus();
+                return;
+            }
+
+            if (password === '4508') {
                 document.getElementById('errorMsg').classList.add('hidden');
                 document.getElementById('loginPage').style.opacity = '0';
+                
+                // 1. บันทึกประวัติการ "เข้าสู่ระบบ" ลง Supabase
+                if (supabaseClient) {
+                    try {
+                        await supabaseClient.from('access_logs').insert([{ 
+                            username: username, 
+                            action: 'เข้าสู่ระบบ' 
+                        }]);
+                        // เก็บชื่อลง LocalStorage ไว้ใช้ตอนกดออก
+                        localStorage.setItem('currentUser', username);
+                    } catch (err) {
+                        console.error("ไม่สามารถบันทึก Log ได้", err);
+                    }
+                }
+
                 setTimeout(() => {
                     document.getElementById('loginPage').classList.add('hidden');
                     document.getElementById('dashboardPage').classList.remove('hidden');
@@ -617,7 +654,24 @@
             }
         }
 
-        function logout() {
+        async function logout() {
+            const username = localStorage.getItem('currentUser') || 'ผู้ใช้ไม่ระบุชื่อ';
+            
+            // 2. บันทึกประวัติการ "ออกจากระบบ" ลง Supabase
+            if (supabaseClient) {
+                try {
+                    await supabaseClient.from('access_logs').insert([{ 
+                        username: username, 
+                        action: 'ออกจากระบบ' 
+                    }]);
+                    localStorage.removeItem('currentUser');
+                } catch (err) {
+                    console.error("ไม่สามารถบันทึก Log ได้", err);
+                }
+            }
+
+            // เคลียร์ค่าหน้า Login
+            document.getElementById('usernameInput').value = '';
             document.getElementById('passwordInput').value = '';
             document.getElementById('dashboardPage').classList.add('hidden');
             document.getElementById('loginPage').classList.remove('hidden');
