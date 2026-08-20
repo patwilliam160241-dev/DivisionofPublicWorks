@@ -203,7 +203,7 @@
                             <thead>
                                 <tr class="bg-slate-100 text-slate-600 text-sm border-b border-slate-200">
                                     <th class="py-3 px-4 font-medium min-w-[150px]" rowspan="2">ชื่อโครงการ</th>
-                                    <th class="py-3 px-3 font-medium border-l border-slate-200" rowspan="2">ประเภทถนน</th>
+                                    <th class="py-3 px-3 font-medium border-l border-slate-200" rowspan="2">ประเภทงาน</th>
                                     <th class="py-3 px-3 font-medium text-center border-l border-slate-200" rowspan="2">ช่วงระยะงาน</th>
                                     <th class="py-2 px-2 font-medium text-center border-l border-slate-200" colspan="3">ขนาดหลัก (ม.)</th>
                                     <th class="py-3 px-2 font-medium text-center border-l border-slate-200 bg-amber-50/50 min-w-[120px]" rowspan="2">พื้นที่หูช้างรวม (ตร.ม.)</th>
@@ -244,7 +244,7 @@
                             <input type="text" id="surveyProjectName" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="ระบุชื่อโครงการ">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">ประเภทงานถนน <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">ประเภทงาน <span class="text-red-500">*</span></label>
                             <select id="surveyRoadType" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                                 <option value="">-- เลือกประเภท --</option>
                                 <option value="คอนกรีตเสริมเหล็ก (คสล.)">คอนกรีตเสริมเหล็ก (คสล.)</option>
@@ -252,6 +252,7 @@
                                 <option value="ลูกรัง">ลูกรัง</option>
                                 <option value="หินคลุก">หินคลุก</option>
                                 <option value="ดิน">ดิน</option>
+                                <option value="งานปรับปรุงภูมิทัศน์">งานปรับปรุงภูมิทัศน์</option>
                                 <option value="อื่นๆ">อื่นๆ</option>
                             </select>
                         </div>
@@ -507,6 +508,19 @@
                                 <input type="number" step="any" id="inputBasePrice" value="350" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
                             </div>
                         </div>
+                        
+                        <!-- ================= ส่วนที่เพิ่มเข้ามาสำหรับงานปรับปรุงภูมิทัศน์ ================= -->
+                        <div id="costInputsLandscape" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">ค่าวัสดุและต้นไม้ (บาท/ตร.ม.)</label>
+                                <input type="number" step="any" id="inputLandscapeMaterialPrice" value="500" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">ค่าแรงงาน (บาท/ตร.ม.)</label>
+                                <input type="number" step="any" id="inputLandscapeLaborPrice" value="150" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()">
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
 
@@ -840,7 +854,6 @@
                 iconAnchor: [9, 9]
             });
 
-            // หมุดหัว/ท้ายสามารถลากได้
             const markerStart = L.marker([startLat, startLng], {
                 icon: startIcon,
                 draggable: true,
@@ -1080,11 +1093,14 @@
             document.getElementById('costInputsConcrete').classList.add('hidden');
             document.getElementById('costInputsAsphalt').classList.add('hidden');
             document.getElementById('costInputsGravel').classList.add('hidden');
+            document.getElementById('costInputsLandscape').classList.add('hidden');
 
             if (item.road_type.includes('คสล') || item.road_type.includes('คอนกรีต')) {
                 document.getElementById('costInputsConcrete').classList.remove('hidden');
             } else if (item.road_type.includes('แอสฟัลท์') || item.road_type.includes('ยางมะตอย')) {
                 document.getElementById('costInputsAsphalt').classList.remove('hidden');
+            } else if (item.road_type.includes('ภูมิทัศน์')) {
+                document.getElementById('costInputsLandscape').classList.remove('hidden');
             } else {
                 document.getElementById('costInputsGravel').classList.remove('hidden');
                 document.getElementById('labelBaseMaterial').innerText = `ราคาวัสดุ (${item.road_type}) (บาท/ลบ.ม.)`;
@@ -1165,6 +1181,13 @@
 
                 directCost = costAsphalt + costTack + laborMachineCost;
 
+            } else if (roadType.includes('ภูมิทัศน์')) {
+                // สำหรับงานปรับปรุงภูมิทัศน์ (คิดตามพื้นที่ ตร.ม.)
+                const pLandMaterial = parseFloat(document.getElementById('inputLandscapeMaterialPrice').value || 0);
+                const pLandLabor = parseFloat(document.getElementById('inputLandscapeLaborPrice').value || 0);
+                
+                directCost = calcTotalArea * (pLandMaterial + pLandLabor);
+
             } else {
                 const pBase = parseFloat(document.getElementById('inputBasePrice').value || 0);
                 const costMaterial = calcTotalVolume * (pBase * 1.2); // เผื่อยุบตัว 20%
@@ -1232,7 +1255,7 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100 md:col-span-2">
-                        <h5 class="text-[11px] font-bold text-blue-800 mb-2 tracking-wide uppercase">ขนาดหลักถนน (เมตร)</h5>
+                        <h5 class="text-[11px] font-bold text-blue-800 mb-2 tracking-wide uppercase">ขนาดหลัก (เมตร)</h5>
                         <div class="grid grid-cols-3 gap-3 max-w-lg">
                             <div>
                                 <label class="block text-[10px] text-slate-600 mb-1 font-medium">กว้าง</label>
@@ -1494,7 +1517,7 @@
             const roadType = document.getElementById('surveyRoadType').value;
             
             if (!projectName || !roadType) {
-                alert('กรุณาระบุชื่อโครงการ และ ประเภทงานถนน');
+                alert('กรุณาระบุชื่อโครงการ และ ประเภทงานถนน/ปรับปรุงภูมิทัศน์');
                 return;
             }
 
