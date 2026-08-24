@@ -600,6 +600,19 @@
         let pickerMarker = null;
         let currentPickerTarget = 'start'; 
 
+        // ================= ฟังก์ชันสำหรับดึง IP Address =================
+        async function getClientIP() {
+            try {
+                // ใช้ API ฟรีสำหรับดึง public IP
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip;
+            } catch (error) {
+                console.error("ไม่สามารถดึง IP ได้:", error);
+                return 'Unknown IP';
+            }
+        }
+
         // ================= ระบบ Login / บันทึก Log =================
         document.getElementById('passwordInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') { e.preventDefault(); checkPassword(); }
@@ -627,15 +640,20 @@
                 document.getElementById('errorMsg').classList.add('hidden');
                 document.getElementById('loginPage').style.opacity = '0';
                 
+                // ดึง IP Address
+                const ipAddress = await getClientIP();
+
                 // 1. บันทึกประวัติการ "เข้าสู่ระบบ" ลง Supabase
                 if (supabaseClient) {
                     try {
                         await supabaseClient.from('access_logs').insert([{ 
                             username: username, 
-                            action: 'เข้าสู่ระบบ' 
+                            action: 'เข้าสู่ระบบ',
+                            ip_address: ipAddress // บันทึก IP ลงคอลัมน์ใหม่
                         }]);
-                        // เก็บชื่อลง LocalStorage ไว้ใช้ตอนกดออก
+                        // เก็บชื่อและ IP ลง LocalStorage ไว้ใช้ตอนกดออก
                         localStorage.setItem('currentUser', username);
+                        localStorage.setItem('currentIP', ipAddress);
                     } catch (err) {
                         console.error("ไม่สามารถบันทึก Log ได้", err);
                     }
@@ -656,15 +674,19 @@
 
         async function logout() {
             const username = localStorage.getItem('currentUser') || 'ผู้ใช้ไม่ระบุชื่อ';
+            // ดึง IP เดิมที่เก็บไว้ตอน Login หรือถ้าไม่มีให้ดึงใหม่
+            const ipAddress = localStorage.getItem('currentIP') || await getClientIP(); 
             
             // 2. บันทึกประวัติการ "ออกจากระบบ" ลง Supabase
             if (supabaseClient) {
                 try {
                     await supabaseClient.from('access_logs').insert([{ 
                         username: username, 
-                        action: 'ออกจากระบบ' 
+                        action: 'ออกจากระบบ',
+                        ip_address: ipAddress // บันทึก IP ลงคอลัมน์ใหม่
                     }]);
                     localStorage.removeItem('currentUser');
+                    localStorage.removeItem('currentIP'); // เคลียร์ IP ออก
                 } catch (err) {
                     console.error("ไม่สามารถบันทึก Log ได้", err);
                 }
