@@ -654,10 +654,12 @@
             if (password === '4508') {
                 document.getElementById('errorMsg').classList.add('hidden');
                 
-                // เปลี่ยนสถานะปุ่ม Login เป็นกำลังโหลดเพื่อแจ้งให้ผู้ใช้ทราบ
+                // เปลี่ยนสถานะปุ่ม Login เป็นกำลังโหลด
                 const loginBtn = document.getElementById('loginBtn');
                 const originalBtnText = loginBtn.innerHTML;
-                loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังดึงพิกัดและเข้าสู่ระบบ...';
+                
+                // 🟢 แก้ไขข้อความตรงนี้ให้ขึ้นแค่ "กำลังโหลด..."
+                loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...';
                 loginBtn.disabled = true;
                 
                 // ดึง IP Address และ GPS ไปพร้อมๆ กัน
