@@ -247,7 +247,7 @@
                         </button>
                     </div>
                     <!-- รายการแท็บหัวข้อย่อย -->
-                    <div id="adminCategoryTabs" class="flex gap-2 overflow-x-auto custom-scrollbar p-4 bg-slate-50">
+                    <div id="adminCategoryTabs" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 p-4 bg-slate-50">
                         <!-- ถูกสร้างผ่าน JS -->
                     </div>
                 </div>
@@ -265,6 +265,7 @@
                             <thead>
                                 <tr class="bg-slate-100 text-slate-600 text-sm border-b border-slate-200">
                                     <th class="py-3 px-4 font-medium">ชื่อโครงการ / สัญญา</th>
+                                    <th class="py-3 px-4 font-medium">เลขที่สัญญา</th>
                                     <th class="py-3 px-4 font-medium text-center">วันเริ่มสัญญา</th>
                                     <th class="py-3 px-4 font-medium text-center">วันสิ้นสุดสัญญา</th>
                                     <th class="py-3 px-4 font-medium text-center">วันส่งมอบงาน</th>
@@ -300,6 +301,11 @@
                     <input type="text" id="adminProjectName" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:amber-500 focus:outline-none" placeholder="ระบุชื่อโครงการ หรือ สัญญาจ้าง">
                 </div>
 
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">เลขที่สัญญาจ้าง</label>
+                    <input type="text" id="adminContractNumber" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" placeholder="ระบุเลขที่สัญญาจ้าง">
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">วันเริ่มสัญญา</label>
@@ -320,6 +326,10 @@
                         <label class="block text-sm font-medium text-slate-700 mb-2">ราคากลาง (บาท)</label>
                         <input type="number" step="any" id="adminMedianPrice" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm" placeholder="0.00">
                     </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">รายละเอียดเพิ่มเติม</label>
+                    <textarea id="adminDescription" rows="4" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none" placeholder="รายละเอียดเพิ่มเติมเกี่ยวกับงาน / สัญญา..."></textarea>
                 </div>
             </div>
 
@@ -786,7 +796,7 @@
                 } else {
                     document.getElementById('currentAdminCatTitle').innerText = 'กรุณาสร้างและเลือกหัวข้อย่อยก่อน';
                     document.getElementById('btnAddAdminWork').classList.add('hidden');
-                    document.getElementById('adminTableBody').innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-400">ยังไม่มีหัวข้อย่อย กรุณากดสร้างหัวข้อย่อยใหม่</td></tr>';
+                    document.getElementById('adminTableBody').innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">ยังไม่มีหัวข้อย่อย กรุณากดสร้างหัวข้อย่อยใหม่</td></tr>';
                 }
             } catch(e) { 
                 console.error(e); 
@@ -805,9 +815,14 @@
                     const isActive = cat.id === currentAdminCategoryId;
                     const bgClass = isActive ? 'bg-amber-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-amber-100 border border-slate-200';
                     html += `
-                        <div class="flex items-center ${bgClass} rounded-lg px-4 py-2 cursor-pointer transition-colors whitespace-nowrap group shrink-0">
-                            <span onclick="selectAdminCategory('${cat.id}')" class="flex-1 font-medium">${cat.name}</span>
-                            <button onclick="deleteAdminCategory('${cat.id}', '${cat.name}')" class="ml-3 text-red-400 hover:text-red-600 ${isActive ? 'text-amber-200 hover:text-white' : ''} opacity-0 group-hover:opacity-100 transition-opacity" title="ลบหัวข้อย่อย"><i class="fa-solid fa-trash"></i></button>
+                        <div class="${isActive ? 'border-amber-500 ring-2 ring-amber-100' : 'border-slate-200'} bg-white rounded-xl border p-4 cursor-pointer hover:border-amber-300 hover:shadow-sm transition-all group">
+                            <div class="flex items-center justify-between gap-3">
+                                <div onclick="selectAdminCategory('${cat.id}')" class="flex items-center gap-3 flex-1 min-w-0">
+                                    <span class="w-10 h-10 rounded-lg ${isActive ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-600'} flex items-center justify-center shrink-0"><i class="fa-solid fa-folder"></i></span>
+                                    <div class="min-w-0"><div class="font-bold text-slate-800 truncate">${cat.name}</div><div class="text-[11px] text-slate-400">คลิกเพื่อดูข้อมูล</div></div>
+                                </div>
+                                <button onclick="deleteAdminCategory('${cat.id}', '${cat.name}'); event.stopPropagation();" class="text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 rounded-lg p-2 shrink-0" title="ลบหัวข้อย่อย"><i class="fa-solid fa-trash"></i></button>
+                            </div>
                         </div>
                     `;
                 });
@@ -859,7 +874,7 @@
             if (!supabaseClient || !currentAdminCategoryId) return;
             const tbody = document.getElementById('adminTableBody');
             if(!tbody) return;
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
 
             try {
                 const { data, error } = await supabaseClient
@@ -874,13 +889,14 @@
                 let htmlContent = '';
 
                 if (data.length === 0) {
-                    htmlContent = '<tr><td colspan="6" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลในหัวข้อย่อยนี้</td></tr>';
+                    htmlContent = '<tr><td colspan="7" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลในหัวข้อย่อยนี้</td></tr>';
                 } else {
                     data.forEach(item => {
                         const price = item.median_price ? parseFloat(item.median_price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
                         htmlContent += `
                         <tr class="hover:bg-amber-50/50 transition-colors">
-                            <td class="py-3 px-4 font-medium text-slate-800 break-words">${item.project_name}</td>
+                            <td class="py-3 px-4 font-medium text-slate-800 break-words">${item.project_name}${item.description ? `<div class="text-xs text-slate-400 mt-1 whitespace-pre-wrap">${item.description}</div>` : ''}</td>
+                            <td class="py-3 px-4 text-slate-600">${item.contract_number || '-'}</td>
                             <td class="py-3 px-4 text-center text-slate-600">${formatThaiDate(item.start_date)}</td>
                             <td class="py-3 px-4 text-center text-slate-600">${formatThaiDate(item.end_date)}</td>
                             <td class="py-3 px-4 text-center text-emerald-600 font-medium">${formatThaiDate(item.delivery_date)}</td>
@@ -895,7 +911,7 @@
                 tbody.innerHTML = htmlContent;
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
             }
         }
 
@@ -912,18 +928,22 @@
                 document.getElementById('adminModalTitle').innerText = 'แก้ไขข้อมูลสัญญา';
                 document.getElementById('adminId').value = item.id;
                 document.getElementById('adminProjectName').value = item.project_name;
+                document.getElementById('adminContractNumber').value = item.contract_number || '';
                 document.getElementById('adminStartDate').value = item.start_date || '';
                 document.getElementById('adminEndDate').value = item.end_date || '';
                 document.getElementById('adminDeliveryDate').value = item.delivery_date || '';
                 document.getElementById('adminMedianPrice').value = item.median_price || '';
+                document.getElementById('adminDescription').value = item.description || '';
             } else {
                 document.getElementById('adminModalTitle').innerText = 'เพิ่มข้อมูลสัญญา';
                 document.getElementById('adminId').value = '';
                 document.getElementById('adminProjectName').value = '';
+                document.getElementById('adminContractNumber').value = '';
                 document.getElementById('adminStartDate').value = '';
                 document.getElementById('adminEndDate').value = '';
                 document.getElementById('adminDeliveryDate').value = '';
                 document.getElementById('adminMedianPrice').value = '';
+                document.getElementById('adminDescription').value = '';
             }
         }
 
@@ -934,6 +954,8 @@
         async function saveAdminWork() {
             const id = document.getElementById('adminId').value;
             const projectName = document.getElementById('adminProjectName').value.trim();
+            const contractNumber = document.getElementById('adminContractNumber').value.trim() || null;
+            const description = document.getElementById('adminDescription').value.trim() || null;
             const startDate = document.getElementById('adminStartDate').value || null;
             const endDate = document.getElementById('adminEndDate').value || null;
             const deliveryDate = document.getElementById('adminDeliveryDate').value || null;
@@ -950,6 +972,8 @@
 
             const payload = {
                 project_name: projectName,
+                contract_number: contractNumber,
+                description: description,
                 start_date: startDate,
                 end_date: endDate,
                 delivery_date: deliveryDate,
