@@ -116,12 +116,15 @@
                 <span class="text-white font-bold text-lg">กองช่าง</span>
             </div>
             
-            <div class="p-4 shrink-0 border-b border-slate-800 w-64">
-                <button onclick="switchView('files')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg transition-colors flex items-center justify-center mb-2">
+            <div class="p-4 shrink-0 border-b border-slate-800 w-64 space-y-2">
+                <button onclick="switchView('files')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
                     <i class="fa-solid fa-folder-open mr-2"></i> ระบบจัดการไฟล์
                 </button>
                 <button onclick="switchView('survey')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
                     <i class="fa-solid fa-map-location-dot mr-2"></i> งานสำรวจ
+                </button>
+                <button onclick="switchView('admin')" class="w-full bg-amber-600 hover:bg-amber-500 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
+                    <i class="fa-solid fa-file-contract mr-2"></i> งานธุรการ
                 </button>
             </div>
 
@@ -228,7 +231,83 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ================= วิว: ระบบงานธุรการ (ใหม่) ================= -->
+            <div id="adminWorkView" class="hidden flex-1 overflow-auto p-8 custom-scrollbar">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-amber-50">
+                        <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-file-contract mr-2 text-amber-600"></i>รายการงานธุรการ / สัญญาจ้าง</h2>
+                        <button onclick="openAdminModal()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium shadow-sm">
+                            <i class="fa-solid fa-plus mr-2"></i> เพิ่มข้อมูลสัญญา
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 text-sm border-b border-slate-200">
+                                    <th class="py-3 px-4 font-medium">ชื่อโครงการ / สัญญา</th>
+                                    <th class="py-3 px-4 font-medium text-center">วันเริ่มสัญญา</th>
+                                    <th class="py-3 px-4 font-medium text-center">วันสิ้นสุดสัญญา</th>
+                                    <th class="py-3 px-4 font-medium text-center">วันส่งมอบงาน</th>
+                                    <th class="py-3 px-4 font-medium text-right">ราคากลาง (บาท)</th>
+                                    <th class="py-3 px-4 font-medium text-center">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTableBody" class="text-sm divide-y divide-slate-100">
+                                <tr><td colspan="6" class="text-center py-8 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </main>
+    </div>
+
+    <!-- ================= Modal: เพิ่ม/แก้ไข งานธุรการ (ใหม่) ================= -->
+    <div id="adminModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center py-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col max-h-[95vh]">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-amber-50 shrink-0 rounded-t-xl">
+                <h3 id="adminModalTitle" class="text-xl font-bold text-slate-800">เพิ่มข้อมูลสัญญา (งานธุรการ)</h3>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 space-y-5 custom-scrollbar">
+                <input type="hidden" id="adminId">
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">ชื่อโครงการ / หัวข้อสัญญา <span class="text-red-500">*</span></label>
+                    <input type="text" id="adminProjectName" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" placeholder="ระบุชื่อโครงการ หรือ สัญญาจ้าง">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">วันเริ่มสัญญา</label>
+                        <input type="date" id="adminStartDate" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">วันสิ้นสุดสัญญา</label>
+                        <input type="date" id="adminEndDate" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">วันส่งมอบงาน</label>
+                        <input type="date" id="adminDeliveryDate" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">ราคากลาง (บาท)</label>
+                        <input type="number" step="any" id="adminMedianPrice" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm" placeholder="0.00">
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-5 border-t border-slate-200 flex justify-end gap-3 bg-white shrink-0 rounded-b-xl">
+                <button onclick="closeAdminModal()" class="px-6 py-2.5 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium">ยกเลิก</button>
+                <button onclick="saveAdminWork()" class="px-6 py-2.5 text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors font-medium shadow-sm">บันทึกข้อมูล</button>
+            </div>
+        </div>
     </div>
 
     <!-- ================= Modal: เพิ่ม/แก้ไข งานสำรวจ ================= -->
@@ -577,6 +656,7 @@
         let currentCategoryId = 'all'; 
         let categoriesData = []; 
         let surveysData = [];
+        let adminWorksData = []; // ตัวแปรเก็บข้อมูลธุรการ
 
         let calcCurrentProject = null;
         let calcTotalArea = 0;
@@ -658,7 +738,6 @@
                 const loginBtn = document.getElementById('loginBtn');
                 const originalBtnText = loginBtn.innerHTML;
                 
-                // 🟢 แก้ไขข้อความตรงนี้ให้ขึ้นแค่ "กำลังโหลด..."
                 loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...';
                 loginBtn.disabled = true;
                 
@@ -699,6 +778,7 @@
                     if(supabaseClient) {
                         loadCategories();
                         fetchSurveys();
+                        fetchAdminWorks(); // โหลดข้อมูลธุรการเมื่อล็อกอินสำเร็จ
                     }
                 }, 300);
             } else {
@@ -756,21 +836,151 @@
         function switchView(view) {
             const fileView = document.getElementById('fileManagerView');
             const surveyView = document.getElementById('surveyWorkView');
+            const adminView = document.getElementById('adminWorkView'); 
             const sidebarFileControls = document.getElementById('sidebarFileControls');
             const title = document.getElementById('currentCategoryTitle');
 
+            // ซ่อนทุกวิวไว้ก่อน
+            fileView.classList.add('hidden');
+            surveyView.classList.add('hidden');
+            if(adminView) adminView.classList.add('hidden');
+            sidebarFileControls.classList.add('hidden');
+
             if (view === 'files') {
                 fileView.classList.remove('hidden');
-                surveyView.classList.add('hidden');
                 sidebarFileControls.classList.remove('hidden');
                 const currentCat = categoriesData.find(c => c.id === currentCategoryId);
                 title.innerText = currentCategoryId === 'all' ? 'ไฟล์ทั้งหมด' : `หมวดหมู่: ${currentCat ? currentCat.name : ''}`;
             } else if (view === 'survey') {
-                fileView.classList.add('hidden');
                 surveyView.classList.remove('hidden');
-                sidebarFileControls.classList.add('hidden');
                 title.innerHTML = '<i class="fa-solid fa-map-location-dot text-emerald-500 mr-2"></i> หมวดหมู่งานสำรวจ';
                 fetchSurveys();
+            } else if (view === 'admin') {
+                if(adminView) adminView.classList.remove('hidden');
+                title.innerHTML = '<i class="fa-solid fa-file-contract text-amber-500 mr-2"></i> หมวดหมู่งานธุรการ';
+                fetchAdminWorks();
+            }
+        }
+
+        // ================= ระบบงานธุรการ (CRUD) =================
+        function formatThaiDate(dateString) {
+            if (!dateString) return '-';
+            const d = new Date(dateString);
+            return d.toLocaleDateString('th-TH');
+        }
+
+        async function fetchAdminWorks() {
+            if (!supabaseClient) return;
+            const tbody = document.getElementById('adminTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+
+            try {
+                const { data, error } = await supabaseClient.from('admin_works').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+
+                adminWorksData = data;
+                let htmlContent = '';
+
+                if (data.length === 0) {
+                    htmlContent = '<tr><td colspan="6" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลงานธุรการ / สัญญา</td></tr>';
+                } else {
+                    data.forEach(item => {
+                        const price = item.median_price ? parseFloat(item.median_price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
+                        htmlContent += `
+                        <tr class="hover:bg-amber-50/50 transition-colors">
+                            <td class="py-3 px-4 font-medium text-slate-800 break-words">${item.project_name}</td>
+                            <td class="py-3 px-4 text-center text-slate-600">${formatThaiDate(item.start_date)}</td>
+                            <td class="py-3 px-4 text-center text-slate-600">${formatThaiDate(item.end_date)}</td>
+                            <td class="py-3 px-4 text-center text-emerald-600 font-medium">${formatThaiDate(item.delivery_date)}</td>
+                            <td class="py-3 px-4 text-right text-indigo-600 font-bold">${price}</td>
+                            <td class="py-3 px-4 text-center">
+                                <button onclick="openAdminModal('${item.id}')" class="text-blue-500 hover:text-blue-700 bg-white hover:bg-blue-50 border border-slate-200 p-1.5 rounded shadow-sm mr-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="deleteAdminWork('${item.id}', '${item.project_name}')" class="text-red-500 hover:text-red-700 bg-white hover:bg-red-50 border border-slate-200 p-1.5 rounded shadow-sm"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>`;
+                    });
+                }
+                tbody.innerHTML = htmlContent;
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล หรือคุณยังไม่ได้สร้างตาราง admin_works ในฐานข้อมูล</td></tr>';
+            }
+        }
+
+        function openAdminModal(id = null) {
+            document.getElementById('adminModal').classList.remove('hidden');
+            
+            if (id) {
+                const item = adminWorksData.find(a => a.id === id);
+                document.getElementById('adminModalTitle').innerText = 'แก้ไขข้อมูลสัญญา';
+                document.getElementById('adminId').value = item.id;
+                document.getElementById('adminProjectName').value = item.project_name;
+                document.getElementById('adminStartDate').value = item.start_date || '';
+                document.getElementById('adminEndDate').value = item.end_date || '';
+                document.getElementById('adminDeliveryDate').value = item.delivery_date || '';
+                document.getElementById('adminMedianPrice').value = item.median_price || '';
+            } else {
+                document.getElementById('adminModalTitle').innerText = 'เพิ่มข้อมูลสัญญา (งานธุรการ)';
+                document.getElementById('adminId').value = '';
+                document.getElementById('adminProjectName').value = '';
+                document.getElementById('adminStartDate').value = '';
+                document.getElementById('adminEndDate').value = '';
+                document.getElementById('adminDeliveryDate').value = '';
+                document.getElementById('adminMedianPrice').value = '';
+            }
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        async function saveAdminWork() {
+            const id = document.getElementById('adminId').value;
+            const projectName = document.getElementById('adminProjectName').value.trim();
+            const startDate = document.getElementById('adminStartDate').value || null;
+            const endDate = document.getElementById('adminEndDate').value || null;
+            const deliveryDate = document.getElementById('adminDeliveryDate').value || null;
+            const medianPrice = document.getElementById('adminMedianPrice').value ? parseFloat(document.getElementById('adminMedianPrice').value) : null;
+            
+            if (!projectName) {
+                alert('กรุณาระบุชื่อโครงการ / หัวข้อสัญญา');
+                return;
+            }
+
+            const payload = {
+                project_name: projectName,
+                start_date: startDate,
+                end_date: endDate,
+                delivery_date: deliveryDate,
+                median_price: medianPrice
+            };
+
+            try {
+                if (id) {
+                    const { error } = await supabaseClient.from('admin_works').update(payload).eq('id', id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseClient.from('admin_works').insert([payload]);
+                    if (error) throw error;
+                }
+                closeAdminModal();
+                fetchAdminWorks();
+            } catch (err) {
+                console.error(err);
+                alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาตรวจสอบตาราง admin_works ใน Database');
+            }
+        }
+
+        async function deleteAdminWork(id, projectName) {
+            if (!confirm(`คุณต้องการลบข้อมูลสัญญา "${projectName}" ใช่หรือไม่?`)) return;
+            try {
+                const { error } = await supabaseClient.from('admin_works').delete().eq('id', id);
+                if (error) throw error;
+                fetchAdminWorks();
+            } catch (err) {
+                console.error(err);
+                alert('เกิดข้อผิดพลาดในการลบข้อมูล');
             }
         }
 
@@ -1370,7 +1580,6 @@
             document.getElementById('outputFactorFCost').innerText = (totalCost - directCost).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' บาท';
             document.getElementById('outputTotalCost').innerText = totalCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' บาท';
         }
-
 
         // ================= ระบบเพิ่ม Dynamic Segments (Form Survey) =================
         function createSegmentHTML(seg, index) {
