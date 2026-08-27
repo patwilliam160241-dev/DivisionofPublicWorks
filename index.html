@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>กองช่างเทศบาลตำบลน้ำซึม</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,7 +17,8 @@
         .active-category { background-color: #4f46e5; color: white; }
         .inactive-category { hover:background-color: #1e293b; color: #cbd5e1; }
         
-        /* Custom Scrollbar */
+        /* Custom Scrollbar ให้ลื่นไหลบนมือถือ */
+        .custom-scrollbar { -webkit-overflow-scrolling: touch; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -81,8 +82,8 @@
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen overflow-hidden">
 
-    <div id="loginPage" class="flex items-center justify-center h-full bg-gradient-to-br from-indigo-500 to-purple-600 absolute inset-0 z-50 transition-opacity duration-300">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center">
+    <div id="loginPage" class="flex items-center justify-center h-full bg-gradient-to-br from-indigo-500 to-purple-600 absolute inset-0 z-50 transition-opacity duration-300 px-4">
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md text-center">
             <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fa-solid fa-folder-open text-3xl"></i>
             </div>
@@ -91,42 +92,49 @@
             
             <div class="mb-4 text-left">
                 <input type="text" id="usernameInput" placeholder="ระบุชื่อของคุณ..." 
-                       class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                       class="w-full px-4 py-3 text-base rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
             </div>
             <div class="mb-4 text-left">
                 <input type="password" id="passwordInput" placeholder="กรอกรหัสผ่าน..." 
-                       class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                       class="w-full px-4 py-3 text-base rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
             </div>
             <p id="errorMsg" class="text-red-500 text-sm mb-4 hidden">รหัสผ่านไม่ถูกต้อง!</p>
-            <button id="loginBtn" onclick="checkPassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors shadow-lg">
+            <button id="loginBtn" onclick="checkPassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors shadow-lg text-lg">
                 เข้าสู่ระบบ
             </button>
         </div>
     </div>
 
-    <div id="dashboardPage" class="hidden flex h-full">
+    <div id="dashboardPage" class="hidden flex h-full relative">
         
-        <aside id="mainSidebar" class="w-64 bg-slate-900 text-slate-300 flex flex-col h-full transition-all duration-300 overflow-hidden shrink-0">
-            <div class="h-16 flex items-center px-6 border-b border-slate-800 shrink-0 w-64">
-                <i class="fa-solid fa-cloud text-indigo-400 text-xl mr-3"></i>
-                <span class="text-white font-bold text-lg">กองช่าง</span>
+        <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/60 z-40 hidden md:hidden backdrop-blur-sm transition-opacity"></div>
+        
+        <aside id="mainSidebar" class="fixed md:relative z-50 w-64 md:w-64 bg-slate-900 text-slate-300 flex flex-col h-full transition-all duration-300 overflow-hidden shrink-0 -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none">
+            <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800 shrink-0 w-64">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-cloud text-indigo-400 text-xl mr-3"></i>
+                    <span class="text-white font-bold text-lg">กองช่าง</span>
+                </div>
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
             </div>
             
             <div class="p-4 shrink-0 border-b border-slate-800 w-64 space-y-2">
-                <button onclick="switchView('files')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
+                <button onclick="switchView('files')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 md:py-2 rounded-lg transition-colors flex items-center justify-center">
                     <i class="fa-solid fa-folder-open mr-2"></i> ระบบจัดการไฟล์
                 </button>
-                <button onclick="switchView('survey')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
+                <button onclick="switchView('survey')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 md:py-2 rounded-lg transition-colors flex items-center justify-center">
                     <i class="fa-solid fa-map-location-dot mr-2"></i> งานสำรวจ
                 </button>
-                <button onclick="switchView('admin')" class="w-full bg-amber-600 hover:bg-amber-500 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
+                <button onclick="switchView('admin')" class="w-full bg-amber-600 hover:bg-amber-500 text-white py-3 md:py-2 rounded-lg transition-colors flex items-center justify-center">
                     <i class="fa-solid fa-file-contract mr-2"></i> งานธุรการ
                 </button>
             </div>
 
             <div id="sidebarFileControls" class="flex flex-col flex-1 overflow-hidden w-64">
                 <div class="p-4 shrink-0">
-                    <button onclick="createCategory()" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
+                    <button onclick="createCategory()" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-3 md:py-2 rounded-lg transition-colors flex items-center justify-center">
                         <i class="fa-solid fa-plus mr-2"></i> สร้างแฟ้มบุคคล
                     </button>
                 </div>
@@ -135,52 +143,52 @@
             </div>
 
             <div class="p-4 border-t border-slate-800 shrink-0 w-64">
-                <button onclick="logout()" class="flex items-center px-4 py-2 w-full hover:bg-red-500 hover:text-white rounded-lg transition-colors text-slate-400">
+                <button onclick="logout()" class="flex items-center px-4 py-3 md:py-2 w-full hover:bg-red-500 hover:text-white rounded-lg transition-colors text-slate-400">
                     <i class="fa-solid fa-right-from-bracket w-6 mr-2"></i> ออกจากระบบ
                 </button>
             </div>
         </aside>
 
         <main class="flex-1 flex flex-col h-full overflow-hidden relative">
-            <header class="h-16 bg-white border-b border-slate-200 flex items-center px-6 shadow-sm shrink-0">
-                <button onclick="toggleSidebar()" class="text-slate-500 hover:text-indigo-600 mr-4 focus:outline-none p-2 rounded-lg hover:bg-slate-100 transition-colors" title="ซ่อน/แสดง เมนู">
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center px-4 md:px-6 shadow-sm shrink-0">
+                <button onclick="toggleSidebar()" class="text-slate-700 bg-slate-100 hover:bg-slate-200 focus:ring-2 focus:ring-indigo-500 mr-3 md:mr-4 p-2.5 rounded-lg transition-colors flex items-center justify-center shadow-sm" title="ซ่อน/แสดง เมนู">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
-                <h1 id="currentCategoryTitle" class="text-xl font-semibold text-slate-800">ไฟล์ทั้งหมด</h1>
+                <h1 id="currentCategoryTitle" class="text-xl font-bold text-slate-800 truncate">ไฟล์ทั้งหมด</h1>
             </header>
 
-            <div id="fileManagerView" class="flex-1 overflow-auto p-8 custom-scrollbar">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-8">
+            <div id="fileManagerView" class="flex-1 overflow-auto p-4 md:p-8 custom-scrollbar">
+                <div class="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-slate-100 mb-6 md:mb-8">
                     <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">
                         <h2 class="text-lg font-semibold">อัปโหลดไฟล์ใหม่</h2>
                         <div class="flex items-center gap-2">
-                            <label class="text-sm text-slate-600">จัดเก็บในแฟ้ม:</label>
-                            <select id="uploadCategorySelect" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 min-w-[200px]">
+                            <label class="text-sm text-slate-600 whitespace-nowrap">จัดเก็บในแฟ้ม:</label>
+                            <select id="uploadCategorySelect" class="border border-slate-300 rounded-lg px-3 py-2.5 md:py-2 text-base md:text-sm focus:outline-none focus:border-indigo-500 w-full md:min-w-[200px]">
                                 <option value="">-- กรุณาเลือกแฟ้มบุคคล --</option>
                             </select>
                         </div>
                     </div>
                     <input type="file" id="fileInput" class="hidden" multiple onchange="uploadFile(event)">
-                    <div onclick="triggerUpload()" id="uploadBox" class="border-2 border-dashed border-slate-300 rounded-xl p-10 text-center hover:bg-slate-50 hover:border-indigo-400 transition-colors cursor-pointer relative">
-                        <i id="uploadIcon" class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-300 mb-3"></i>
-                        <p id="uploadText" class="text-slate-600 font-medium">คลิกเพื่อเลือกไฟล์อัปโหลด (สามารถเลือกได้หลายไฟล์)</p>
+                    <div onclick="triggerUpload()" id="uploadBox" class="border-2 border-dashed border-slate-300 rounded-xl p-6 md:p-10 text-center hover:bg-slate-50 hover:border-indigo-400 transition-colors cursor-pointer relative">
+                        <i id="uploadIcon" class="fa-solid fa-cloud-arrow-up text-4xl md:text-5xl text-indigo-300 mb-3"></i>
+                        <p id="uploadText" class="text-slate-600 font-medium text-sm md:text-base">คลิกเพื่อเลือกไฟล์อัปโหลด<br class="md:hidden"><span class="text-xs md:text-sm text-slate-400"> (เลือกได้หลายไฟล์)</span></p>
                     </div>
                 </div>
 
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                        <h2 class="text-lg font-semibold">รายการไฟล์ (<span id="totalFilesCount">0</span>)</h2>
-                        <button onclick="fetchFiles()" class="text-sm bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded text-slate-600"><i class="fa-solid fa-rotate-right"></i> รีเฟรช</button>
+                    <div class="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center">
+                        <h2 class="text-base md:text-lg font-semibold">รายการไฟล์ (<span id="totalFilesCount">0</span>)</h2>
+                        <button onclick="fetchFiles()" class="text-sm bg-slate-100 hover:bg-slate-200 px-3 py-2 md:py-1 rounded-lg text-slate-700 font-medium shadow-sm"><i class="fa-solid fa-rotate-right"></i> รีเฟรช</button>
                     </div>
                     <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
                             <thead>
                                 <tr class="bg-slate-50 text-slate-500 text-sm border-b border-slate-200">
-                                    <th class="py-3 px-6 font-medium">ชื่อไฟล์</th>
-                                    <th class="py-3 px-6 font-medium">แฟ้มบุคคล</th>
-                                    <th class="py-3 px-6 font-medium">ขนาด</th>
-                                    <th class="py-3 px-6 font-medium">วันที่</th>
-                                    <th class="py-3 px-6 font-medium text-center">จัดการ</th>
+                                    <th class="py-3 px-4 md:px-6 font-medium">ชื่อไฟล์</th>
+                                    <th class="py-3 px-4 md:px-6 font-medium">แฟ้มบุคคล</th>
+                                    <th class="py-3 px-4 md:px-6 font-medium">ขนาด</th>
+                                    <th class="py-3 px-4 md:px-6 font-medium">วันที่</th>
+                                    <th class="py-3 px-4 md:px-6 font-medium text-center">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody id="fileTableBody" class="text-sm divide-y divide-slate-100">
@@ -191,25 +199,25 @@
                 </div>
             </div>
 
-            <div id="surveyWorkView" class="hidden flex-1 overflow-auto p-8 custom-scrollbar">
+            <div id="surveyWorkView" class="hidden flex-1 overflow-auto p-4 md:p-8 custom-scrollbar">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                        <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-list mr-2 text-emerald-600"></i>รายการงานสำรวจ</h2>
-                        <button onclick="openSurveyModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium shadow-sm">
-                            <i class="fa-solid fa-plus mr-2"></i> เพิ่มข้อมูลงานสำรวจ
+                    <div class="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                        <h2 class="text-base md:text-lg font-semibold text-slate-800 truncate"><i class="fa-solid fa-list mr-2 text-emerald-600"></i>รายการงานสำรวจ</h2>
+                        <button onclick="openSurveyModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2.5 md:px-4 md:py-2 rounded-lg transition-colors text-sm font-medium shadow-sm whitespace-nowrap">
+                            <i class="fa-solid fa-plus md:mr-2"></i> <span class="hidden md:inline">เพิ่มข้อมูลงานสำรวจ</span>
                         </button>
                     </div>
                     <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full text-left border-collapse min-w-[900px]">
                             <thead>
                                 <tr class="bg-slate-100 text-slate-600 text-sm border-b border-slate-200">
-                                    <th class="py-3 px-4 font-medium min-w-[150px]" rowspan="2">ชื่อโครงการ</th>
-                                    <th class="py-3 px-3 font-medium border-l border-slate-200" rowspan="2">ประเภทงาน</th>
-                                    <th class="py-3 px-3 font-medium text-center border-l border-slate-200" rowspan="2">ช่วงระยะงาน</th>
+                                    <th class="py-3 px-4 font-medium min-w-[200px]" rowspan="2">ชื่อโครงการ</th>
+                                    <th class="py-3 px-3 font-medium border-l border-slate-200 whitespace-nowrap" rowspan="2">ประเภทงาน</th>
+                                    <th class="py-3 px-3 font-medium text-center border-l border-slate-200 whitespace-nowrap" rowspan="2">ช่วงระยะงาน</th>
                                     <th class="py-2 px-2 font-medium text-center border-l border-slate-200" colspan="3">ขนาดหลัก (ม.)</th>
                                     <th class="py-3 px-2 font-medium text-center border-l border-slate-200 bg-amber-50/50 min-w-[120px]" rowspan="2">พื้นที่หูช้างรวม (ตร.ม.)</th>
-                                    <th class="py-3 px-4 font-medium text-center border-l border-slate-200" rowspan="2">พิกัด (หัว-ท้าย)</th>
-                                    <th class="py-3 px-4 font-medium text-center border-l border-slate-200" rowspan="2">จัดการ</th>
+                                    <th class="py-3 px-4 font-medium text-center border-l border-slate-200 min-w-[160px]" rowspan="2">พิกัด (หัว-ท้าย)</th>
+                                    <th class="py-3 px-4 font-medium text-center border-l border-slate-200 min-w-[150px]" rowspan="2">จัดการ</th>
                                 </tr>
                                 <tr class="bg-slate-50 text-slate-500 text-[11px] border-b border-slate-200 text-center">
                                     <th class="py-1 px-1 border-l border-slate-200">กว้าง</th>
@@ -233,7 +241,7 @@
                             <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-file-contract mr-2 text-amber-600"></i>ระบบงานธุรการ</h2>
                             <p class="text-xs text-slate-500 mt-1">จัดการสัญญาและข้อมูลแบ่งตามหัวข้อย่อย</p>
                         </div>
-                        <button onclick="createAdminCategory()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium shadow-sm flex items-center shrink-0">
+                        <button onclick="createAdminCategory()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-lg transition-colors text-sm font-medium shadow-sm flex items-center shrink-0 w-full md:w-auto justify-center">
                             <i class="fa-solid fa-folder-plus mr-2"></i> สร้างหัวข้อย่อยใหม่
                         </button>
                     </div>
@@ -243,16 +251,16 @@
 
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex-1 flex flex-col">
                     <div class="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
-                        <h3 id="currentAdminCatTitle" class="text-md font-bold text-slate-700">กรุณาเลือกหัวข้อย่อยด้านบน</h3>
-                        <button id="btnAddAdminWork" onclick="openAdminModal()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium shadow-sm flex items-center">
-                            <i class="fa-solid fa-plus mr-2"></i> เพิ่มข้อมูล
+                        <h3 id="currentAdminCatTitle" class="text-sm md:text-md font-bold text-slate-700 truncate mr-2">กรุณาเลือกหัวข้อย่อยด้านบน</h3>
+                        <button id="btnAddAdminWork" onclick="openAdminModal()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 md:px-4 md:py-2 rounded-lg transition-colors text-sm font-medium shadow-sm flex items-center shrink-0">
+                            <i class="fa-solid fa-plus md:mr-2"></i> <span class="hidden md:inline">เพิ่มข้อมูล</span>
                         </button>
                     </div>
                     <div class="overflow-x-auto custom-scrollbar flex-1">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
                             <thead>
                                 <tr class="bg-slate-100 text-slate-600 text-sm border-b border-slate-200">
-                                    <th class="py-3 px-4 font-medium">ชื่อโครงการ / สัญญา</th>
+                                    <th class="py-3 px-4 font-medium min-w-[180px]">ชื่อโครงการ / สัญญา</th>
                                     <th class="py-3 px-4 font-medium">เลขที่สัญญา</th>
                                     <th class="py-3 px-4 font-medium text-center">วันเริ่มสัญญา</th>
                                     <th class="py-3 px-4 font-medium text-center">วันสิ้นสุดสัญญา</th>
@@ -262,7 +270,7 @@
                                 </tr>
                             </thead>
                             <tbody id="adminTableBody" class="text-sm divide-y divide-slate-100">
-                                <tr><td colspan="6" class="text-center py-8 text-slate-400">กรุณาเลือกหัวข้อย่อยก่อน</td></tr>
+                                <tr><td colspan="7" class="text-center py-8 text-slate-400">กรุณาเลือกหัวข้อย่อยก่อน</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -273,79 +281,79 @@
         </main>
     </div>
 
-    <div id="adminModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center py-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col max-h-[95vh]">
-            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-amber-50 shrink-0 rounded-t-xl">
-                <h3 id="adminModalTitle" class="text-xl font-bold text-slate-800">เพิ่มข้อมูลสัญญา (งานธุรการ)</h3>
-                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <div id="adminModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-2 md:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-auto flex flex-col max-h-[95vh]">
+            <div class="p-4 md:p-5 border-b border-slate-200 flex justify-between items-center bg-amber-50 shrink-0 rounded-t-xl">
+                <h3 id="adminModalTitle" class="text-lg md:text-xl font-bold text-slate-800">เพิ่มข้อมูลสัญญา (งานธุรการ)</h3>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors shadow-sm"><i class="fa-solid fa-xmark text-xl w-5 h-5 flex items-center justify-center"></i></button>
             </div>
             
-            <div class="p-6 overflow-y-auto flex-1 space-y-5 custom-scrollbar">
+            <div class="p-4 md:p-6 overflow-y-auto flex-1 space-y-4 md:space-y-5 custom-scrollbar">
                 <input type="hidden" id="adminId">
                 
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">ชื่อโครงการ / หัวข้อสัญญา <span class="text-red-500">*</span></label>
-                    <input type="text" id="adminProjectName" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:amber-500 focus:outline-none" placeholder="ระบุชื่อโครงการ หรือ สัญญาจ้าง">
+                    <input type="text" id="adminProjectName" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" placeholder="ระบุชื่อโครงการ หรือ สัญญาจ้าง">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">เลขที่สัญญาจ้าง</label>
-                    <input type="text" id="adminContractNumber" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" placeholder="ระบุเลขที่สัญญาจ้าง">
+                    <input type="text" id="adminContractNumber" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" placeholder="ระบุเลขที่สัญญาจ้าง">
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">วันเริ่มสัญญา</label>
-                        <input type="date" id="adminStartDate" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+                        <input type="date" id="adminStartDate" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">วันสิ้นสุดสัญญา</label>
-                        <input type="date" id="adminEndDate" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+                        <input type="date" id="adminEndDate" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">วันส่งมอบงาน</label>
-                        <input type="date" id="adminDeliveryDate" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+                        <input type="date" id="adminDeliveryDate" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">ราคากลาง (บาท)</label>
-                        <input type="number" step="any" id="adminMedianPrice" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm" placeholder="0.00">
+                        <input type="number" step="any" id="adminMedianPrice" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" placeholder="0.00">
                     </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">รายละเอียดเพิ่มเติม</label>
-                    <textarea id="adminDescription" rows="4" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none" placeholder="รายละเอียดเพิ่มเติมเกี่ยวกับงาน / สัญญา..."></textarea>
+                    <textarea id="adminDescription" rows="4" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none" placeholder="รายละเอียดเพิ่มเติมเกี่ยวกับงาน / สัญญา..."></textarea>
                 </div>
             </div>
 
-            <div class="p-5 border-t border-slate-200 flex justify-end gap-3 bg-white shrink-0 rounded-b-xl">
-                <button onclick="closeAdminModal()" class="px-6 py-2.5 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium">ยกเลิก</button>
-                <button id="saveAdminBtn" onclick="saveAdminWork()" class="px-6 py-2.5 text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors font-medium shadow-sm">บันทึกข้อมูล</button>
+            <div class="p-4 md:p-5 border-t border-slate-200 flex justify-end gap-3 bg-white shrink-0 rounded-b-xl">
+                <button onclick="closeAdminModal()" class="px-6 py-3 md:py-2.5 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium">ยกเลิก</button>
+                <button id="saveAdminBtn" onclick="saveAdminWork()" class="px-6 py-3 md:py-2.5 text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors font-medium shadow-sm">บันทึกข้อมูล</button>
             </div>
         </div>
     </div>
 
-    <div id="surveyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center py-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl mx-4 flex flex-col h-[95vh]">
-            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0 rounded-t-xl">
-                <h3 id="surveyModalTitle" class="text-xl font-bold text-slate-800">เพิ่มข้อมูลงานสำรวจ</h3>
-                <button onclick="closeSurveyModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <div id="surveyModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-2 md:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl mx-auto flex flex-col h-[95vh]">
+            <div class="p-4 md:p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0 rounded-t-xl">
+                <h3 id="surveyModalTitle" class="text-lg md:text-xl font-bold text-slate-800">เพิ่มข้อมูลงานสำรวจ</h3>
+                <button onclick="closeSurveyModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors shadow-sm"><i class="fa-solid fa-xmark text-xl w-5 h-5 flex items-center justify-center"></i></button>
             </div>
             
-            <div class="p-6 overflow-y-auto flex-1 space-y-6 bg-slate-50/50 custom-scrollbar">
+            <div class="p-4 md:p-6 overflow-y-auto flex-1 space-y-4 md:space-y-6 bg-slate-50/50 custom-scrollbar">
                 <input type="hidden" id="surveyId">
                 
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-2">ชื่อโครงการ <span class="text-red-500">*</span></label>
-                            <input type="text" id="surveyProjectName" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="ระบุชื่อโครงการ">
+                            <input type="text" id="surveyProjectName" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="ระบุชื่อโครงการ">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-2">ประเภทงาน <span class="text-red-500">*</span></label>
-                            <select id="surveyRoadType" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <select id="surveyRoadType" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                                 <option value="">-- เลือกประเภท --</option>
                                 <option value="คอนกรีตเสริมเหล็ก (คสล.)">คอนกรีตเสริมเหล็ก (คสล.)</option>
                                 <option value="แอสฟัลท์ติกคอนกรีต">แอสฟัลท์ติกคอนกรีต</option>
@@ -359,221 +367,221 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="flex justify-between items-center mb-4">
+                <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
                         <h4 class="font-bold text-slate-800 flex items-center">
                             <i class="fa-solid fa-ruler-combined mr-2 text-indigo-500"></i> รายละเอียดขนาด / ช่วงระยะงาน
                         </h4>
-                        <button type="button" onclick="addSegment()" class="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors font-medium flex items-center">
-                            <i class="fa-solid fa-plus mr-1"></i> เพิ่มช่วงระยะงาน
+                        <button type="button" onclick="addSegment()" class="w-full md:w-auto text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 px-4 py-2 rounded-lg hover:bg-indigo-100 transition-colors font-medium flex items-center justify-center shadow-sm">
+                            <i class="fa-solid fa-plus mr-2"></i> เพิ่มช่วงระยะงาน
                         </button>
                     </div>
                     <div id="segmentsContainer" class="space-y-4"></div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                        <h4 class="font-bold text-slate-800 mb-4 flex items-center">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-slate-800 mb-4 flex items-center text-sm md:text-base">
                             <i class="fa-solid fa-location-dot mr-2 text-emerald-500"></i> ตำแหน่งพิกัด (GPS) 
-                            <span class="text-xs font-normal text-slate-400 ml-2">(สามารถพิมพ์ระบุเองได้)</span>
+                            <span class="text-xs font-normal text-slate-400 ml-2 block md:inline">(สามารถพิมพ์ระบุเองได้)</span>
                         </h4>
                         <div class="space-y-4">
                             <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
-                                <div class="flex justify-between items-center mb-2">
+                                <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center mb-3 gap-2">
                                     <span class="text-sm font-semibold text-emerald-800">จุดเริ่มต้น (หัว)</span>
-                                    <div class="flex gap-1.5">
-                                        <button type="button" onclick="openLocationPicker('start')" class="text-[10px] bg-slate-600 hover:bg-slate-700 text-white px-2 py-1 rounded shadow transition-colors flex items-center">
-                                            <i class="fa-solid fa-map-location-dot mr-1"></i> ปักหมุดเอง
+                                    <div class="flex gap-2 w-full sm:w-auto">
+                                        <button type="button" onclick="openLocationPicker('start')" class="flex-1 sm:flex-none text-xs bg-slate-600 hover:bg-slate-700 text-white px-3 py-2 rounded-lg shadow transition-colors flex items-center justify-center">
+                                            <i class="fa-solid fa-map-location-dot mr-1"></i> แผนที่
                                         </button>
-                                        <button type="button" onclick="getCurrentGPS('start')" id="gpsStartBtn" class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded shadow transition-colors flex items-center">
-                                            <i class="fa-solid fa-crosshairs mr-1"></i> ดึงพิกัดปัจจุบัน
+                                        <button type="button" onclick="getCurrentGPS('start')" id="gpsStartBtn" class="flex-1 sm:flex-none text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg shadow transition-colors flex items-center justify-center">
+                                            <i class="fa-solid fa-crosshairs mr-1"></i> ดึงพิกัด
                                         </button>
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label class="block text-[10px] text-slate-500">ละติจูด (N)</label>
-                                        <input type="number" step="any" id="surveyStartLat" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
+                                        <label class="block text-[11px] text-slate-500 mb-1">ละติจูด (N)</label>
+                                        <input type="number" step="any" id="surveyStartLat" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-base md:text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] text-slate-500">ลองจิจูด (E)</label>
-                                        <input type="number" step="any" id="surveyStartLng" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
+                                        <label class="block text-[11px] text-slate-500 mb-1">ลองจิจูด (E)</label>
+                                        <input type="number" step="any" id="surveyStartLng" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-base md:text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
                                     </div>
                                 </div>
                             </div>
                             <div class="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
-                                <div class="flex justify-between items-center mb-2">
+                                <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center mb-3 gap-2">
                                     <span class="text-sm font-semibold text-blue-800">จุดสิ้นสุด (ท้าย)</span>
-                                    <div class="flex gap-1.5">
-                                        <button type="button" onclick="openLocationPicker('end')" class="text-[10px] bg-slate-600 hover:bg-slate-700 text-white px-2 py-1 rounded shadow transition-colors flex items-center">
-                                            <i class="fa-solid fa-map-location-dot mr-1"></i> ปักหมุดเอง
+                                    <div class="flex gap-2 w-full sm:w-auto">
+                                        <button type="button" onclick="openLocationPicker('end')" class="flex-1 sm:flex-none text-xs bg-slate-600 hover:bg-slate-700 text-white px-3 py-2 rounded-lg shadow transition-colors flex items-center justify-center">
+                                            <i class="fa-solid fa-map-location-dot mr-1"></i> แผนที่
                                         </button>
-                                        <button type="button" onclick="getCurrentGPS('end')" id="gpsEndBtn" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded shadow transition-colors flex items-center">
-                                            <i class="fa-solid fa-crosshairs mr-1"></i> ดึงพิกัดปัจจุบัน
+                                        <button type="button" onclick="getCurrentGPS('end')" id="gpsEndBtn" class="flex-1 sm:flex-none text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg shadow transition-colors flex items-center justify-center">
+                                            <i class="fa-solid fa-crosshairs mr-1"></i> ดึงพิกัด
                                         </button>
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label class="block text-[10px] text-slate-500">ละติจูด (N)</label>
-                                        <input type="number" step="any" id="surveyEndLat" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                                        <label class="block text-[11px] text-slate-500 mb-1">ละติจูด (N)</label>
+                                        <input type="number" step="any" id="surveyEndLat" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-base md:text-sm focus:ring-2 focus:ring-blue-500 font-mono">
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] text-slate-500">ลองจิจูด (E)</label>
-                                        <input type="number" step="any" id="surveyEndLng" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                                        <label class="block text-[11px] text-slate-500 mb-1">ลองจิจูด (E)</label>
+                                        <input type="number" step="any" id="surveyEndLng" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-base md:text-sm focus:ring-2 focus:ring-blue-500 font-mono">
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col min-h-[150px]">
                         <h4 class="font-bold text-slate-800 mb-4 flex items-center">
                             <i class="fa-solid fa-comment-dots mr-2 text-amber-500"></i> หมายเหตุ
                         </h4>
-                        <textarea id="surveyRemark" class="w-full flex-1 border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none text-sm" placeholder="ระบุหมายเหตุเพิ่มเติม (ถ้ามี)..."></textarea>
+                        <textarea id="surveyRemark" class="w-full flex-1 border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none text-base md:text-sm" placeholder="ระบุหมายเหตุเพิ่มเติม (ถ้ามี)..."></textarea>
                     </div>
                 </div>
             </div>
 
-            <div class="p-5 border-t border-slate-200 flex justify-end gap-3 bg-white shrink-0 rounded-b-xl">
-                <button onclick="closeSurveyModal()" class="px-6 py-2.5 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium">ยกเลิก</button>
-                <button onclick="saveSurvey()" class="px-6 py-2.5 text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors font-medium shadow-sm">บันทึกข้อมูล</button>
+            <div class="p-4 md:p-5 border-t border-slate-200 flex justify-end gap-3 bg-white shrink-0 rounded-b-xl">
+                <button onclick="closeSurveyModal()" class="px-6 py-3 md:py-2.5 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium">ยกเลิก</button>
+                <button onclick="saveSurvey()" class="px-6 py-3 md:py-2.5 text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors font-medium shadow-sm">บันทึกข้อมูล</button>
             </div>
         </div>
     </div>
 
-    <div id="pickerModal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-[130] flex items-center justify-center py-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col overflow-hidden max-h-[90vh]">
+    <div id="pickerModal" class="hidden fixed inset-0 bg-black/80 z-[130] flex items-center justify-center p-2 md:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-auto flex flex-col overflow-hidden max-h-[90vh]">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0">
-                <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-map-pin mr-2 text-rose-500"></i> คลิกเลือกตำแหน่งบนแผนที่</h3>
-                <button type="button" onclick="closeLocationPicker()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-1.5 transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <h3 class="text-base md:text-lg font-bold text-slate-800"><i class="fa-solid fa-map-pin mr-2 text-rose-500"></i> คลิกเลือกตำแหน่งบนแผนที่</h3>
+                <button type="button" onclick="closeLocationPicker()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors shadow-sm"><i class="fa-solid fa-xmark text-lg w-5 h-5 flex items-center justify-center"></i></button>
             </div>
             <div class="flex-1 relative">
-                <div id="pickerMapContainer" class="w-full h-[400px] z-10"></div>
-                <div class="absolute top-3 left-1/2 -translate-x-1/2 z-[20] bg-slate-800/90 text-white px-4 py-1.5 rounded-full shadow-lg text-sm font-medium pointer-events-none">คลิกที่แผนที่เพื่อปักหมุด</div>
+                <div id="pickerMapContainer" class="w-full h-[60vh] md:h-[400px] z-10"></div>
+                <div class="absolute top-3 left-1/2 -translate-x-1/2 z-[20] bg-slate-800/90 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none whitespace-nowrap">คลิกที่แผนที่เพื่อปักหมุด</div>
             </div>
-            <div class="p-4 border-t border-slate-200 flex justify-between items-center bg-white shrink-0">
-                <div class="text-xs text-slate-500 flex flex-col">
+            <div class="p-4 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center bg-white shrink-0 gap-4">
+                <div class="text-sm text-slate-500 flex flex-col md:flex-row items-center gap-1 md:gap-2">
                     <span>พิกัดที่เลือก:</span>
-                    <span id="pickerCurrentCoord" class="font-mono font-bold text-slate-800 text-sm">-</span>
+                    <span id="pickerCurrentCoord" class="font-mono font-bold text-slate-800 bg-slate-100 px-2 py-1 rounded">-</span>
                 </div>
-                <div class="flex gap-2">
-                    <button type="button" onclick="closeLocationPicker()" class="px-4 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium">ยกเลิก</button>
-                    <button type="button" onclick="confirmLocationPicker()" class="px-4 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium shadow-sm">ยืนยันพิกัดนี้</button>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <button type="button" onclick="closeLocationPicker()" class="flex-1 md:flex-none px-4 py-3 md:py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium">ยกเลิก</button>
+                    <button type="button" onclick="confirmLocationPicker()" class="flex-1 md:flex-none px-4 py-3 md:py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-sm">ยืนยันพิกัดนี้</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-[110] flex items-center justify-center py-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-4 flex flex-col overflow-hidden max-h-[95vh]">
-            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-indigo-50 shrink-0">
-                <h3 class="text-xl font-bold text-indigo-800"><i class="fa-solid fa-road mr-2"></i> รูปแบบถนนและสรุปพื้นที่</h3>
+    <div id="previewModal" class="hidden fixed inset-0 bg-black/70 z-[110] flex items-center justify-center p-2 md:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-auto flex flex-col overflow-hidden max-h-[95vh]">
+            <div class="p-4 md:p-5 border-b border-slate-200 flex justify-between items-center bg-indigo-50 shrink-0">
+                <h3 class="text-lg md:text-xl font-bold text-indigo-800"><i class="fa-solid fa-road mr-2"></i> รูปแบบถนนและสรุปพื้นที่</h3>
                 <div class="flex gap-2 no-print">
-                    <button onclick="printPreview()" class="text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition-colors font-medium shadow-sm flex items-center text-sm"><i class="fa-solid fa-print mr-2"></i> พิมพ์</button>
-                    <button onclick="closePreviewModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors border border-slate-200"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    <button onclick="printPreview()" class="text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition-colors font-medium shadow-sm flex items-center text-sm"><i class="fa-solid fa-print md:mr-2"></i> <span class="hidden md:inline">พิมพ์</span></button>
+                    <button onclick="closePreviewModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors border border-slate-200"><i class="fa-solid fa-xmark text-xl w-5 h-5 flex items-center justify-center"></i></button>
                 </div>
             </div>
-            <div class="p-6 flex-1 flex flex-col gap-6 bg-slate-50/50 overflow-hidden">
+            <div class="p-4 md:p-6 flex-1 flex flex-col gap-6 bg-slate-50/50 overflow-hidden">
                 <div class="text-center shrink-0">
-                    <h4 id="previewModalProjectName" class="text-xl font-bold text-slate-800"></h4>
+                    <h4 id="previewModalProjectName" class="text-lg md:text-xl font-bold text-slate-800"></h4>
                     <p class="text-sm text-slate-500 mt-1">ประเภท: <span id="previewModalRoadType" class="font-medium text-slate-700"></span></p>
                 </div>
-                <div id="previewSegmentsList" class="flex-1 overflow-y-auto custom-scrollbar space-y-5 pr-2"></div>
+                <div id="previewSegmentsList" class="flex-1 overflow-y-auto custom-scrollbar space-y-5 pr-1 md:pr-2"></div>
             </div>
         </div>
     </div>
 
-    <div id="mapModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-[120] flex items-center justify-center py-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-4 flex flex-col overflow-hidden max-h-[95vh]">
-            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-sky-50 shrink-0">
-                <h3 class="text-xl font-bold text-sky-800"><i class="fa-solid fa-map-location-dot mr-2"></i> แผนที่เส้นทางตามถนน (หัว-ท้าย)</h3>
+    <div id="mapModal" class="hidden fixed inset-0 bg-black/70 z-[120] flex items-center justify-center p-2 md:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-auto flex flex-col overflow-hidden max-h-[95vh]">
+            <div class="p-4 md:p-5 border-b border-slate-200 flex justify-between items-center bg-sky-50 shrink-0">
+                <h3 class="text-base md:text-xl font-bold text-sky-800"><i class="fa-solid fa-map-location-dot mr-2"></i> แผนที่เส้นทาง (หัว-ท้าย)</h3>
                 <div class="flex items-center gap-2">
-                    <button id="saveMapPositionBtn" onclick="saveMapPositions()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกตำแหน่ง</button>
-                    <button onclick="closeMapModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    <button id="saveMapPositionBtn" onclick="saveMapPositions()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium shadow-sm transition-colors"><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึก</button>
+                    <button onclick="closeMapModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl w-5 h-5 flex items-center justify-center"></i></button>
                 </div>
             </div>
-            <div class="p-4 flex flex-col gap-4 flex-1">
-                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-lg border border-slate-200 shrink-0">
-                    <div>
-                        <h4 id="mapProjectName" class="font-bold text-slate-800 text-lg mb-1"></h4>
-                        <div class="flex flex-wrap items-center gap-4 text-sm text-slate-600">
-                            <span class="flex items-center"><span class="w-3 h-3 bg-emerald-500 rounded-full mr-2 shadow-sm border border-white"></span> จุดเริ่มต้น</span>
-                            <span class="flex items-center"><span class="w-3 h-3 bg-blue-500 rounded-full mr-2 shadow-sm border border-white"></span> จุดสิ้นสุด</span>
+            <div class="p-3 md:p-4 flex flex-col gap-3 md:gap-4 flex-1">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-50 p-3 md:p-4 rounded-lg border border-slate-200 shrink-0 gap-3">
+                    <div class="w-full md:w-auto">
+                        <h4 id="mapProjectName" class="font-bold text-slate-800 text-base md:text-lg mb-2 md:mb-1 truncate"></h4>
+                        <div class="flex flex-wrap items-center gap-3 md:gap-4 text-xs md:text-sm text-slate-600">
+                            <span class="flex items-center bg-white px-2 py-1 rounded border"><span class="w-3 h-3 bg-emerald-500 rounded-full mr-1.5 shadow-sm border border-white"></span> จุดเริ่มต้น</span>
+                            <span class="flex items-center bg-white px-2 py-1 rounded border"><span class="w-3 h-3 bg-blue-500 rounded-full mr-1.5 shadow-sm border border-white"></span> จุดสิ้นสุด</span>
                         </div>
                     </div>
-                    <div class="text-right bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-lg">
-                        <span id="mapDistanceLabel" class="block text-xs text-indigo-500 font-bold mb-0.5">ระยะทางตามถนนโดยประมาณ</span>
-                        <span id="mapDistance" class="font-black text-2xl text-indigo-700">0.00</span> <span class="font-bold text-indigo-600">เมตร</span>
+                    <div class="text-left md:text-right bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-lg w-full md:w-auto flex flex-row md:flex-col justify-between items-center md:items-end">
+                        <span id="mapDistanceLabel" class="block text-[10px] md:text-xs text-indigo-500 font-bold md:mb-0.5">ระยะทางตามถนน</span>
+                        <div><span id="mapDistance" class="font-black text-xl md:text-2xl text-indigo-700">0.00</span> <span class="font-bold text-indigo-600 text-sm">เมตร</span></div>
                     </div>
                 </div>
-                <div id="mapContainer" class="w-full flex-1 rounded-lg border-2 border-slate-300 shadow-inner min-h-[400px]"></div>
+                <div id="mapContainer" class="w-full flex-1 rounded-lg border-2 border-slate-300 shadow-inner min-h-[50vh] md:min-h-[400px]"></div>
             </div>
         </div>
     </div>
 
-    <div id="costModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-[120] flex items-center justify-center py-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-4 flex flex-col overflow-hidden max-h-[95vh]">
-            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-gradient-to-r from-emerald-600 to-teal-600 shrink-0">
-                <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-calculator mr-2"></i> ประเมินราคาก่อสร้างเบื้องต้น</h3>
-                <button onclick="closeCostModal()" class="text-emerald-100 hover:text-white bg-transparent hover:bg-emerald-700 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <div id="costModal" class="hidden fixed inset-0 bg-black/70 z-[120] flex items-center justify-center p-2 md:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-auto flex flex-col overflow-hidden max-h-[95vh]">
+            <div class="p-4 md:p-5 border-b border-slate-200 flex justify-between items-center bg-gradient-to-r from-emerald-600 to-teal-600 shrink-0">
+                <h3 class="text-lg md:text-xl font-bold text-white"><i class="fa-solid fa-calculator mr-2"></i> ประเมินราคาก่อสร้างเบื้องต้น</h3>
+                <button onclick="closeCostModal()" class="text-emerald-100 hover:text-white bg-white/20 hover:bg-white/30 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl w-5 h-5 flex items-center justify-center"></i></button>
             </div>
-            <div class="p-6 overflow-y-auto flex-1 space-y-6 bg-slate-50 custom-scrollbar">
+            <div class="p-4 md:p-6 overflow-y-auto flex-1 space-y-4 md:space-y-6 bg-slate-50 custom-scrollbar">
                 <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                    <h4 id="costProjectName" class="font-bold text-lg text-slate-800">ชื่อโครงการ</h4>
-                    <p class="text-sm text-slate-500 mb-3">ประเภท: <span id="costRoadType" class="font-medium text-emerald-600"></span></p>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div class="bg-slate-50 p-3 rounded border border-slate-100 text-center">
-                            <span class="block text-slate-500 mb-1">พื้นที่รวม (ตร.ม.)</span>
-                            <span id="costTotalArea" class="text-xl font-bold text-slate-700">0.00</span>
+                    <h4 id="costProjectName" class="font-bold text-base md:text-lg text-slate-800">ชื่อโครงการ</h4>
+                    <p class="text-xs md:text-sm text-slate-500 mb-3">ประเภท: <span id="costRoadType" class="font-medium text-emerald-600"></span></p>
+                    <div class="grid grid-cols-2 gap-3 md:gap-4 text-sm">
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-center">
+                            <span class="block text-xs md:text-sm text-slate-500 mb-1">พื้นที่รวม (ตร.ม.)</span>
+                            <span id="costTotalArea" class="text-lg md:text-xl font-bold text-slate-700">0.00</span>
                         </div>
-                        <div class="bg-slate-50 p-3 rounded border border-slate-100 text-center">
-                            <span class="block text-slate-500 mb-1">ปริมาตรรวม (ลบ.ม.)</span>
-                            <span id="costTotalVolume" class="text-xl font-bold text-slate-700">0.00</span>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-center">
+                            <span class="block text-xs md:text-sm text-slate-500 mb-1">ปริมาตรรวม (ลบ.ม.)</span>
+                            <span id="costTotalVolume" class="text-lg md:text-xl font-bold text-slate-700">0.00</span>
                         </div>
                     </div>
                 </div>
-                <div class="bg-white p-5 rounded-lg shadow-sm border border-amber-200 relative overflow-hidden">
+                <div class="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-amber-200 relative overflow-hidden">
                     <div class="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
-                    <h4 class="font-bold text-slate-800 mb-1 flex items-center"><i class="fa-solid fa-coins mr-2 text-amber-500"></i> อัตราค่าวัสดุและน้ำมัน</h4>
-                    <p class="text-xs text-slate-500 mb-4">* กรุณาปรับปรุงราคาให้ตรงกับประกาศ <a href="https://uthaithani.moc.go.th/" target="_blank" class="text-blue-500 hover:underline">สำนักงานพาณิชย์จังหวัดอุทัยธานี</a> ประจำเดือนปัจจุบัน</p>
+                    <h4 class="font-bold text-slate-800 mb-1 flex items-center text-sm md:text-base"><i class="fa-solid fa-coins mr-2 text-amber-500"></i> อัตราค่าวัสดุและน้ำมัน</h4>
+                    <p class="text-[10px] md:text-xs text-slate-500 mb-4">* กรุณาปรับปรุงราคาให้ตรงกับประกาศ <a href="https://uthaithani.moc.go.th/" target="_blank" class="text-blue-500 hover:underline">สำนักงานพาณิชย์จังหวัดอุทัยธานี</a> ประจำเดือนปัจจุบัน</p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="md:col-span-2 bg-blue-50 p-3 rounded border border-blue-100 flex justify-between items-center">
+                        <div class="md:col-span-2 bg-blue-50 p-3 rounded-lg border border-blue-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                             <div>
                                 <label class="text-sm font-semibold text-blue-800 block">ราคาน้ำมันดีเซล B7 ณ วันนี้ (บาท/ลิตร)</label>
-                                <span class="text-[10px] text-blue-600 block">*ดึงราคา ปตท. อัตโนมัติ (ฐาน กทม. + ค่าขนส่งอุทัยธานี ~0.45 บ.)</span>
+                                <span class="text-[10px] text-blue-600 block mt-0.5">*ดึงราคา ปตท. อัตโนมัติ (ฐาน กทม. + ค่าขนส่งอุทัยธานี ~0.45 บ.)</span>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="updateOilPrice()" id="syncOilBtn" class="text-blue-500 hover:text-blue-700 bg-white border border-blue-200 px-2 py-1 rounded shadow-sm transition-colors" title="อัปเดตราคาน้ำมันล่าสุด"><i class="fa-solid fa-rotate"></i></button>
-                                <input type="number" step="any" id="inputOilPrice" value="32.94" class="w-24 border border-blue-300 rounded px-2 py-1 text-right focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-700" onchange="calculateCost()">
+                            <div class="flex items-center gap-2 w-full md:w-auto">
+                                <button type="button" onclick="updateOilPrice()" id="syncOilBtn" class="text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-3 py-2 rounded-lg shadow-sm transition-colors flex items-center justify-center w-10" title="อัปเดตราคาน้ำมันล่าสุด"><i class="fa-solid fa-rotate"></i></button>
+                                <input type="number" step="any" id="inputOilPrice" value="32.94" class="w-full md:w-28 border border-blue-300 rounded-lg px-3 py-2 text-right focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-700 text-base" onchange="calculateCost()">
                             </div>
                         </div>
                         <div id="costInputsConcrete" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">คอนกรีตผสมเสร็จ (บาท/ลบ.ม.)</label><input type="number" step="any" id="inputConcretePrice" value="2200" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">เหล็กเสริมตะแกรง Wire Mesh (บาท/ตร.ม.)</label><input type="number" step="any" id="inputWiremeshPrice" value="45" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">ทรายรองใต้ผิวจราจร (บาท/ลบ.ม.)</label><input type="number" step="any" id="inputSandPrice" value="450" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
+                            <div><label class="block text-xs font-medium text-slate-700 mb-1">คอนกรีตผสมเสร็จ (บาท/ลบ.ม.)</label><input type="number" step="any" id="inputConcretePrice" value="2200" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-base md:text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
+                            <div><label class="block text-xs font-medium text-slate-700 mb-1">เหล็กเสริมตะแกรง Wire Mesh (บาท/ตร.ม.)</label><input type="number" step="any" id="inputWiremeshPrice" value="45" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-base md:text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
+                            <div><label class="block text-xs font-medium text-slate-700 mb-1">ทรายรองใต้ผิวจราจร (บาท/ลบ.ม.)</label><input type="number" step="any" id="inputSandPrice" value="450" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-base md:text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
                         </div>
                         <div id="costInputsAsphalt" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">แอสฟัลท์ติกคอนกรีต (บาท/ตัน)</label><input type="number" step="any" id="inputAsphaltPrice" value="3500" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">น้ำยา Tack Coat (บาท/ตร.ม.)</label><input type="number" step="any" id="inputTackcoatPrice" value="15" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
+                            <div><label class="block text-xs font-medium text-slate-700 mb-1">แอสฟัลท์ติกคอนกรีต (บาท/ตัน)</label><input type="number" step="any" id="inputAsphaltPrice" value="3500" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-base md:text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
+                            <div><label class="block text-xs font-medium text-slate-700 mb-1">น้ำยา Tack Coat (บาท/ตร.ม.)</label><input type="number" step="any" id="inputTackcoatPrice" value="15" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-base md:text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
                         </div>
                         <div id="costInputsGravel" class="hidden md:col-span-2 grid grid-cols-1 gap-4">
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1" id="labelBaseMaterial">ราคาวัสดุ (ลูกรัง/หินคลุก/ดิน) (บาท/ลบ.ม.)</label><input type="number" step="any" id="inputBasePrice" value="350" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
+                            <div><label class="block text-xs font-medium text-slate-700 mb-1" id="labelBaseMaterial">ราคาวัสดุ (ลูกรัง/หินคลุก/ดิน) (บาท/ลบ.ม.)</label><input type="number" step="any" id="inputBasePrice" value="350" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-base md:text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
                         </div>
                         <div id="costInputsLandscape" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">ค่าวัสดุและต้นไม้ (บาท/ตร.ม.)</label><input type="number" step="any" id="inputLandscapeMaterialPrice" value="500" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">ค่าแรงงาน (บาท/ตร.ม.)</label><input type="number" step="any" id="inputLandscapeLaborPrice" value="150" class="w-full border border-slate-300 rounded px-3 py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
+                            <div><label class="block text-xs font-medium text-slate-700 mb-1">ค่าวัสดุและต้นไม้ (บาท/ตร.ม.)</label><input type="number" step="any" id="inputLandscapeMaterialPrice" value="500" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-base md:text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
+                            <div><label class="block text-xs font-medium text-slate-700 mb-1">ค่าแรงงาน (บาท/ตร.ม.)</label><input type="number" step="any" id="inputLandscapeLaborPrice" value="150" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-base md:text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
                         </div>
                     </div>
                 </div>
-                <div class="bg-emerald-50 p-5 rounded-lg shadow-sm border border-emerald-200">
-                    <h4 class="font-bold text-emerald-800 mb-4 text-center text-lg">สรุปราคากลางประเมิน</h4>
+                <div class="bg-emerald-50 p-4 md:p-5 rounded-lg shadow-sm border border-emerald-200">
+                    <h4 class="font-bold text-emerald-800 mb-4 text-center text-base md:text-lg">สรุปราคากลางประเมิน</h4>
                     <div class="space-y-3 text-sm">
-                        <div class="flex justify-between items-center border-b border-emerald-100 pb-2"><span class="text-slate-600">ค่างานต้นทุน (Direct Cost)</span><span id="outputDirectCost" class="font-mono text-base text-slate-800">0.00 บาท</span></div>
-                        <div class="flex justify-between items-center border-b border-emerald-100 pb-2"><span class="text-slate-600 flex items-center">ค่า Factor F (งานทาง)<input type="number" step="0.0001" id="inputFactorF" value="1.3624" class="ml-2 w-20 border border-emerald-300 rounded px-1 py-0.5 text-xs text-center" onchange="calculateCost()"></span><span id="outputFactorFCost" class="font-mono text-base text-slate-800">0.00 บาท</span></div>
-                        <div class="flex justify-between items-center pt-2"><span class="text-emerald-700 font-bold text-lg">ราคากลางสุทธิโดยประมาณ</span><span id="outputTotalCost" class="font-mono text-2xl font-black text-emerald-600">0.00 บาท</span></div>
+                        <div class="flex justify-between items-center border-b border-emerald-100 pb-2"><span class="text-slate-600 text-xs md:text-sm">ค่างานต้นทุน (Direct Cost)</span><span id="outputDirectCost" class="font-mono text-sm md:text-base text-slate-800 font-bold">0.00 บาท</span></div>
+                        <div class="flex justify-between items-center border-b border-emerald-100 pb-2"><span class="text-slate-600 text-xs md:text-sm flex items-center">ค่า Factor F <input type="number" step="0.0001" id="inputFactorF" value="1.3624" class="ml-2 w-20 border border-emerald-300 rounded px-1 py-1 text-xs text-center" onchange="calculateCost()"></span><span id="outputFactorFCost" class="font-mono text-sm md:text-base text-slate-800 font-bold">0.00 บาท</span></div>
+                        <div class="flex justify-between items-center pt-2"><span class="text-emerald-700 font-bold text-base md:text-lg">ราคากลางสุทธิโดยประมาณ</span><span id="outputTotalCost" class="font-mono text-xl md:text-2xl font-black text-emerald-600">0.00 บาท</span></div>
                     </div>
                 </div>
             </div>
@@ -692,6 +700,12 @@
                         fetchSurveys();
                         loadAdminCategories(); // โหลดหมวดหมู่ธุรการ
                     }
+
+                    // --- เปิดเมนูอัตโนมัติเมื่อใช้มือถือ ---
+                    if (window.innerWidth < 768) {
+                        document.getElementById('mainSidebar').classList.remove('-translate-x-full');
+                        document.getElementById('sidebarOverlay').classList.remove('hidden');
+                    }
                 }, 300);
             } else {
                 document.getElementById('errorMsg').classList.remove('hidden');
@@ -726,8 +740,17 @@
         // ================= ระบบสลับ Sidebar และ หน้าจอ =================
         function toggleSidebar() {
             const sidebar = document.getElementById('mainSidebar');
-            sidebar.classList.toggle('w-64');
-            sidebar.classList.toggle('w-0');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (window.innerWidth < 768) {
+                // สำหรับมือถือ: สไลด์เมนูเข้า-ออก และแสดง/ซ่อน Overlay
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            } else {
+                // สำหรับคอมพิวเตอร์: ยืด-หดเมนู
+                sidebar.classList.toggle('md:w-64');
+                sidebar.classList.toggle('md:w-0');
+            }
         }
 
         function switchView(view) {
@@ -756,6 +779,12 @@
                 if(adminView) adminView.classList.remove('hidden');
                 title.innerHTML = '<i class="fa-solid fa-file-contract text-amber-500 mr-2"></i> หมวดหมู่งานธุรการ';
                 if(adminCategoriesData.length === 0) loadAdminCategories();
+            }
+
+            // ซ่อน Sidebar อัตโนมัติเมื่อเลือกเมนู (เฉพาะในมือถือ)
+            if (window.innerWidth < 768) {
+                document.getElementById('mainSidebar').classList.add('-translate-x-full');
+                document.getElementById('sidebarOverlay').classList.add('hidden');
             }
         }
 
@@ -806,7 +835,7 @@
                                     <span class="w-10 h-10 rounded-lg ${isActive ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-600'} flex items-center justify-center shrink-0"><i class="fa-solid fa-folder"></i></span>
                                     <div class="min-w-0"><div class="font-bold text-slate-800 truncate">${cat.name}</div><div class="text-[11px] text-slate-400">คลิกเพื่อดูข้อมูล</div></div>
                                 </div>
-                                <button onclick="deleteAdminCategory('${cat.id}', '${cat.name}'); event.stopPropagation();" class="text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 rounded-lg p-2 shrink-0" title="ลบหัวข้อย่อย"><i class="fa-solid fa-trash"></i></button>
+                                <button onclick="deleteAdminCategory('${cat.id}', '${cat.name}'); event.stopPropagation();" class="text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 rounded-lg p-2 md:p-1.5 w-10 md:w-8 h-10 md:h-8 flex items-center justify-center shrink-0" title="ลบหัวข้อย่อย"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
                     `;
@@ -820,7 +849,7 @@
             renderAdminCategories();
             const cat = adminCategoriesData.find(c => c.id === id);
             if(cat) {
-                document.getElementById('currentAdminCatTitle').innerHTML = `รายการในหัวข้อ: <span class="text-amber-600">${cat.name}</span>`;
+                document.getElementById('currentAdminCatTitle').innerHTML = `รายการในหัวข้อ: <span class="text-amber-600 truncate inline-block max-w-[150px] align-bottom">${cat.name}</span>`;
                 document.getElementById('btnAddAdminWork').classList.remove('hidden');
                 fetchAdminWorks();
             }
@@ -881,14 +910,16 @@
                         htmlContent += `
                         <tr class="hover:bg-amber-50/50 transition-colors">
                             <td class="py-3 px-4 font-medium text-slate-800 break-words">${item.project_name}${item.description ? `<div class="text-xs text-slate-400 mt-1 whitespace-pre-wrap">${item.description}</div>` : ''}</td>
-                            <td class="py-3 px-4 text-slate-600">${item.contract_number || '-'}</td>
-                            <td class="py-3 px-4 text-center text-slate-600">${formatThaiDate(item.start_date)}</td>
-                            <td class="py-3 px-4 text-center text-slate-600">${formatThaiDate(item.end_date)}</td>
-                            <td class="py-3 px-4 text-center text-emerald-600 font-medium">${formatThaiDate(item.delivery_date)}</td>
-                            <td class="py-3 px-4 text-right text-indigo-600 font-bold">${price}</td>
+                            <td class="py-3 px-4 text-slate-600 whitespace-nowrap">${item.contract_number || '-'}</td>
+                            <td class="py-3 px-4 text-center text-slate-600 whitespace-nowrap">${formatThaiDate(item.start_date)}</td>
+                            <td class="py-3 px-4 text-center text-slate-600 whitespace-nowrap">${formatThaiDate(item.end_date)}</td>
+                            <td class="py-3 px-4 text-center text-emerald-600 font-medium whitespace-nowrap">${formatThaiDate(item.delivery_date)}</td>
+                            <td class="py-3 px-4 text-right text-indigo-600 font-bold whitespace-nowrap">${price}</td>
                             <td class="py-3 px-4 text-center">
-                                <button onclick="openAdminModal('${item.id}')" class="text-blue-500 hover:text-blue-700 bg-white hover:bg-blue-50 border border-slate-200 p-1.5 rounded shadow-sm mr-1" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button onclick="deleteAdminWork('${item.id}', '${item.project_name}')" class="text-red-500 hover:text-red-700 bg-white hover:bg-red-50 border border-slate-200 p-1.5 rounded shadow-sm" title="ลบ"><i class="fa-solid fa-trash"></i></button>
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <button onclick="openAdminModal('${item.id}')" class="text-blue-500 hover:text-white bg-white hover:bg-blue-500 border border-blue-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
+                                    <button onclick="deleteAdminWork('${item.id}', '${item.project_name}')" class="text-red-500 hover:text-white bg-white hover:bg-red-500 border border-red-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="ลบ"><i class="fa-solid fa-trash"></i></button>
+                                </div>
                             </td>
                         </tr>`;
                     });
@@ -971,7 +1002,7 @@
             const btn = document.querySelector('#adminModal button.bg-amber-600');
             const originalText = btn ? btn.innerHTML : 'บันทึกข้อมูล';
             if(btn) {
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังบันทึก...';
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin md:mr-2"></i> <span class="hidden md:inline">กำลังบันทึก...</span>';
                 btn.disabled = true;
             }
 
@@ -1035,10 +1066,10 @@
                         const hasStart = item.start_lat && item.start_lng;
                         const hasEnd = item.end_lat && item.end_lng;
                         
-                        let locationHTML = `<div class="flex flex-col gap-1.5 min-w-[130px] text-left">`;
+                        let locationHTML = `<div class="flex flex-col gap-2 min-w-[140px] text-left">`;
                         if(hasStart) {
                             locationHTML += `
-                                <div class="bg-emerald-50 border border-emerald-100 rounded p-1 shadow-sm text-[10px]">
+                                <div class="bg-emerald-50 border border-emerald-100 rounded p-1.5 shadow-sm text-[11px] md:text-[10px]">
                                     <div class="font-bold text-emerald-700">เริ่ม:</div>
                                     <span class="font-mono">N:${parseFloat(item.start_lat).toFixed(6)}</span><br>
                                     <span class="font-mono">E:${parseFloat(item.start_lng).toFixed(6)}</span>
@@ -1046,7 +1077,7 @@
                         }
                         if(hasEnd) {
                             locationHTML += `
-                                <div class="bg-blue-50 border border-blue-100 rounded p-1 shadow-sm text-[10px]">
+                                <div class="bg-blue-50 border border-blue-100 rounded p-1.5 shadow-sm text-[11px] md:text-[10px]">
                                     <div class="font-bold text-blue-700">สิ้นสุด:</div>
                                     <span class="font-mono">N:${parseFloat(item.end_lat).toFixed(6)}</span><br>
                                     <span class="font-mono">E:${parseFloat(item.end_lng).toFixed(6)}</span>
@@ -1055,12 +1086,12 @@
                         
                         if(hasStart && hasEnd) {
                             locationHTML += `
-                                <button onclick="openMapModal('${item.id}')" class="mt-1 w-full text-[11px] font-bold bg-sky-500 hover:bg-sky-600 text-white py-1.5 rounded flex items-center justify-center transition-colors shadow-sm">
-                                    <i class="fa-solid fa-route mr-1.5"></i> ดูเส้นทางพิกัด
+                                <button onclick="openMapModal('${item.id}')" class="mt-1 w-full text-xs font-bold bg-sky-500 hover:bg-sky-600 text-white py-2 md:py-1.5 rounded-lg flex items-center justify-center transition-colors shadow-sm">
+                                    <i class="fa-solid fa-route mr-1.5"></i> ดูเส้นทาง
                                 </button>
                             `;
                         } else if(!hasStart && !hasEnd) {
-                            locationHTML += `<span class="text-[10px] text-slate-400 text-center">- ไม่ระบุพิกัด -</span>`;
+                            locationHTML += `<span class="text-xs md:text-[10px] text-slate-400 text-center">- ไม่ระบุพิกัด -</span>`;
                         }
                         
                         locationHTML += `</div>`;
@@ -1090,7 +1121,7 @@
                                 htmlContent += `
                                     <td class="py-3 px-4 font-medium text-slate-800 break-words align-top" rowspan="${rowCount}">
                                         ${item.project_name}
-                                        ${item.remark ? `<div class="mt-2 text-xs text-amber-600 bg-amber-50 p-1.5 rounded border border-amber-100 line-clamp-2" title="${item.remark}"><i class="fa-solid fa-comment-dots"></i> ${item.remark}</div>` : ''}
+                                        ${item.remark ? `<div class="mt-2 text-xs md:text-[11px] text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-100 line-clamp-2" title="${item.remark}"><i class="fa-solid fa-comment-dots"></i> ${item.remark}</div>` : ''}
                                     </td>
                                     <td class="py-3 px-3 align-top border-l border-slate-100" rowspan="${rowCount}">
                                         <span class="bg-slate-200 px-2 py-1 rounded text-xs text-slate-700 whitespace-nowrap block text-center">${item.road_type || '-'}</span>
@@ -1099,11 +1130,11 @@
                             }
 
                             htmlContent += `
-                                <td class="py-2 px-3 text-xs font-medium text-indigo-700 border-l border-slate-100 align-middle">${seg.name || '-'}</td>
-                                <td class="py-2 px-2 text-center text-[13px] border-l border-slate-100 text-slate-700">${seg.w || '-'}</td>
-                                <td class="py-2 px-2 text-center text-[13px] text-slate-700">${seg.l || '-'}</td>
-                                <td class="py-2 px-2 text-center text-[13px] text-slate-700">${seg.t || '-'}</td>
-                                <td class="py-2 px-2 text-center text-[13px] border-l border-slate-100 text-slate-700 bg-amber-50/30 font-bold text-amber-700">${totalEarArea > 0 ? totalEarArea.toFixed(2) : '-'}</td>
+                                <td class="py-3 px-3 text-xs md:text-[13px] font-medium text-indigo-700 border-l border-slate-100 align-middle whitespace-nowrap">${seg.name || '-'}</td>
+                                <td class="py-3 px-2 text-center text-[13px] border-l border-slate-100 text-slate-700 font-mono">${seg.w || '-'}</td>
+                                <td class="py-3 px-2 text-center text-[13px] text-slate-700 font-mono">${seg.l || '-'}</td>
+                                <td class="py-3 px-2 text-center text-[13px] text-slate-700 font-mono">${seg.t || '-'}</td>
+                                <td class="py-3 px-2 text-center text-[13px] border-l border-slate-100 text-slate-700 bg-amber-50/30 font-bold text-amber-700 font-mono">${totalEarArea > 0 ? totalEarArea.toFixed(2) : '-'}</td>
                             `;
 
                             if (idx === 0) {
@@ -1111,14 +1142,14 @@
                                     <td class="py-3 px-3 align-top border-l border-slate-100" rowspan="${rowCount}">
                                         ${locationHTML}
                                     </td>
-                                    <td class="py-3 px-3 align-top border-l border-slate-100 text-center whitespace-nowrap" rowspan="${rowCount}">
-                                        <div class="flex flex-col gap-1.5 w-full">
-                                            <button onclick="openCostModal('${item.id}')" class="text-white bg-teal-500 hover:bg-teal-600 px-2 py-1.5 rounded shadow-sm transition-colors text-xs flex items-center justify-center w-full"><i class="fa-solid fa-calculator mr-1"></i> ประเมินราคา</button>
+                                    <td class="py-3 px-3 align-top border-l border-slate-100 text-center" rowspan="${rowCount}">
+                                        <div class="flex flex-col gap-2 w-full">
+                                            <button onclick="openCostModal('${item.id}')" class="text-white bg-teal-500 hover:bg-teal-600 px-3 py-2 md:py-1.5 rounded-lg shadow-sm transition-colors text-xs font-medium flex items-center justify-center w-full"><i class="fa-solid fa-calculator mr-1.5"></i> ประเมินราคา</button>
                                             
-                                            <div class="flex gap-1 w-full mt-1">
-                                                <button onclick="openPreviewModal('${item.id}')" class="flex-1 text-indigo-500 hover:text-indigo-700 bg-white hover:bg-indigo-50 border border-slate-200 p-1.5 rounded shadow-sm transition-colors" title="ดูรูปแบบถนน"><i class="fa-solid fa-image"></i></button>
-                                                <button onclick="openSurveyModal('${item.id}')" class="flex-1 text-slate-500 hover:text-blue-600 bg-white hover:bg-blue-50 border border-slate-200 p-1.5 rounded shadow-sm transition-colors" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
-                                                <button onclick="deleteSurvey('${item.id}', '${item.project_name}')" class="flex-1 text-red-500 hover:text-red-700 bg-white hover:bg-red-50 border border-slate-200 p-1.5 rounded shadow-sm transition-colors" title="ลบ"><i class="fa-solid fa-trash"></i></button>
+                                            <div class="flex gap-1.5 w-full mt-1">
+                                                <button onclick="openPreviewModal('${item.id}')" class="flex-1 text-indigo-500 hover:text-white bg-indigo-50 hover:bg-indigo-500 border border-indigo-200 p-2 rounded-lg shadow-sm transition-colors" title="ดูรูปแบบถนน"><i class="fa-solid fa-image"></i></button>
+                                                <button onclick="openSurveyModal('${item.id}')" class="flex-1 text-slate-600 hover:text-white bg-slate-100 hover:bg-slate-600 border border-slate-200 p-2 rounded-lg shadow-sm transition-colors" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
+                                                <button onclick="deleteSurvey('${item.id}', '${item.project_name}')" class="flex-1 text-red-500 hover:text-white bg-red-50 hover:bg-red-500 border border-red-200 p-2 rounded-lg shadow-sm transition-colors" title="ลบ"><i class="fa-solid fa-trash"></i></button>
                                             </div>
                                         </div>
                                     </td>
@@ -1307,7 +1338,7 @@
             const btn = document.getElementById('saveMapPositionBtn');
             const originalHTML = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังบันทึก...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin md:mr-1"></i> <span class="hidden md:inline">กำลังบันทึก...</span>';
 
             try {
                 const { error } = await supabaseClient
@@ -1628,20 +1659,20 @@
                 const valT = seg[`et_${c.key}`] !== undefined ? seg[`et_${c.key}`] : (c.key === 'fl' ? (seg.et || '') : '');
 
                 cornersHTML += `
-                <div class="border border-amber-200 bg-white p-2 rounded shadow-sm">
-                    <div class="text-[10px] font-bold text-slate-700 mb-1.5 border-b border-slate-100 pb-1 text-center">${c.label}</div>
-                    <div class="grid grid-cols-3 gap-1">
+                <div class="border border-amber-200 bg-white p-3 rounded-lg shadow-sm">
+                    <div class="text-[11px] font-bold text-slate-700 mb-2 border-b border-slate-100 pb-1 text-center">${c.label}</div>
+                    <div class="grid grid-cols-3 gap-2">
                         <div>
-                            <label class="block text-[9px] text-slate-500 text-center mb-0.5">กว้าง</label>
-                            <input type="number" step="any" class="seg-ew-${c.key} w-full border border-slate-300 rounded px-1.5 py-1 text-xs focus:ring-1 focus:ring-amber-500 outline-none text-center" value="${valW}">
+                            <label class="block text-[10px] text-slate-500 text-center mb-1">กว้าง</label>
+                            <input type="number" step="any" class="seg-ew-${c.key} w-full border border-slate-300 rounded-md px-2 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none text-center" value="${valW}">
                         </div>
                         <div>
-                            <label class="block text-[9px] text-slate-500 text-center mb-0.5">ยาว</label>
-                            <input type="number" step="any" class="seg-el-${c.key} w-full border border-slate-300 rounded px-1.5 py-1 text-xs focus:ring-1 focus:ring-amber-500 outline-none text-center" value="${valL}">
+                            <label class="block text-[10px] text-slate-500 text-center mb-1">ยาว</label>
+                            <input type="number" step="any" class="seg-el-${c.key} w-full border border-slate-300 rounded-md px-2 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none text-center" value="${valL}">
                         </div>
                         <div>
-                            <label class="block text-[9px] text-slate-500 text-center mb-0.5">หนา</label>
-                            <input type="number" step="any" class="seg-et-${c.key} w-full border border-slate-300 rounded px-1.5 py-1 text-xs focus:ring-1 focus:ring-amber-500 outline-none text-center" value="${valT}">
+                            <label class="block text-[10px] text-slate-500 text-center mb-1">หนา</label>
+                            <input type="number" step="any" class="seg-et-${c.key} w-full border border-slate-300 rounded-md px-2 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none text-center" value="${valT}">
                         </div>
                     </div>
                 </div>
@@ -1649,40 +1680,40 @@
             });
 
             return `
-            <div class="segment-item bg-slate-50 border border-slate-200 p-4 rounded-xl relative shadow-sm transition-all">
+            <div class="segment-item bg-slate-50 border border-slate-200 p-4 md:p-5 rounded-xl relative shadow-sm transition-all">
                 ${showDelete ? `
-                <button type="button" onclick="removeSegment(this)" class="absolute top-3 right-3 text-red-400 hover:text-red-600 bg-white hover:bg-red-50 w-8 h-8 rounded-full shadow-sm flex items-center justify-center transition-colors border border-red-100" title="ลบช่วงระยะงานนี้">
+                <button type="button" onclick="removeSegment(this)" class="absolute top-3 right-3 text-red-400 hover:text-red-600 bg-white hover:bg-red-50 w-8 h-8 md:w-8 md:h-8 rounded-full shadow-sm flex items-center justify-center transition-colors border border-red-100" title="ลบช่วงระยะงานนี้">
                     <i class="fa-solid fa-trash text-sm"></i>
                 </button>
                 ` : ''}
                 
-                <div class="mb-4 ${showDelete ? 'pr-12' : ''}">
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">ช่วงระยะงาน <span class="text-slate-400 font-normal ml-1">(เช่น ช่วงที่ 1, กม. 0+000 ถึง 1+000)</span></label>
-                    <input type="text" class="seg-name w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white" value="${seg.name || ''}" placeholder="ระบุช่วงระยะงาน">
+                <div class="mb-4 ${showDelete ? 'pr-10' : ''}">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">ช่วงระยะงาน <span class="text-slate-400 font-normal ml-1 text-xs md:text-sm">(เช่น ช่วงที่ 1, กม. 0+000 ถึง 1+000)</span></label>
+                    <input type="text" class="seg-name w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all bg-white" value="${seg.name || ''}" placeholder="ระบุช่วงระยะงาน">
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100 md:col-span-2">
-                        <h5 class="text-[11px] font-bold text-blue-800 mb-2 tracking-wide uppercase">ขนาดหลัก (เมตร)</h5>
+                    <div class="bg-blue-50/60 p-3 md:p-4 rounded-lg border border-blue-100 md:col-span-2">
+                        <h5 class="text-[11px] md:text-xs font-bold text-blue-800 mb-3 tracking-wide uppercase">ขนาดหลัก (เมตร)</h5>
                         <div class="grid grid-cols-3 gap-3 max-w-lg">
                             <div>
-                                <label class="block text-[10px] text-slate-600 mb-1 font-medium">กว้าง</label>
-                                <input type="number" step="any" class="seg-w w-full border border-slate-300 rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.w || ''}">
+                                <label class="block text-[11px] text-slate-600 mb-1 font-medium">กว้าง</label>
+                                <input type="number" step="any" class="seg-w w-full border border-slate-300 rounded-lg px-3 py-2 md:py-1.5 text-base md:text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.w || ''}">
                             </div>
                             <div>
-                                <label class="block text-[10px] text-slate-600 mb-1 font-medium">ยาว</label>
-                                <input type="number" step="any" class="seg-l w-full border border-slate-300 rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.l || ''}">
+                                <label class="block text-[11px] text-slate-600 mb-1 font-medium">ยาว</label>
+                                <input type="number" step="any" class="seg-l w-full border border-slate-300 rounded-lg px-3 py-2 md:py-1.5 text-base md:text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.l || ''}">
                             </div>
                             <div>
-                                <label class="block text-[10px] text-slate-600 mb-1 font-medium">หนา</label>
-                                <input type="number" step="any" class="seg-t w-full border border-slate-300 rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.t || ''}">
+                                <label class="block text-[11px] text-slate-600 mb-1 font-medium">หนา</label>
+                                <input type="number" step="any" class="seg-t w-full border border-slate-300 rounded-lg px-3 py-2 md:py-1.5 text-base md:text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" value="${seg.t || ''}">
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-amber-50/60 p-3 rounded-lg border border-amber-100 md:col-span-2">
-                        <h5 class="text-[11px] font-bold text-amber-800 mb-2 tracking-wide uppercase">พื้นที่หูช้างรูปสามเหลี่ยม 4 มุม (เมตร)</h5>
-                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="bg-amber-50/60 p-3 md:p-4 rounded-lg border border-amber-100 md:col-span-2">
+                        <h5 class="text-[11px] md:text-xs font-bold text-amber-800 mb-3 tracking-wide uppercase">พื้นที่หูช้างรูปสามเหลี่ยม 4 มุม (เมตร)</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                             ${cornersHTML}
                         </div>
                     </div>
@@ -2008,9 +2039,9 @@
                             <i class="fa-solid fa-folder w-6"></i> ${cat.name}
                         </div>
                         <div class="flex opacity-0 group-hover:opacity-100 transition-opacity gap-3">
-                            <i class="fa-solid fa-pen text-blue-400 hover:text-blue-600" 
+                            <i class="fa-solid fa-pen text-blue-400 hover:text-blue-600 p-2 md:p-1" 
                                onclick="editCategory('${cat.id}', '${cat.name}'); event.stopPropagation();" title="แก้ไขชื่อแฟ้ม"></i>
-                            <i class="fa-solid fa-trash text-red-400 hover:text-red-600" 
+                            <i class="fa-solid fa-trash text-red-400 hover:text-red-600 p-2 md:p-1" 
                                onclick="deleteCategory('${cat.id}', '${cat.name}'); event.stopPropagation();" title="ลบแฟ้มนี้"></i>
                         </div>
                     </div>
@@ -2100,19 +2131,19 @@
 
             return `
                 <tr class="hover:bg-slate-50 transition-colors ${displayClass} ${groupClass}">
-                    <td class="py-3 px-6 flex items-start pl-[40px]">
+                    <td class="py-4 md:py-3 px-4 md:px-6 flex items-start pl-[40px]">
                         <i class="fa-solid ${iconClass} text-lg mr-3 mt-1 shrink-0"></i> 
-                        <span class="break-words whitespace-normal">${file.file_name}</span>
+                        <span class="break-words whitespace-normal text-sm">${file.file_name}</span>
                     </td>
-                    <td class="py-3 px-6 text-slate-600">
-                        <span class="bg-slate-200 px-2 py-1 rounded text-xs">${categoryName}</span>
+                    <td class="py-4 md:py-3 px-4 md:px-6 text-slate-600">
+                        <span class="bg-slate-200 px-2 py-1 rounded text-xs whitespace-nowrap">${categoryName}</span>
                     </td>
-                    <td class="py-3 px-6 text-slate-500 whitespace-nowrap">${formatBytes(file.file_size)}</td>
-                    <td class="py-3 px-6 text-slate-500 whitespace-nowrap">${date}</td>
-                    <td class="py-3 px-6 text-center space-x-2 whitespace-nowrap">
-                        <a href="${file.file_url}" target="_blank" class="text-indigo-500 hover:text-indigo-700 p-2" title="ดาวน์โหลดไฟล์"><i class="fa-solid fa-download"></i></a>
-                        <button onclick="moveFile('${file.id}', '${file.file_name}')" class="text-amber-500 hover:text-amber-700 p-2" title="ย้ายโฟลเดอร์"><i class="fa-solid fa-folder-tree"></i></button>
-                        <button onclick="deleteFile('${file.id}', '${file.file_name}')" class="text-red-500 hover:text-red-700 p-2" title="ลบไฟล์นี้"><i class="fa-solid fa-trash"></i></button>
+                    <td class="py-4 md:py-3 px-4 md:px-6 text-slate-500 whitespace-nowrap">${formatBytes(file.file_size)}</td>
+                    <td class="py-4 md:py-3 px-4 md:px-6 text-slate-500 whitespace-nowrap">${date}</td>
+                    <td class="py-4 md:py-3 px-4 md:px-6 text-center space-x-1 md:space-x-2 whitespace-nowrap">
+                        <a href="${file.file_url}" target="_blank" class="text-indigo-500 hover:text-white bg-white hover:bg-indigo-500 border border-indigo-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 inline-flex items-center justify-center rounded-lg shadow-sm transition-colors" title="ดาวน์โหลดไฟล์"><i class="fa-solid fa-download"></i></a>
+                        <button onclick="moveFile('${file.id}', '${file.file_name}')" class="text-amber-500 hover:text-white bg-white hover:bg-amber-500 border border-amber-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 inline-flex items-center justify-center rounded-lg shadow-sm transition-colors" title="ย้ายโฟลเดอร์"><i class="fa-solid fa-folder-tree"></i></button>
+                        <button onclick="deleteFile('${file.id}', '${file.file_name}')" class="text-red-500 hover:text-white bg-white hover:bg-red-500 border border-red-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 inline-flex items-center justify-center rounded-lg shadow-sm transition-colors" title="ลบไฟล์นี้"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
             `;
@@ -2178,7 +2209,7 @@
         async function fetchFiles() {
             if (!supabaseClient) return;
             const tbody = document.getElementById('fileTableBody');
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
 
             try {
                 let query = supabaseClient.from('files').select('*, categories(name)').order('created_at', { ascending: false });
@@ -2194,7 +2225,7 @@
                 let htmlContent = '';
 
                 if (data.length === 0) {
-                    htmlContent = '<tr><td colspan="5" class="text-center py-4 text-slate-400">ไม่พบไฟล์ในแฟ้มนี้</td></tr>';
+                    htmlContent = '<tr><td colspan="5" class="text-center py-8 text-slate-400">ไม่พบไฟล์ในแฟ้มนี้</td></tr>';
                 } 
                 else if (currentCategoryId === 'all') {
                     const groupedData = {};
@@ -2218,7 +2249,7 @@
                         const group = groupedData[catId];
                         htmlContent += `
                             <tr class="bg-indigo-50 border-b border-indigo-100 cursor-pointer hover:bg-indigo-100 transition-colors" onclick="toggleGroup('${catId}')">
-                                <td colspan="5" class="py-3 px-6 font-semibold text-indigo-800">
+                                <td colspan="5" class="py-4 md:py-3 px-4 md:px-6 font-semibold text-indigo-800">
                                     <i id="icon-${catId}" class="fa-solid fa-plus w-5 text-indigo-500"></i>
                                     <i class="fa-solid fa-folder text-indigo-400 mr-2"></i> ${group.name} 
                                     <span class="text-sm font-normal text-indigo-500 ml-2">(${group.files.length} ไฟล์)</span>
@@ -2233,7 +2264,7 @@
                     if(noCategoryData.length > 0) {
                         htmlContent += `
                             <tr class="bg-slate-100 border-b border-slate-200">
-                                <td colspan="5" class="py-3 px-6 font-semibold text-slate-700">
+                                <td colspan="5" class="py-4 md:py-3 px-4 md:px-6 font-semibold text-slate-700">
                                     <i class="fa-solid fa-folder-open text-slate-400 mr-2"></i> ไม่ระบุแฟ้ม
                                 </td>
                             </tr>
@@ -2253,14 +2284,14 @@
 
             } catch (err) {
                 console.error('Error:', err);
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
             }
         }
 
         function triggerUpload() {
             const selectedCat = document.getElementById('uploadCategorySelect').value;
             if(!selectedCat) {
-                alert("กรุณาเลือกแฟ้มบุคคลจาก Dropdown (ด้านบนขวา) ก่อนทำการอัปโหลดไฟล์ครับ!");
+                alert("กรุณาเลือกแฟ้มบุคคลจาก Dropdown (ด้านบน) ก่อนทำการอัปโหลดไฟล์ครับ!");
                 return;
             }
             document.getElementById('fileInput').click();
@@ -2276,7 +2307,7 @@
             const icon = document.getElementById('uploadIcon');
             const text = document.getElementById('uploadText');
             
-            icon.className = 'fa-solid fa-spinner fa-spin text-4xl text-indigo-500 mb-3';
+            icon.className = 'fa-solid fa-spinner fa-spin text-4xl md:text-5xl text-indigo-500 mb-3';
             
             let successCount = 0;
             let failCount = 0;
@@ -2313,8 +2344,8 @@
                 }
             }
 
-            icon.className = 'fa-solid fa-cloud-arrow-up text-4xl text-indigo-300 mb-3';
-            text.innerText = 'คลิกเพื่อเลือกไฟล์อัปโหลด (สามารถเลือกได้หลายไฟล์)';
+            icon.className = 'fa-solid fa-cloud-arrow-up text-4xl md:text-5xl text-indigo-300 mb-3';
+            text.innerHTML = 'คลิกเพื่อเลือกไฟล์อัปโหลด<br class="md:hidden"><span class="text-xs md:text-sm text-slate-400"> (เลือกได้หลายไฟล์)</span>';
             document.getElementById('fileInput').value = ''; 
             document.getElementById('uploadBox').style.pointerEvents = 'auto';
 
