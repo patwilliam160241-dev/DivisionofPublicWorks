@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Leaflet CSS & JS สำหรับแผนที่ -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -82,7 +81,6 @@
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen overflow-hidden">
 
-    <!-- ================= หน้า Login ================= -->
     <div id="loginPage" class="flex items-center justify-center h-full bg-gradient-to-br from-indigo-500 to-purple-600 absolute inset-0 z-50 transition-opacity duration-300">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center">
             <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -106,10 +104,8 @@
         </div>
     </div>
 
-    <!-- ================= หน้า Dashboard ================= -->
     <div id="dashboardPage" class="hidden flex h-full">
         
-        <!-- Sidebar -->
         <aside id="mainSidebar" class="w-64 bg-slate-900 text-slate-300 flex flex-col h-full transition-all duration-300 overflow-hidden shrink-0">
             <div class="h-16 flex items-center px-6 border-b border-slate-800 shrink-0 w-64">
                 <i class="fa-solid fa-cloud text-indigo-400 text-xl mr-3"></i>
@@ -145,7 +141,6 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="flex-1 flex flex-col h-full overflow-hidden relative">
             <header class="h-16 bg-white border-b border-slate-200 flex items-center px-6 shadow-sm shrink-0">
                 <button onclick="toggleSidebar()" class="text-slate-500 hover:text-indigo-600 mr-4 focus:outline-none p-2 rounded-lg hover:bg-slate-100 transition-colors" title="ซ่อน/แสดง เมนู">
@@ -154,7 +149,6 @@
                 <h1 id="currentCategoryTitle" class="text-xl font-semibold text-slate-800">ไฟล์ทั้งหมด</h1>
             </header>
 
-            <!-- ================= วิว: ระบบจัดการไฟล์ ================= -->
             <div id="fileManagerView" class="flex-1 overflow-auto p-8 custom-scrollbar">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-8">
                     <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">
@@ -197,7 +191,6 @@
                 </div>
             </div>
 
-            <!-- ================= วิว: ระบบงานสำรวจ ================= -->
             <div id="surveyWorkView" class="hidden flex-1 overflow-auto p-8 custom-scrollbar">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                     <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -232,10 +225,8 @@
                 </div>
             </div>
 
-            <!-- ================= วิว: ระบบงานธุรการ (แก้ไขใหม่) ================= -->
             <div id="adminWorkView" class="hidden flex-1 overflow-auto p-4 md:p-8 custom-scrollbar flex flex-col gap-4">
                 
-                <!-- ส่วนหัวข้อย่อย -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden shrink-0">
                     <div class="p-4 md:p-6 border-b border-slate-100 bg-amber-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
@@ -246,13 +237,10 @@
                             <i class="fa-solid fa-folder-plus mr-2"></i> สร้างหัวข้อย่อยใหม่
                         </button>
                     </div>
-                    <!-- รายการแท็บหัวข้อย่อย -->
                     <div id="adminCategoryTabs" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 p-4 bg-slate-50">
-                        <!-- ถูกสร้างผ่าน JS -->
-                    </div>
+                        </div>
                 </div>
 
-                <!-- ส่วนตารางข้อมูลสัญญา -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex-1 flex flex-col">
                     <div class="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
                         <h3 id="currentAdminCatTitle" class="text-md font-bold text-slate-700">กรุณาเลือกหัวข้อย่อยด้านบน</h3>
@@ -285,7 +273,6 @@
         </main>
     </div>
 
-    <!-- ================= Modal: เพิ่ม/แก้ไข งานธุรการ (แก้ไขใหม่) ================= -->
     <div id="adminModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center py-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col max-h-[95vh]">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-amber-50 shrink-0 rounded-t-xl">
@@ -335,12 +322,11 @@
 
             <div class="p-5 border-t border-slate-200 flex justify-end gap-3 bg-white shrink-0 rounded-b-xl">
                 <button onclick="closeAdminModal()" class="px-6 py-2.5 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium">ยกเลิก</button>
-                <button onclick="saveAdminWork()" class="px-6 py-2.5 text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors font-medium shadow-sm">บันทึกข้อมูล</button>
+                <button id="saveAdminBtn" onclick="saveAdminWork()" class="px-6 py-2.5 text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors font-medium shadow-sm">บันทึกข้อมูล</button>
             </div>
         </div>
     </div>
 
-    <!-- ================= Modals งานสำรวจ และอื่นๆ (คงเดิม) ================= -->
     <div id="surveyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center py-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl mx-4 flex flex-col h-[95vh]">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0 rounded-t-xl">
@@ -457,7 +443,6 @@
         </div>
     </div>
 
-    <!-- โค้ด Modal อื่นๆ Picker, Preview, Map, Cost ขออนุญาตคงเดิมไม่ตัดออกเพื่อความสมบูรณ์ -->
     <div id="pickerModal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-[130] flex items-center justify-center py-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col overflow-hidden max-h-[90vh]">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0">
@@ -959,7 +944,8 @@
             const startDate = document.getElementById('adminStartDate').value || null;
             const endDate = document.getElementById('adminEndDate').value || null;
             const deliveryDate = document.getElementById('adminDeliveryDate').value || null;
-            const medianPrice = document.getElementById('adminMedianPrice').value ? parseFloat(document.getElementById('adminMedianPrice').value) : null;
+            const medianPriceInput = document.getElementById('adminMedianPrice').value;
+            const medianPrice = medianPriceInput ? parseFloat(medianPriceInput) : null;
             
             if (!projectName) {
                 alert('กรุณาระบุชื่อโครงการ / หัวข้อสัญญา');
@@ -981,6 +967,14 @@
                 category_id: currentAdminCategoryId // ใส่รหัสหัวข้อย่อย
             };
 
+            // ดึงปุ่มบันทึกมาใส่สถานะ Loading
+            const btn = document.querySelector('#adminModal button.bg-amber-600');
+            const originalText = btn ? btn.innerHTML : 'บันทึกข้อมูล';
+            if(btn) {
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังบันทึก...';
+                btn.disabled = true;
+            }
+
             try {
                 if (id) {
                     const { error } = await supabaseClient.from('admin_works').update(payload).eq('id', id);
@@ -992,8 +986,20 @@
                 closeAdminModal();
                 fetchAdminWorks();
             } catch (err) {
-                console.error(err);
-                alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+                console.error("Supabase Error Details:", err);
+                
+                // ดึงข้อความ Error จริงจาก Supabase ออกมาโชว์
+                let errorMsg = err.message || JSON.stringify(err);
+                if (err.hint) errorMsg += "\nคำแนะนำ: " + err.hint;
+                if (err.details) errorMsg += "\nรายละเอียด: " + err.details;
+                
+                alert('บันทึกไม่สำเร็จ! สาเหตุจากระบบฐานข้อมูล:\n\n' + errorMsg);
+            } finally {
+                // คืนค่าปุ่มกลับเป็นเหมือนเดิม
+                if(btn) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
             }
         }
 
@@ -1136,8 +1142,7 @@
             var dLon = (lon2 - lon1) * Math.PI / 180;
             var a = 
                 Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-                Math.sin(dLon/2) * Math.sin(dLon/2);
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
             var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
             return R * c; 
         }
@@ -1825,29 +1830,24 @@
                     </div>
                     <div class="relative w-full h-56 bg-emerald-50/40 flex items-center justify-center overflow-hidden">
                         
-                        <!-- ถนนหลัก -->
                         <div class="w-3/4 h-24 bg-slate-400 relative flex items-center justify-center shadow-lg">
                             <div class="w-full h-0 border-t-[3px] border-yellow-300"></div>
                             
-                            <!-- หูช้างซ้ายบน (หัว-ซ้าย) -->
                             ${area_fl > 0 ? `
                                 <div class="absolute -top-[16px] left-0 w-0 h-0 border-b-[16px] border-b-slate-400 border-r-[24px] border-r-transparent"></div>
                                 <div class="absolute -top-7 left-1 text-[9px] text-amber-700 bg-white/90 px-1 rounded shadow border border-amber-100 whitespace-nowrap">หัวซ้าย: ${ew_fl}x${el_fl}</div>
                             ` : ''}
                             
-                            <!-- หูช้างซ้ายล่าง (หัว-ขวา) -->
                             ${area_fr > 0 ? `
                                 <div class="absolute -bottom-[16px] left-0 w-0 h-0 border-t-[16px] border-t-slate-400 border-r-[24px] border-r-transparent"></div>
                                 <div class="absolute -bottom-7 left-1 text-[9px] text-amber-700 bg-white/90 px-1 rounded shadow border border-amber-100 whitespace-nowrap">หัวขวา: ${ew_fr}x${el_fr}</div>
                             ` : ''}
                             
-                            <!-- หูช้างขวาบน (ท้าย-ซ้าย) -->
                             ${area_bl > 0 ? `
                                 <div class="absolute -top-[16px] right-0 w-0 h-0 border-b-[16px] border-b-slate-400 border-l-[24px] border-l-transparent"></div>
                                 <div class="absolute -top-7 right-1 text-[9px] text-amber-700 bg-white/90 px-1 rounded shadow border border-amber-100 whitespace-nowrap">ท้ายซ้าย: ${ew_bl}x${el_bl}</div>
                             ` : ''}
                             
-                            <!-- หูช้างขวาล่าง (ท้าย-ขวา) -->
                             ${area_br > 0 ? `
                                 <div class="absolute -bottom-[16px] right-0 w-0 h-0 border-t-[16px] border-t-slate-400 border-l-[24px] border-l-transparent"></div>
                                 <div class="absolute -bottom-7 right-1 text-[9px] text-amber-700 bg-white/90 px-1 rounded shadow border border-amber-100 whitespace-nowrap">ท้ายขวา: ${ew_br}x${el_br}</div>
