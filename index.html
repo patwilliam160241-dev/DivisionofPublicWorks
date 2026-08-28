@@ -138,6 +138,9 @@
                 <button onclick="switchView('admin')" class="w-full bg-amber-600 hover:bg-amber-500 text-white py-3.5 md:py-2 rounded-lg transition-colors flex items-center justify-center font-medium">
                     <i class="fa-solid fa-file-contract mr-2"></i> งานธุรการ
                 </button>
+                <button onclick="switchView('daily')" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3.5 md:py-2 rounded-lg transition-colors flex items-center justify-center font-medium">
+                    <i class="fa-solid fa-list-check mr-2"></i> งานประจำวัน
+                </button>
             </div>
 
             <div id="sidebarFileControls" class="flex flex-col flex-1 overflow-hidden w-64">
@@ -287,6 +290,34 @@
                     </div>
                 </div>
 
+            </div>
+
+            <div id="dailyTaskView" class="hidden flex-1 overflow-auto p-3 md:p-8 custom-scrollbar">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full">
+                    <div class="p-4 md:p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50 shrink-0">
+                        <h2 class="text-base md:text-lg font-semibold text-slate-800 truncate flex items-center"><i class="fa-solid fa-list-check mr-2 text-blue-600"></i>รายการงานประจำวัน (Daily Tasks)</h2>
+                        <button onclick="openDailyModal()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 md:py-2.5 rounded-lg transition-colors text-sm font-medium shadow-sm flex justify-center items-center">
+                            <i class="fa-solid fa-plus mr-2"></i> เพิ่มงานใหม่
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar flex-1 relative">
+                        <table class="w-full text-left border-collapse min-w-[900px]">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 text-xs md:text-sm border-b border-slate-200">
+                                    <th class="py-3 px-4 font-medium min-w-[200px]">ชื่องาน</th>
+                                    <th class="py-3 px-4 font-medium min-w-[250px]">รายละเอียด</th>
+                                    <th class="py-3 px-4 font-medium text-center">กำหนดการ</th>
+                                    <th class="py-3 px-4 font-medium text-center">ผู้ปฏิบัติงาน</th>
+                                    <th class="py-3 px-4 font-medium text-center">สถานะ</th>
+                                    <th class="py-3 px-4 font-medium text-center sticky-col bg-slate-100 min-w-[100px]">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dailyTableBody" class="text-sm divide-y divide-slate-100">
+                                <tr><td colspan="6" class="text-center py-8 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
         </main>
@@ -610,6 +641,54 @@
         </div>
     </div>
 
+    <div id="dailyModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-3 md:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-auto flex flex-col max-h-[95vh] h-full md:h-auto">
+            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-blue-50 shrink-0 rounded-t-xl">
+                <h3 id="dailyModalTitle" class="text-base md:text-lg font-bold text-slate-800">เพิ่มงานประจำวัน</h3>
+                <button onclick="closeDailyModal()" class="text-slate-400 hover:text-red-500 bg-white p-2 rounded-lg"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="p-4 md:p-6 overflow-y-auto flex-1 space-y-4 custom-scrollbar">
+                <input type="hidden" id="dailyId">
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">ชื่องาน <span class="text-red-500">*</span></label>
+                    <input type="text" id="dailyTaskName" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="ระบุชื่องานที่ต้องทำ">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">รายละเอียดงาน</label>
+                    <textarea id="dailyDescription" rows="3" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none" placeholder="อธิบายรายละเอียดการทำงาน..."></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">สถานะงาน <span class="text-red-500">*</span></label>
+                        <select id="dailyStatus" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                            <option value="รอดำเนินการ">รอดำเนินการ</option>
+                            <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                            <option value="เสร็จสิ้น">เสร็จสิ้น</option>
+                            <option value="ยกเลิก/เลื่อน">ยกเลิก/เลื่อน</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">กำหนดการ</label>
+                        <input type="date" id="dailyScheduleDate" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">ผู้ปฏิบัติงาน</label>
+                        <input type="text" id="dailyAssignee" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="ชื่อผู้รับผิดชอบ">
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row justify-end gap-3 bg-white shrink-0 rounded-b-xl">
+                <button onclick="closeDailyModal()" class="w-full sm:w-auto px-6 py-3.5 sm:py-2.5 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 font-medium transition-colors">ยกเลิก</button>
+                <button onclick="saveDailyTask()" class="w-full sm:w-auto px-6 py-3.5 sm:py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 font-medium shadow-sm transition-colors">บันทึกข้อมูล</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // =================ตั้งค่า Supabase=================
         let supabaseClient = null;
@@ -629,6 +708,8 @@
         let adminWorksData = []; 
         let adminCategoriesData = [];
         let currentAdminCategoryId = null;
+
+        let dailyTasksData = []; // เพิ่มตัวแปรเก็บข้อมูลงานประจำวัน
 
         let calcCurrentProject = null;
         let calcTotalArea = 0;
@@ -779,6 +860,7 @@
             const fileView = document.getElementById('fileManagerView');
             const surveyView = document.getElementById('surveyWorkView');
             const adminView = document.getElementById('adminWorkView'); 
+            const dailyView = document.getElementById('dailyTaskView');
             const sidebarFileControls = document.getElementById('sidebarFileControls');
             const title = document.getElementById('currentCategoryTitle');
 
@@ -786,6 +868,7 @@
             fileView.classList.add('hidden');
             surveyView.classList.add('hidden');
             if(adminView) adminView.classList.add('hidden');
+            if(dailyView) dailyView.classList.add('hidden');
             sidebarFileControls.classList.add('hidden');
 
             if (view === 'files') {
@@ -801,6 +884,10 @@
                 if(adminView) adminView.classList.remove('hidden');
                 title.innerHTML = '<i class="fa-solid fa-file-contract text-amber-500 mr-2"></i> หมวดหมู่งานธุรการ';
                 if(adminCategoriesData.length === 0) loadAdminCategories();
+            } else if (view === 'daily') {
+                if(dailyView) dailyView.classList.remove('hidden');
+                title.innerHTML = '<i class="fa-solid fa-list-check text-blue-500 mr-2"></i> งานประจำวัน (Checklist)';
+                fetchDailyTasks();
             }
 
             // ซ่อน Sidebar อัตโนมัติเมื่อเลือกเมนู (เฉพาะในมือถือ)
@@ -2409,6 +2496,127 @@
                 fetchFiles(); 
             } catch (error) {
                 alert('เกิดข้อผิดพลาดในการลบ: ' + error.message);
+            }
+        }
+
+        // ================= ระบบ Daily Task Checklist =================
+        async function fetchDailyTasks() {
+            if (!supabaseClient) return;
+            const tbody = document.getElementById('dailyTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('daily_tasks')
+                    .select('*')
+                    .order('schedule_date', { ascending: false, nullsFirst: true }) // เรียงตามวันที่
+                    .order('created_at', { ascending: false });
+                    
+                if (error) throw error;
+                dailyTasksData = data;
+                let htmlContent = '';
+
+                if (data.length === 0) {
+                    htmlContent = '<tr><td colspan="6" class="text-center py-8 text-slate-400">ยังไม่มีงานประจำวัน</td></tr>';
+                } else {
+                    data.forEach(item => {
+                        let statusBadge = '';
+                        if (item.status === 'รอดำเนินการ') statusBadge = '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium border border-slate-200">รอดำเนินการ</span>';
+                        else if (item.status === 'กำลังดำเนินการ') statusBadge = '<span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-medium border border-blue-200">กำลังดำเนินการ</span>';
+                        else if (item.status === 'เสร็จสิ้น') statusBadge = '<span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-xs font-medium border border-emerald-200">เสร็จสิ้น</span>';
+                        else statusBadge = `<span class="bg-red-50 text-red-600 px-2 py-1 rounded text-xs font-medium border border-red-200">${item.status}</span>`;
+
+                        htmlContent += `
+                        <tr class="hover:bg-blue-50/50 transition-colors">
+                            <td class="py-3 px-4 font-medium text-slate-800 break-words">${item.task_name}</td>
+                            <td class="py-3 px-4 text-slate-600 text-xs whitespace-pre-wrap">${item.task_description || '-'}</td>
+                            <td class="py-3 px-4 text-center text-slate-600 whitespace-nowrap">${formatThaiDate(item.schedule_date)}</td>
+                            <td class="py-3 px-4 text-center text-slate-600 whitespace-nowrap">${item.assignee || '-'}</td>
+                            <td class="py-3 px-4 text-center whitespace-nowrap">${statusBadge}</td>
+                            <td class="py-3 px-4 text-center sticky-col bg-white border-l border-slate-100">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <button onclick="openDailyModal('${item.id}')" class="text-blue-500 hover:text-white bg-white hover:bg-blue-500 border border-blue-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
+                                    <button onclick="deleteDailyTask('${item.id}', '${item.task_name}')" class="text-red-500 hover:text-white bg-white hover:bg-red-500 border border-red-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="ลบ"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    });
+                }
+                tbody.innerHTML = htmlContent;
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
+            }
+        }
+
+        function openDailyModal(id = null) {
+            document.getElementById('dailyModal').classList.remove('hidden');
+            if (id) {
+                const item = dailyTasksData.find(a => a.id === id);
+                document.getElementById('dailyModalTitle').innerText = 'แก้ไขงานประจำวัน';
+                document.getElementById('dailyId').value = item.id;
+                document.getElementById('dailyTaskName').value = item.task_name;
+                document.getElementById('dailyDescription').value = item.task_description || '';
+                document.getElementById('dailyStatus').value = item.status || 'รอดำเนินการ';
+                document.getElementById('dailyScheduleDate').value = item.schedule_date || '';
+                document.getElementById('dailyAssignee').value = item.assignee || '';
+            } else {
+                document.getElementById('dailyModalTitle').innerText = 'เพิ่มงานประจำวัน';
+                document.getElementById('dailyId').value = '';
+                document.getElementById('dailyTaskName').value = '';
+                document.getElementById('dailyDescription').value = '';
+                document.getElementById('dailyStatus').value = 'รอดำเนินการ';
+                document.getElementById('dailyScheduleDate').value = '';
+                document.getElementById('dailyAssignee').value = '';
+            }
+        }
+
+        function closeDailyModal() {
+            document.getElementById('dailyModal').classList.add('hidden');
+        }
+
+        async function saveDailyTask() {
+            const id = document.getElementById('dailyId').value;
+            const taskName = document.getElementById('dailyTaskName').value.trim();
+            if (!taskName) {
+                alert('กรุณาระบุชื่องานครับ');
+                return;
+            }
+
+            const payload = {
+                task_name: taskName,
+                task_description: document.getElementById('dailyDescription').value.trim() || null,
+                status: document.getElementById('dailyStatus').value,
+                schedule_date: document.getElementById('dailyScheduleDate').value || null,
+                assignee: document.getElementById('dailyAssignee').value.trim() || null
+            };
+
+            try {
+                if (id) {
+                    const { error } = await supabaseClient.from('daily_tasks').update(payload).eq('id', id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseClient.from('daily_tasks').insert([payload]);
+                    if (error) throw error;
+                }
+                closeDailyModal();
+                fetchDailyTasks();
+            } catch (err) {
+                console.error(err);
+                alert('บันทึกไม่สำเร็จ: ' + err.message);
+            }
+        }
+
+        async function deleteDailyTask(id, taskName) {
+            if (!confirm(`คุณต้องการลบงาน "${taskName}" ใช่หรือไม่?`)) return;
+            try {
+                const { error } = await supabaseClient.from('daily_tasks').delete().eq('id', id);
+                if (error) throw error;
+                fetchDailyTasks();
+            } catch (err) {
+                console.error(err);
+                alert('เกิดข้อผิดพลาดในการลบข้อมูล');
             }
         }
     </script>
