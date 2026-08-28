@@ -141,6 +141,9 @@
                 <button onclick="switchView('daily')" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3.5 md:py-2 rounded-lg transition-colors flex items-center justify-center font-medium">
                     <i class="fa-solid fa-list-check mr-2"></i> งานประจำวัน
                 </button>
+                <button onclick="switchView('event')" class="w-full bg-purple-600 hover:bg-purple-500 text-white py-3.5 md:py-2 rounded-lg transition-colors flex items-center justify-center font-medium">
+                    <i class="fa-solid fa-calendar-days mr-2"></i> งานประชุม/กิจกรรม
+                </button>
             </div>
 
             <div id="sidebarFileControls" class="flex flex-col flex-1 overflow-hidden w-64">
@@ -320,6 +323,35 @@
                 </div>
             </div>
 
+            <div id="eventWorkView" class="hidden flex-1 overflow-auto p-3 md:p-8 custom-scrollbar">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full">
+                    <div class="p-4 md:p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-purple-50 shrink-0">
+                        <h2 class="text-base md:text-lg font-semibold text-slate-800 truncate flex items-center"><i class="fa-solid fa-calendar-days mr-2 text-purple-600"></i>รายการงานประชุม/กิจกรรม</h2>
+                        <button onclick="openEventModal()" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 md:py-2.5 rounded-lg transition-colors text-sm font-medium shadow-sm flex justify-center items-center">
+                            <i class="fa-solid fa-plus mr-2"></i> เพิ่มงานประชุม
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar flex-1 relative">
+                        <table class="w-full text-left border-collapse min-w-[900px]">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 text-xs md:text-sm border-b border-slate-200">
+                                    <th class="py-3 px-4 font-medium text-center min-w-[120px]">วันที่ประชุม</th>
+                                    <th class="py-3 px-4 font-medium text-center min-w-[100px]">เวลา</th>
+                                    <th class="py-3 px-4 font-medium min-w-[200px]">ประชุมเรื่องอะไร</th>
+                                    <th class="py-3 px-4 font-medium min-w-[150px]">ประชุมที่ไหน</th>
+                                    <th class="py-3 px-4 font-medium min-w-[150px]">ใครไป</th>
+                                    <th class="py-3 px-4 font-medium text-center min-w-[120px]">สถานะ</th>
+                                    <th class="py-3 px-4 font-medium text-center sticky-col bg-slate-100 min-w-[100px]">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventTableBody" class="text-sm divide-y divide-slate-100">
+                                <tr><td colspan="7" class="text-center py-8 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -400,247 +432,6 @@
         </div>
     </div>
 
-    <div id="surveyModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-3 md:p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl mx-auto flex flex-col max-h-[95vh] h-full md:h-auto">
-            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0 rounded-t-xl">
-                <h3 id="surveyModalTitle" class="text-base md:text-xl font-bold text-slate-800">เพิ่มข้อมูลงานสำรวจ</h3>
-                <button onclick="closeSurveyModal()" class="text-slate-400 hover:text-red-500 bg-white p-2 rounded-lg shadow-sm"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            
-            <div class="p-4 md:p-6 overflow-y-auto flex-1 space-y-4 md:space-y-6 bg-slate-50/50 custom-scrollbar">
-                <input type="hidden" id="surveyId">
-                
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1.5">ชื่อโครงการ <span class="text-red-500">*</span></label>
-                            <input type="text" id="surveyProjectName" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="ระบุชื่อโครงการ">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1.5">ประเภทงาน <span class="text-red-500">*</span></label>
-                            <select id="surveyRoadType" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
-                                <option value="">-- เลือกประเภท --</option>
-                                <option value="คอนกรีตเสริมเหล็ก (คสล.)">คอนกรีตเสริมเหล็ก (คสล.)</option>
-                                <option value="แอสฟัลท์ติกคอนกรีต">แอสฟัลท์ติกคอนกรีต</option>
-                                <option value="ลูกรัง">ลูกรัง</option>
-                                <option value="หินคลุก">หินคลุก</option>
-                                <option value="ดิน">ดิน</option>
-                                <option value="งานปรับปรุงภูมิทัศน์">งานปรับปรุงภูมิทัศน์</option>
-                                <option value="อื่นๆ">อื่นๆ</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                        <h4 class="font-bold text-slate-800 text-sm md:text-base flex items-center">
-                            <i class="fa-solid fa-ruler-combined mr-2 text-indigo-500"></i> รายละเอียดขนาด / ช่วงระยะงาน
-                        </h4>
-                        <button type="button" onclick="addSegment()" class="w-full sm:w-auto text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 px-4 py-2.5 rounded-lg hover:bg-indigo-100 font-medium flex items-center justify-center">
-                            <i class="fa-solid fa-plus mr-2"></i> เพิ่มช่วงระยะงาน
-                        </button>
-                    </div>
-                    <div id="segmentsContainer" class="space-y-4"></div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <h4 class="font-bold text-slate-800 mb-3 text-sm md:text-base flex items-center">
-                            <i class="fa-solid fa-location-dot mr-2 text-emerald-500"></i> ตำแหน่งพิกัด (GPS) 
-                            <span class="text-xs font-normal text-slate-400 ml-2 block md:inline">(ระบุเองได้)</span>
-                        </h4>
-                        <div class="space-y-3">
-                            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
-                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
-                                    <span class="text-sm font-semibold text-emerald-800">จุดเริ่มต้น (หัว)</span>
-                                    <div class="flex gap-2 w-full sm:w-auto">
-                                        <button type="button" onclick="openLocationPicker('start')" class="flex-1 sm:flex-none text-xs bg-slate-600 text-white px-3 py-2 rounded-lg shadow-sm flex items-center justify-center">
-                                            <i class="fa-solid fa-map mr-1"></i> แผนที่
-                                        </button>
-                                        <button type="button" onclick="getCurrentGPS('start')" id="gpsStartBtn" class="flex-1 sm:flex-none text-xs bg-emerald-600 text-white px-3 py-2 rounded-lg shadow-sm flex items-center justify-center">
-                                            <i class="fa-solid fa-crosshairs mr-1"></i> ดึงพิกัด
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input type="number" step="any" id="surveyStartLat" placeholder="ละติจูด (N)" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-emerald-500">
-                                    <input type="number" step="any" id="surveyStartLng" placeholder="ลองจิจูด (E)" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-emerald-500">
-                                </div>
-                            </div>
-                            <div class="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
-                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
-                                    <span class="text-sm font-semibold text-blue-800">จุดสิ้นสุด (ท้าย)</span>
-                                    <div class="flex gap-2 w-full sm:w-auto">
-                                        <button type="button" onclick="openLocationPicker('end')" class="flex-1 sm:flex-none text-xs bg-slate-600 text-white px-3 py-2 rounded-lg shadow-sm flex items-center justify-center">
-                                            <i class="fa-solid fa-map mr-1"></i> แผนที่
-                                        </button>
-                                        <button type="button" onclick="getCurrentGPS('end')" id="gpsEndBtn" class="flex-1 sm:flex-none text-xs bg-blue-600 text-white px-3 py-2 rounded-lg shadow-sm flex items-center justify-center">
-                                            <i class="fa-solid fa-crosshairs mr-1"></i> ดึงพิกัด
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input type="number" step="any" id="surveyEndLat" placeholder="ละติจูด (N)" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-blue-500">
-                                    <input type="number" step="any" id="surveyEndLng" placeholder="ลองจิจูด (E)" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-blue-500">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-                        <h4 class="font-bold text-slate-800 mb-3 text-sm md:text-base flex items-center">
-                            <i class="fa-solid fa-comment-dots mr-2 text-amber-500"></i> หมายเหตุ
-                        </h4>
-                        <textarea id="surveyRemark" class="w-full flex-1 border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none text-sm min-h-[100px]" placeholder="ระบุหมายเหตุเพิ่มเติม (ถ้ามี)..."></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="p-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row justify-end gap-3 bg-white shrink-0 rounded-b-xl">
-                <button onclick="closeSurveyModal()" class="w-full sm:w-auto px-6 py-3.5 sm:py-2.5 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 font-medium transition-colors">ยกเลิก</button>
-                <button onclick="saveSurvey()" class="w-full sm:w-auto px-6 py-3.5 sm:py-2.5 text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 font-medium shadow-sm transition-colors">บันทึกข้อมูล</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="pickerModal" class="hidden fixed inset-0 bg-black/80 z-[130] flex items-center justify-center p-2 md:p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-auto flex flex-col overflow-hidden max-h-[90vh]">
-            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0">
-                <h3 class="text-base md:text-lg font-bold text-slate-800"><i class="fa-solid fa-map-pin mr-2 text-rose-500"></i> คลิกเลือกตำแหน่งบนแผนที่</h3>
-                <button type="button" onclick="closeLocationPicker()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors shadow-sm"><i class="fa-solid fa-xmark text-lg w-5 h-5 flex items-center justify-center"></i></button>
-            </div>
-            <div class="flex-1 relative">
-                <div id="pickerMapContainer" class="w-full h-[60vh] md:h-[400px] z-10"></div>
-                <div class="absolute top-3 left-1/2 -translate-x-1/2 z-[20] bg-slate-800/90 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none whitespace-nowrap">คลิกที่แผนที่เพื่อปักหมุด</div>
-            </div>
-            <div class="p-4 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center bg-white shrink-0 gap-4">
-                <div class="text-sm text-slate-500 flex flex-col md:flex-row items-center gap-1 md:gap-2">
-                    <span>พิกัดที่เลือก:</span>
-                    <span id="pickerCurrentCoord" class="font-mono font-bold text-slate-800 bg-slate-100 px-2 py-1 rounded">-</span>
-                </div>
-                <div class="flex gap-2 w-full md:w-auto flex-col sm:flex-row">
-                    <button type="button" onclick="closeLocationPicker()" class="flex-1 px-4 py-3.5 md:py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 font-medium">ยกเลิก</button>
-                    <button type="button" onclick="confirmLocationPicker()" class="flex-1 px-4 py-3.5 md:py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 font-medium shadow-sm">ยืนยันพิกัดนี้</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="previewModal" class="hidden fixed inset-0 bg-black/70 z-[110] flex items-center justify-center p-2 md:p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-auto flex flex-col overflow-hidden max-h-[95vh]">
-            <div class="p-4 md:p-5 border-b border-slate-200 flex justify-between items-center bg-indigo-50 shrink-0">
-                <h3 class="text-lg md:text-xl font-bold text-indigo-800"><i class="fa-solid fa-road mr-2"></i> รูปแบบถนนและสรุปพื้นที่</h3>
-                <div class="flex gap-2 no-print">
-                    <button onclick="printPreview()" class="text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition-colors font-medium shadow-sm flex items-center text-sm"><i class="fa-solid fa-print md:mr-2"></i> <span class="hidden md:inline">พิมพ์</span></button>
-                    <button onclick="closePreviewModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors border border-slate-200"><i class="fa-solid fa-xmark text-xl w-5 h-5 flex items-center justify-center"></i></button>
-                </div>
-            </div>
-            <div class="p-4 md:p-6 flex-1 flex flex-col gap-6 bg-slate-50/50 overflow-hidden">
-                <div class="text-center shrink-0">
-                    <h4 id="previewModalProjectName" class="text-lg md:text-xl font-bold text-slate-800"></h4>
-                    <p class="text-sm text-slate-500 mt-1">ประเภท: <span id="previewModalRoadType" class="font-medium text-slate-700"></span></p>
-                </div>
-                <div id="previewSegmentsList" class="flex-1 overflow-y-auto custom-scrollbar space-y-5 pr-1 md:pr-2"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="mapModal" class="hidden fixed inset-0 bg-black/70 z-[120] flex items-center justify-center p-2 md:p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-auto flex flex-col overflow-hidden max-h-[95vh]">
-            <div class="p-4 md:p-5 border-b border-slate-200 flex justify-between items-center bg-sky-50 shrink-0">
-                <h3 class="text-base md:text-xl font-bold text-sky-800"><i class="fa-solid fa-map-location-dot mr-2"></i> แผนที่เส้นทาง (หัว-ท้าย)</h3>
-                <div class="flex items-center gap-2">
-                    <button id="saveMapPositionBtn" onclick="saveMapPositions()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium shadow-sm transition-colors"><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึก</button>
-                    <button onclick="closeMapModal()" class="text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl w-5 h-5 flex items-center justify-center"></i></button>
-                </div>
-            </div>
-            <div class="p-3 md:p-4 flex flex-col gap-3 md:gap-4 flex-1">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-50 p-3 md:p-4 rounded-lg border border-slate-200 shrink-0 gap-3">
-                    <div class="w-full md:w-auto">
-                        <h4 id="mapProjectName" class="font-bold text-slate-800 text-base md:text-lg mb-2 md:mb-1 truncate"></h4>
-                        <div class="flex flex-wrap items-center gap-3 md:gap-4 text-xs md:text-sm text-slate-600">
-                            <span class="flex items-center bg-white px-2 py-1 rounded border"><span class="w-3 h-3 bg-emerald-500 rounded-full mr-1.5 shadow-sm border border-white"></span> จุดเริ่มต้น</span>
-                            <span class="flex items-center bg-white px-2 py-1 rounded border"><span class="w-3 h-3 bg-blue-500 rounded-full mr-1.5 shadow-sm border border-white"></span> จุดสิ้นสุด</span>
-                        </div>
-                    </div>
-                    <div class="text-left md:text-right bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-lg w-full md:w-auto flex flex-row md:flex-col justify-between items-center md:items-end">
-                        <span id="mapDistanceLabel" class="block text-[10px] md:text-xs text-indigo-500 font-bold md:mb-0.5">ระยะทางตามถนน</span>
-                        <div><span id="mapDistance" class="font-black text-xl md:text-2xl text-indigo-700">0.00</span> <span class="font-bold text-indigo-600 text-sm">เมตร</span></div>
-                    </div>
-                </div>
-                <div id="mapContainer" class="w-full flex-1 rounded-lg border-2 border-slate-300 shadow-inner min-h-[50vh] md:min-h-[400px]"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="costModal" class="hidden fixed inset-0 bg-black/70 z-[120] flex items-center justify-center p-2 md:p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-auto flex flex-col overflow-hidden max-h-[95vh]">
-            <div class="p-4 md:p-5 border-b border-slate-200 flex justify-between items-center bg-gradient-to-r from-emerald-600 to-teal-600 shrink-0">
-                <h3 class="text-lg md:text-xl font-bold text-white"><i class="fa-solid fa-calculator mr-2"></i> ประเมินราคาก่อสร้างเบื้องต้น</h3>
-                <button onclick="closeCostModal()" class="text-emerald-100 hover:text-white bg-white/20 hover:bg-white/30 rounded-lg p-2 transition-colors"><i class="fa-solid fa-xmark text-xl w-5 h-5 flex items-center justify-center"></i></button>
-            </div>
-            <div class="p-4 md:p-6 overflow-y-auto flex-1 space-y-4 md:space-y-6 bg-slate-50 custom-scrollbar">
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                    <h4 id="costProjectName" class="font-bold text-base md:text-lg text-slate-800">ชื่อโครงการ</h4>
-                    <p class="text-xs md:text-sm text-slate-500 mb-3">ประเภท: <span id="costRoadType" class="font-medium text-emerald-600"></span></p>
-                    <div class="grid grid-cols-2 gap-3 md:gap-4 text-sm">
-                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-center">
-                            <span class="block text-xs md:text-sm text-slate-500 mb-1">พื้นที่รวม (ตร.ม.)</span>
-                            <span id="costTotalArea" class="text-lg md:text-xl font-bold text-slate-700">0.00</span>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-center">
-                            <span class="block text-xs md:text-sm text-slate-500 mb-1">ปริมาตรรวม (ลบ.ม.)</span>
-                            <span id="costTotalVolume" class="text-lg md:text-xl font-bold text-slate-700">0.00</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-amber-200 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
-                    <h4 class="font-bold text-slate-800 mb-1 flex items-center text-sm md:text-base"><i class="fa-solid fa-coins mr-2 text-amber-500"></i> อัตราค่าวัสดุและน้ำมัน</h4>
-                    <p class="text-[10px] md:text-xs text-slate-500 mb-4">* กรุณาปรับปรุงราคาให้ตรงกับประกาศ <a href="https://uthaithani.moc.go.th/" target="_blank" class="text-blue-500 hover:underline">สำนักงานพาณิชย์จังหวัดอุทัยธานี</a> ประจำเดือนปัจจุบัน</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="md:col-span-2 bg-blue-50 p-3 rounded-lg border border-blue-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                            <div>
-                                <label class="text-sm font-semibold text-blue-800 block">ราคาน้ำมันดีเซล B7 ณ วันนี้ (บาท/ลิตร)</label>
-                                <span class="text-[10px] text-blue-600 block mt-0.5">*ดึงราคา ปตท. อัตโนมัติ (ฐาน กทม. + ค่าขนส่งอุทัยธานี ~0.45 บ.)</span>
-                            </div>
-                            <div class="flex items-center gap-2 w-full md:w-auto">
-                                <button type="button" onclick="updateOilPrice()" id="syncOilBtn" class="text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-3 py-2 rounded-lg shadow-sm transition-colors flex items-center justify-center w-10" title="อัปเดตราคาน้ำมันล่าสุด"><i class="fa-solid fa-rotate"></i></button>
-                                <input type="number" step="any" id="inputOilPrice" value="32.94" class="w-full md:w-28 border border-blue-300 rounded-lg px-3 py-2 text-right focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-700 text-base" onchange="calculateCost()">
-                            </div>
-                        </div>
-                        <div id="costInputsConcrete" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">คอนกรีตผสมเสร็จ (บาท/ลบ.ม.)</label><input type="number" step="any" id="inputConcretePrice" value="2200" class="w-full border border-slate-300 rounded-lg px-3 py-3 md:py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">เหล็กเสริมตะแกรง Wire Mesh (บาท/ตร.ม.)</label><input type="number" step="any" id="inputWiremeshPrice" value="45" class="w-full border border-slate-300 rounded-lg px-3 py-3 md:py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">ทรายรองใต้ผิวจราจร (บาท/ลบ.ม.)</label><input type="number" step="any" id="inputSandPrice" value="450" class="w-full border border-slate-300 rounded-lg px-3 py-3 md:py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
-                        </div>
-                        <div id="costInputsAsphalt" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">แอสฟัลท์ติกคอนกรีต (บาท/ตัน)</label><input type="number" step="any" id="inputAsphaltPrice" value="3500" class="w-full border border-slate-300 rounded-lg px-3 py-3 md:py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">น้ำยา Tack Coat (บาท/ตร.ม.)</label><input type="number" step="any" id="inputTackcoatPrice" value="15" class="w-full border border-slate-300 rounded-lg px-3 py-3 md:py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
-                        </div>
-                        <div id="costInputsGravel" class="hidden md:col-span-2 grid grid-cols-1 gap-4">
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1" id="labelBaseMaterial">ราคาวัสดุ (ลูกรัง/หินคลุก/ดิน) (บาท/ลบ.ม.)</label><input type="number" step="any" id="inputBasePrice" value="350" class="w-full border border-slate-300 rounded-lg px-3 py-3 md:py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
-                        </div>
-                        <div id="costInputsLandscape" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">ค่าวัสดุและต้นไม้ (บาท/ตร.ม.)</label><input type="number" step="any" id="inputLandscapeMaterialPrice" value="500" class="w-full border border-slate-300 rounded-lg px-3 py-3 md:py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
-                            <div><label class="block text-xs font-medium text-slate-700 mb-1">ค่าแรงงาน (บาท/ตร.ม.)</label><input type="number" step="any" id="inputLandscapeLaborPrice" value="150" class="w-full border border-slate-300 rounded-lg px-3 py-3 md:py-2 text-sm text-right focus:ring-2 focus:ring-emerald-500" onchange="calculateCost()"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-emerald-50 p-4 md:p-5 rounded-lg shadow-sm border border-emerald-200">
-                    <h4 class="font-bold text-emerald-800 mb-4 text-center text-base md:text-lg">สรุปราคากลางประเมิน</h4>
-                    <div class="space-y-3 text-sm">
-                        <div class="flex justify-between items-center border-b border-emerald-100 pb-2"><span class="text-slate-600 text-xs md:text-sm">ค่างานต้นทุน (Direct Cost)</span><span id="outputDirectCost" class="font-mono text-sm md:text-base text-slate-800 font-bold">0.00 บาท</span></div>
-                        <div class="flex justify-between items-center border-b border-emerald-100 pb-2"><span class="text-slate-600 text-xs md:text-sm flex items-center">ค่า Factor F <input type="number" step="0.0001" id="inputFactorF" value="1.3624" class="ml-2 w-20 border border-emerald-300 rounded px-1 py-1 text-xs text-center" onchange="calculateCost()"></span><span id="outputFactorFCost" class="font-mono text-sm md:text-base text-slate-800 font-bold">0.00 บาท</span></div>
-                        <div class="flex justify-between items-center pt-2"><span class="text-emerald-700 font-bold text-base md:text-lg">ราคากลางสุทธิโดยประมาณ</span><span id="outputTotalCost" class="font-mono text-xl md:text-2xl font-black text-emerald-600">0.00 บาท</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div id="dailyModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-3 md:p-4 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-auto flex flex-col max-h-[95vh] h-full md:h-auto">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-blue-50 shrink-0 rounded-t-xl">
@@ -689,6 +480,60 @@
         </div>
     </div>
 
+    <div id="eventModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-3 md:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-auto flex flex-col max-h-[95vh] h-full md:h-auto">
+            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-purple-50 shrink-0 rounded-t-xl">
+                <h3 id="eventModalTitle" class="text-base md:text-lg font-bold text-slate-800">เพิ่มข้อมูลการประชุม</h3>
+                <button onclick="closeEventModal()" class="text-slate-400 hover:text-red-500 bg-white p-2 rounded-lg"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="p-4 md:p-6 overflow-y-auto flex-1 space-y-4 custom-scrollbar">
+                <input type="hidden" id="eventId">
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">ประชุมเรื่องอะไร <span class="text-red-500">*</span></label>
+                    <input type="text" id="eventSubject" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none" placeholder="ระบุหัวข้อการประชุม">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">วันที่ประชุม <span class="text-red-500">*</span></label>
+                        <input type="date" id="eventDate" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">เวลากี่โมง</label>
+                        <input type="time" id="eventTime" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">ประชุมที่ไหน</label>
+                    <input type="text" id="eventLocation" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none" placeholder="ระบุสถานที่ประชุม">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">ใครไป (ผู้เข้าร่วม)</label>
+                    <textarea id="eventAttendees" rows="2" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none resize-none" placeholder="ระบุชื่อผู้เข้าร่วมประชุม..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">สถานะ <span class="text-red-500">*</span></label>
+                    <select id="eventStatus" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white">
+                        <option value="รอดำเนินการ">รอดำเนินการ</option>
+                        <option value="กำลังประชุม">กำลังประชุม</option>
+                        <option value="เสร็จสิ้น">เสร็จสิ้น</option>
+                        <option value="ยกเลิก/เลื่อน">ยกเลิก/เลื่อน</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row justify-end gap-3 bg-white shrink-0 rounded-b-xl">
+                <button onclick="closeEventModal()" class="w-full sm:w-auto px-6 py-3.5 sm:py-2.5 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 font-medium transition-colors">ยกเลิก</button>
+                <button onclick="saveEvent()" class="w-full sm:w-auto px-6 py-3.5 sm:py-2.5 text-white bg-purple-600 rounded-lg hover:bg-purple-700 font-medium shadow-sm transition-colors">บันทึกข้อมูล</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // =================ตั้งค่า Supabase=================
         let supabaseClient = null;
@@ -709,7 +554,8 @@
         let adminCategoriesData = [];
         let currentAdminCategoryId = null;
 
-        let dailyTasksData = []; // เพิ่มตัวแปรเก็บข้อมูลงานประจำวัน
+        let dailyTasksData = []; // เก็บข้อมูลงานประจำวัน
+        let eventsData = []; // ตัวแปรเก็บข้อมูลงานประชุม/กิจกรรม
 
         let calcCurrentProject = null;
         let calcTotalArea = 0;
@@ -846,11 +692,9 @@
             const overlay = document.getElementById('sidebarOverlay');
             
             if (window.innerWidth < 768) {
-                // สำหรับมือถือ: สไลด์เมนูเข้า-ออก และแสดง/ซ่อน Overlay
                 sidebar.classList.toggle('-translate-x-full');
                 overlay.classList.toggle('hidden');
             } else {
-                // สำหรับคอมพิวเตอร์: ยืด-หดเมนู
                 sidebar.classList.toggle('md:w-64');
                 sidebar.classList.toggle('md:w-0');
             }
@@ -861,6 +705,7 @@
             const surveyView = document.getElementById('surveyWorkView');
             const adminView = document.getElementById('adminWorkView'); 
             const dailyView = document.getElementById('dailyTaskView');
+            const eventView = document.getElementById('eventWorkView');
             const sidebarFileControls = document.getElementById('sidebarFileControls');
             const title = document.getElementById('currentCategoryTitle');
 
@@ -869,6 +714,7 @@
             surveyView.classList.add('hidden');
             if(adminView) adminView.classList.add('hidden');
             if(dailyView) dailyView.classList.add('hidden');
+            if(eventView) eventView.classList.add('hidden');
             sidebarFileControls.classList.add('hidden');
 
             if (view === 'files') {
@@ -888,12 +734,144 @@
                 if(dailyView) dailyView.classList.remove('hidden');
                 title.innerHTML = '<i class="fa-solid fa-list-check text-blue-500 mr-2"></i> งานประจำวัน (Checklist)';
                 fetchDailyTasks();
+            } else if (view === 'event') {
+                if(eventView) eventView.classList.remove('hidden');
+                title.innerHTML = '<i class="fa-solid fa-calendar-days text-purple-500 mr-2"></i> ระบบจัดการประชุม/กิจกรรม';
+                fetchEvents();
             }
 
             // ซ่อน Sidebar อัตโนมัติเมื่อเลือกเมนู (เฉพาะในมือถือ)
             if (window.innerWidth < 768) {
                 document.getElementById('mainSidebar').classList.add('-translate-x-full');
                 document.getElementById('sidebarOverlay').classList.add('hidden');
+            }
+        }
+
+        // ================= ระบบงานประชุม/กิจกรรม (Events) =================
+        async function fetchEvents() {
+            if (!supabaseClient) return;
+            const tbody = document.getElementById('eventTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('events')
+                    .select('*')
+                    .order('event_date', { ascending: false, nullsFirst: true })
+                    .order('event_time', { ascending: false, nullsFirst: true });
+                    
+                if (error) throw error;
+                eventsData = data;
+                let htmlContent = '';
+
+                if (data.length === 0) {
+                    htmlContent = '<tr><td colspan="7" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลการประชุม/กิจกรรม</td></tr>';
+                } else {
+                    data.forEach(item => {
+                        let statusBadge = '';
+                        if (item.status === 'รอดำเนินการ') statusBadge = '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium border border-slate-200">รอดำเนินการ</span>';
+                        else if (item.status === 'กำลังประชุม') statusBadge = '<span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-medium border border-blue-200">กำลังประชุม</span>';
+                        else if (item.status === 'เสร็จสิ้น') statusBadge = '<span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-xs font-medium border border-emerald-200">เสร็จสิ้น</span>';
+                        else if (item.status === 'ยกเลิก/เลื่อน') statusBadge = '<span class="bg-red-50 text-red-600 px-2 py-1 rounded text-xs font-medium border border-red-200">ยกเลิก/เลื่อน</span>';
+                        else statusBadge = `<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium border border-slate-200">${item.status}</span>`;
+
+                        htmlContent += `
+                        <tr class="hover:bg-purple-50/50 transition-colors">
+                            <td class="py-3 px-4 text-center text-slate-600 whitespace-nowrap">${formatThaiDate(item.event_date)}</td>
+                            <td class="py-3 px-4 text-center text-slate-600 whitespace-nowrap">${item.event_time || '-'}</td>
+                            <td class="py-3 px-4 font-medium text-slate-800 break-words">${item.subject}</td>
+                            <td class="py-3 px-4 text-slate-600 text-sm whitespace-pre-wrap">${item.location || '-'}</td>
+                            <td class="py-3 px-4 text-slate-600 text-sm whitespace-pre-wrap">${item.attendees || '-'}</td>
+                            <td class="py-3 px-4 text-center whitespace-nowrap">${statusBadge}</td>
+                            <td class="py-3 px-4 text-center sticky-col bg-white border-l border-slate-100">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <button onclick="openEventModal('${item.id}')" class="text-blue-500 hover:text-white bg-white hover:bg-blue-500 border border-blue-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
+                                    <button onclick="deleteEvent('${item.id}', '${item.subject}')" class="text-red-500 hover:text-white bg-white hover:bg-red-500 border border-red-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="ลบ"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    });
+                }
+                tbody.innerHTML = htmlContent;
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล<br><span class="text-xs">อย่าลืมสร้าง Table `events` ใน Supabase ก่อนนะครับ</span></td></tr>';
+            }
+        }
+
+        function openEventModal(id = null) {
+            document.getElementById('eventModal').classList.remove('hidden');
+            if (id) {
+                const item = eventsData.find(a => a.id === id);
+                document.getElementById('eventModalTitle').innerText = 'แก้ไขข้อมูลการประชุม';
+                document.getElementById('eventId').value = item.id;
+                document.getElementById('eventSubject').value = item.subject;
+                document.getElementById('eventDate').value = item.event_date || '';
+                document.getElementById('eventTime').value = item.event_time || '';
+                document.getElementById('eventLocation').value = item.location || '';
+                document.getElementById('eventAttendees').value = item.attendees || '';
+                document.getElementById('eventStatus').value = item.status || 'รอดำเนินการ';
+            } else {
+                document.getElementById('eventModalTitle').innerText = 'เพิ่มข้อมูลการประชุม';
+                document.getElementById('eventId').value = '';
+                document.getElementById('eventSubject').value = '';
+                document.getElementById('eventDate').value = '';
+                document.getElementById('eventTime').value = '';
+                document.getElementById('eventLocation').value = '';
+                document.getElementById('eventAttendees').value = '';
+                document.getElementById('eventStatus').value = 'รอดำเนินการ';
+            }
+        }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').classList.add('hidden');
+        }
+
+        async function saveEvent() {
+            const id = document.getElementById('eventId').value;
+            const subject = document.getElementById('eventSubject').value.trim();
+            const date = document.getElementById('eventDate').value;
+            
+            if (!subject || !date) {
+                alert('กรุณาระบุเรื่องที่ประชุมและวันที่ประชุมครับ');
+                return;
+            }
+
+            const payload = {
+                subject: subject,
+                event_date: date,
+                event_time: document.getElementById('eventTime').value || null,
+                location: document.getElementById('eventLocation').value.trim() || null,
+                attendees: document.getElementById('eventAttendees').value.trim() || null,
+                status: document.getElementById('eventStatus').value
+            };
+
+            try {
+                if (id) {
+                    const { error } = await supabaseClient.from('events').update(payload).eq('id', id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseClient.from('events').insert([payload]);
+                    if (error) throw error;
+                }
+                closeEventModal();
+                fetchEvents();
+            } catch (err) {
+                console.error(err);
+                alert('บันทึกไม่สำเร็จ: ' + err.message + '\n* กรุณาตรวจสอบว่าได้สร้าง Table `events` ใน Supabase แล้ว');
+            }
+        }
+
+        async function deleteEvent(id, subject) {
+            if (!confirm(`คุณต้องการลบข้อมูลการประชุมเรื่อง "${subject}" ใช่หรือไม่?`)) return;
+            try {
+                const { error } = await supabaseClient.from('events').delete().eq('id', id);
+                if (error) throw error;
+                fetchEvents();
+            } catch (err) {
+                console.error(err);
+                alert('เกิดข้อผิดพลาดในการลบข้อมูล');
             }
         }
 
