@@ -770,10 +770,10 @@
                 } else {
                     data.forEach(item => {
                         let statusBadge = '';
-                        if (item.status === 'รอดำเนินการ') statusBadge = '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium border border-slate-200">รอดำเนินการ</span>';
+                        if (item.status === 'รอดำเนินการ') statusBadge = '<span class="bg-red-50 text-red-600 px-2 py-1 rounded text-xs font-medium border border-red-200">รอดำเนินการ</span>';
                         else if (item.status === 'กำลังประชุม') statusBadge = '<span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-medium border border-blue-200">กำลังประชุม</span>';
                         else if (item.status === 'เสร็จสิ้น') statusBadge = '<span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-xs font-medium border border-emerald-200">เสร็จสิ้น</span>';
-                        else if (item.status === 'ยกเลิก/เลื่อน') statusBadge = '<span class="bg-red-50 text-red-600 px-2 py-1 rounded text-xs font-medium border border-red-200">ยกเลิก/เลื่อน</span>';
+                        else if (item.status === 'ยกเลิก/เลื่อน') statusBadge = '<span class="bg-orange-50 text-orange-600 px-2 py-1 rounded text-xs font-medium border border-orange-200">ยกเลิก/เลื่อน</span>';
                         else statusBadge = `<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium border border-slate-200">${item.status}</span>`;
 
                         htmlContent += `
@@ -2500,10 +2500,10 @@
                 } else {
                     data.forEach(item => {
                         let statusBadge = '';
-                        if (item.status === 'รอดำเนินการ') statusBadge = '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium border border-slate-200">รอดำเนินการ</span>';
+                        if (item.status === 'รอดำเนินการ') statusBadge = '<span class="bg-red-50 text-red-600 px-2 py-1 rounded text-xs font-medium border border-red-200">รอดำเนินการ</span>';
                         else if (item.status === 'กำลังดำเนินการ') statusBadge = '<span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-medium border border-blue-200">กำลังดำเนินการ</span>';
                         else if (item.status === 'เสร็จสิ้น') statusBadge = '<span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-xs font-medium border border-emerald-200">เสร็จสิ้น</span>';
-                        else statusBadge = `<span class="bg-red-50 text-red-600 px-2 py-1 rounded text-xs font-medium border border-red-200">${item.status}</span>`;
+                        else statusBadge = `<span class="bg-orange-50 text-orange-600 px-2 py-1 rounded text-xs font-medium border border-orange-200">${item.status}</span>`;
 
                         htmlContent += `
                         <tr class="hover:bg-blue-50/50 transition-colors">
