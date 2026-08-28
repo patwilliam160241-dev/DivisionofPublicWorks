@@ -274,11 +274,12 @@
                                     <th class="py-3 px-4 font-medium text-center">วันสิ้นสุดสัญญา</th>
                                     <th class="py-3 px-4 font-medium text-center">วันส่งมอบงาน</th>
                                     <th class="py-3 px-4 font-medium text-right">ราคากลาง (บาท)</th>
+                                    <th class="py-3 px-4 font-medium text-center">สถานะ</th>
                                     <th class="py-3 px-4 font-medium text-center sticky-col bg-slate-100 min-w-[100px]">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody id="adminTableBody" class="text-sm divide-y divide-slate-100">
-                                <tr><td colspan="7" class="text-center py-8 text-slate-400">กรุณาเลือกหัวข้อย่อยก่อน</td></tr>
+                                <tr><td colspan="8" class="text-center py-8 text-slate-400">กรุณาเลือกหัวข้อย่อยก่อน</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -307,6 +308,16 @@
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">เลขที่สัญญาจ้าง</label>
                     <input type="text" id="adminContractNumber" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none bg-slate-50 focus:bg-white transition-colors" placeholder="ระบุเลขที่สัญญาจ้าง">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">สถานะโครงการ</label>
+                    <select id="adminStatus" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none bg-slate-50 focus:bg-white transition-colors">
+                        <option value="ยังไม่ได้เริ่มดำเนินการ">ยังไม่ได้เริ่มดำเนินการ</option>
+                        <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                        <option value="รอตรวจงาน">รอตรวจงาน</option>
+                        <option value="ส่งมอบงานแล้ว">ส่งมอบงานแล้ว</option>
+                    </select>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -803,7 +814,7 @@
                 } else {
                     document.getElementById('currentAdminCatTitle').innerText = 'กรุณาสร้างและเลือกหัวข้อย่อยก่อน';
                     document.getElementById('btnAddAdminWork').classList.add('hidden');
-                    document.getElementById('adminTableBody').innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">ยังไม่มีหัวข้อย่อย กรุณากดสร้างหัวข้อย่อยใหม่</td></tr>';
+                    document.getElementById('adminTableBody').innerHTML = '<tr><td colspan="8" class="text-center py-8 text-slate-400">ยังไม่มีหัวข้อย่อย กรุณากดสร้างหัวข้อย่อยใหม่</td></tr>';
                 }
             } catch(e) { 
                 console.error(e); 
@@ -881,7 +892,7 @@
             if (!supabaseClient || !currentAdminCategoryId) return;
             const tbody = document.getElementById('adminTableBody');
             if(!tbody) return;
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
 
             try {
                 const { data, error } = await supabaseClient
@@ -896,10 +907,18 @@
                 let htmlContent = '';
 
                 if (data.length === 0) {
-                    htmlContent = '<tr><td colspan="7" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลในหัวข้อย่อยนี้</td></tr>';
+                    htmlContent = '<tr><td colspan="8" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลในหัวข้อย่อยนี้</td></tr>';
                 } else {
                     data.forEach(item => {
                         const price = item.median_price ? parseFloat(item.median_price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
+                        
+                        let statusBadge = '-';
+                        if (item.status === 'ยังไม่ได้เริ่มดำเนินการ') statusBadge = '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium border border-slate-200 whitespace-nowrap">ยังไม่ได้เริ่ม</span>';
+                        else if (item.status === 'กำลังดำเนินการ') statusBadge = '<span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-medium border border-blue-200 whitespace-nowrap">กำลังดำเนินการ</span>';
+                        else if (item.status === 'รอตรวจงาน') statusBadge = '<span class="bg-amber-50 text-amber-600 px-2 py-1 rounded text-xs font-medium border border-amber-200 whitespace-nowrap">รอตรวจงาน</span>';
+                        else if (item.status === 'ส่งมอบงานแล้ว') statusBadge = '<span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-xs font-medium border border-emerald-200 whitespace-nowrap">ส่งมอบแล้ว</span>';
+                        else statusBadge = `<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium border border-slate-200 whitespace-nowrap">${item.status || 'ยังไม่ได้เริ่ม'}</span>`;
+                        
                         htmlContent += `
                         <tr class="hover:bg-amber-50/50 transition-colors">
                             <td class="py-3 px-4 font-medium text-slate-800 break-words">${item.project_name}${item.description ? `<div class="text-xs text-slate-400 mt-1 whitespace-pre-wrap">${item.description}</div>` : ''}</td>
@@ -908,6 +927,7 @@
                             <td class="py-3 px-4 text-center text-slate-600 whitespace-nowrap">${formatThaiDate(item.end_date)}</td>
                             <td class="py-3 px-4 text-center text-emerald-600 font-medium whitespace-nowrap">${formatThaiDate(item.delivery_date)}</td>
                             <td class="py-3 px-4 text-right text-indigo-600 font-bold whitespace-nowrap">${price}</td>
+                            <td class="py-3 px-4 text-center">${statusBadge}</td>
                             <td class="py-3 px-4 text-center sticky-col bg-white border-l border-slate-100">
                                 <div class="flex items-center justify-center gap-1.5">
                                     <button onclick="openAdminModal('${item.id}')" class="text-blue-500 hover:text-white bg-white hover:bg-blue-500 border border-blue-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -920,7 +940,7 @@
                 tbody.innerHTML = htmlContent;
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
             }
         }
 
@@ -938,6 +958,7 @@
                 document.getElementById('adminId').value = item.id;
                 document.getElementById('adminProjectName').value = item.project_name;
                 document.getElementById('adminContractNumber').value = item.contract_number || '';
+                document.getElementById('adminStatus').value = item.status || 'ยังไม่ได้เริ่มดำเนินการ';
                 document.getElementById('adminStartDate').value = item.start_date || '';
                 document.getElementById('adminEndDate').value = item.end_date || '';
                 document.getElementById('adminDeliveryDate').value = item.delivery_date || '';
@@ -948,6 +969,7 @@
                 document.getElementById('adminId').value = '';
                 document.getElementById('adminProjectName').value = '';
                 document.getElementById('adminContractNumber').value = '';
+                document.getElementById('adminStatus').value = 'ยังไม่ได้เริ่มดำเนินการ';
                 document.getElementById('adminStartDate').value = '';
                 document.getElementById('adminEndDate').value = '';
                 document.getElementById('adminDeliveryDate').value = '';
@@ -970,6 +992,7 @@
             const deliveryDate = document.getElementById('adminDeliveryDate').value || null;
             const medianPriceInput = document.getElementById('adminMedianPrice').value;
             const medianPrice = medianPriceInput ? parseFloat(medianPriceInput) : null;
+            const status = document.getElementById('adminStatus').value;
             
             if (!projectName) {
                 alert('กรุณาระบุชื่อโครงการ / หัวข้อสัญญา');
@@ -988,6 +1011,7 @@
                 end_date: endDate,
                 delivery_date: deliveryDate,
                 median_price: medianPrice,
+                status: status,
                 category_id: currentAdminCategoryId
             };
 
