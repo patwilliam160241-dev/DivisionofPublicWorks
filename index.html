@@ -144,6 +144,9 @@
                 <button onclick="switchView('event')" class="w-full bg-purple-600 hover:bg-purple-500 text-white py-3.5 md:py-2 rounded-lg transition-colors flex items-center justify-center font-medium">
                     <i class="fa-solid fa-calendar-days mr-2"></i> งานประชุม/กิจกรรม
                 </button>
+                <button onclick="switchView('report')" class="w-full bg-pink-600 hover:bg-pink-500 text-white py-3.5 md:py-2 rounded-lg transition-colors flex items-center justify-center font-medium">
+                    <i class="fa-solid fa-book-open mr-2"></i> บันทึกรายงาน
+                </button>
             </div>
 
             <div id="sidebarFileControls" class="flex flex-col flex-1 overflow-hidden w-64">
@@ -352,6 +355,32 @@
                 </div>
             </div>
 
+            <div id="reportWorkView" class="hidden flex-1 overflow-auto p-3 md:p-8 custom-scrollbar">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full">
+                    <div class="p-4 md:p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pink-50 shrink-0">
+                        <h2 class="text-base md:text-lg font-semibold text-slate-800 truncate flex items-center"><i class="fa-solid fa-book-open mr-2 text-pink-600"></i>บันทึกรายงานประจำวันของบุคลากร</h2>
+                        <button onclick="openReportModal()" class="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 text-white px-4 py-3 md:py-2.5 rounded-lg transition-colors text-sm font-medium shadow-sm flex justify-center items-center">
+                            <i class="fa-solid fa-plus mr-2"></i> เขียนรายงานใหม่
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar flex-1 relative">
+                        <table class="w-full text-left border-collapse min-w-[900px]">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 text-xs md:text-sm border-b border-slate-200">
+                                    <th class="py-3 px-4 font-medium text-center min-w-[120px]">วันที่รายงาน</th>
+                                    <th class="py-3 px-4 font-medium min-w-[150px]">ชื่อผู้รายงาน</th>
+                                    <th class="py-3 px-4 font-medium min-w-[300px]">รายละเอียดการปฏิบัติงาน</th>
+                                    <th class="py-3 px-4 font-medium text-center sticky-col bg-slate-100 min-w-[100px]">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody" class="text-sm divide-y divide-slate-100">
+                                <tr><td colspan="4" class="text-center py-8 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -534,9 +563,40 @@
         </div>
     </div>
 
-    <!-- ================= เริ่มต้น: ชุด Modal สำหรับงานสำรวจ ================= -->
-    
-    <!-- 1. Modal: เพิ่ม/แก้ไข ข้อมูลงานสำรวจ -->
+    <div id="reportModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-3 md:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-auto flex flex-col max-h-[95vh] h-full md:h-auto">
+            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-pink-50 shrink-0 rounded-t-xl">
+                <h3 id="reportModalTitle" class="text-base md:text-lg font-bold text-slate-800">เขียนรายงานประจำวัน</h3>
+                <button onclick="closeReportModal()" class="text-slate-400 hover:text-red-500 bg-white p-2 rounded-lg"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="p-4 md:p-6 overflow-y-auto flex-1 space-y-4 custom-scrollbar">
+                <input type="hidden" id="reportId">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">วันที่ <span class="text-red-500">*</span></label>
+                        <input type="date" id="reportDate" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">ชื่อผู้รายงาน <span class="text-red-500">*</span></label>
+                        <input type="text" id="reporterName" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none" placeholder="ระบุชื่อผู้ปฏิบัติงาน">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">รายละเอียดการปฏิบัติงาน <span class="text-red-500">*</span></label>
+                    <textarea id="reportDetails" rows="5" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none resize-none" placeholder="ระบุรายละเอียดงานที่ทำในวันนี้..."></textarea>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row justify-end gap-3 bg-white shrink-0 rounded-b-xl">
+                <button onclick="closeReportModal()" class="w-full sm:w-auto px-6 py-3.5 sm:py-2.5 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 font-medium transition-colors">ยกเลิก</button>
+                <button onclick="saveReport()" class="w-full sm:w-auto px-6 py-3.5 sm:py-2.5 text-white bg-pink-600 rounded-lg hover:bg-pink-700 font-medium shadow-sm transition-colors">บันทึกข้อมูล</button>
+            </div>
+        </div>
+    </div>
+
     <div id="surveyModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-3 md:p-4 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-auto flex flex-col max-h-[95vh] h-full md:h-auto">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-emerald-50 shrink-0 rounded-t-xl">
@@ -606,7 +666,6 @@
         </div>
     </div>
 
-    <!-- 2. Modal: ประเมินราคาก่อสร้าง (Cost) -->
     <div id="costModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-3 md:p-4 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-auto flex flex-col max-h-[95vh] h-full md:h-auto">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-teal-50 shrink-0 rounded-t-xl">
@@ -672,7 +731,6 @@
         </div>
     </div>
 
-    <!-- 3. Modal: แสดงตัวอย่างรูปแบบถนน (Preview) -->
     <div id="previewModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-3 md:p-4 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-auto flex flex-col max-h-[95vh] h-full md:h-auto">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-indigo-50 shrink-0 rounded-t-xl no-print">
@@ -692,7 +750,6 @@
         </div>
     </div>
 
-    <!-- 4. Modal: แผนที่เส้นทาง (Map) -->
     <div id="mapModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-3 md:p-4 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-auto flex flex-col h-[90vh]">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-sky-50 shrink-0 rounded-t-xl">
@@ -710,7 +767,6 @@
         </div>
     </div>
 
-    <!-- 5. Modal: ตัวเลือกตำแหน่งบนแผนที่ (Location Picker) -->
     <div id="pickerModal" class="hidden fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-3 md:p-4 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-auto flex flex-col h-[80vh]">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0 rounded-t-xl">
@@ -725,8 +781,6 @@
         </div>
     </div>
     
-    <!-- ================= สิ้นสุด: ชุด Modal สำหรับงานสำรวจ ================= -->
-
     <script>
         // =================ตั้งค่า Supabase=================
         let supabaseClient = null;
@@ -749,6 +803,8 @@
 
         let dailyTasksData = []; // เก็บข้อมูลงานประจำวัน
         let eventsData = []; // ตัวแปรเก็บข้อมูลงานประชุม/กิจกรรม
+        
+        let reportsData = []; // เก็บข้อมูลรายงานประจำวัน
 
         let calcCurrentProject = null;
         let calcTotalArea = 0;
@@ -899,6 +955,7 @@
             const adminView = document.getElementById('adminWorkView'); 
             const dailyView = document.getElementById('dailyTaskView');
             const eventView = document.getElementById('eventWorkView');
+            const reportView = document.getElementById('reportWorkView');
             const sidebarFileControls = document.getElementById('sidebarFileControls');
             const title = document.getElementById('currentCategoryTitle');
 
@@ -908,6 +965,7 @@
             if(adminView) adminView.classList.add('hidden');
             if(dailyView) dailyView.classList.add('hidden');
             if(eventView) eventView.classList.add('hidden');
+            if(reportView) reportView.classList.add('hidden');
             sidebarFileControls.classList.add('hidden');
 
             if (view === 'files') {
@@ -931,6 +989,10 @@
                 if(eventView) eventView.classList.remove('hidden');
                 title.innerHTML = '<i class="fa-solid fa-calendar-days text-purple-500 mr-2"></i> ระบบจัดการประชุม/กิจกรรม';
                 fetchEvents();
+            } else if (view === 'report') {
+                if(reportView) reportView.classList.remove('hidden');
+                title.innerHTML = '<i class="fa-solid fa-book-open text-pink-500 mr-2"></i> บันทึกรายงานประจำวัน';
+                fetchReports();
             }
 
             // ซ่อน Sidebar อัตโนมัติเมื่อเลือกเมนู (เฉพาะในมือถือ)
@@ -989,7 +1051,7 @@
                 tbody.innerHTML = htmlContent;
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล<br><span class="text-xs">อย่าลืมสร้าง Table `events` ใน Supabase ก่อนนะครับ</span></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล<br><span class="text-xs">อย่าลืมสร้าง Table \`events\` ใน Supabase ก่อนนะครับ</span></td></tr>';
             }
         }
 
@@ -1052,7 +1114,7 @@
                 fetchEvents();
             } catch (err) {
                 console.error(err);
-                alert('บันทึกไม่สำเร็จ: ' + err.message + '\n* กรุณาตรวจสอบว่าได้สร้าง Table `events` ใน Supabase แล้ว');
+                alert('บันทึกไม่สำเร็จ: ' + err.message + '\n* กรุณาตรวจสอบว่าได้สร้าง Table \`events\` ใน Supabase แล้ว');
             }
         }
 
@@ -2785,6 +2847,119 @@
                 const { error } = await supabaseClient.from('daily_tasks').delete().eq('id', id);
                 if (error) throw error;
                 fetchDailyTasks();
+            } catch (err) {
+                console.error(err);
+                alert('เกิดข้อผิดพลาดในการลบข้อมูล');
+            }
+        }
+
+        // ================= ระบบบันทึกรายงานประจำวัน (Daily Reports) =================
+        async function fetchReports() {
+            if (!supabaseClient) return;
+            const tbody = document.getElementById('reportTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('daily_reports')
+                    .select('*')
+                    .order('report_date', { ascending: false, nullsFirst: true })
+                    .order('created_at', { ascending: false });
+                    
+                if (error) throw error;
+                reportsData = data;
+                let htmlContent = '';
+
+                if (data.length === 0) {
+                    htmlContent = '<tr><td colspan="4" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลรายงานประจำวัน</td></tr>';
+                } else {
+                    data.forEach(item => {
+                        htmlContent += `
+                        <tr class="hover:bg-pink-50/50 transition-colors">
+                            <td class="py-3 px-4 text-center text-slate-600 whitespace-nowrap">${formatThaiDate(item.report_date)}</td>
+                            <td class="py-3 px-4 font-bold text-slate-800">${item.reporter_name}</td>
+                            <td class="py-3 px-4 text-slate-600 text-sm whitespace-pre-wrap">${item.report_details || '-'}</td>
+                            <td class="py-3 px-4 text-center sticky-col bg-white border-l border-slate-100">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <button onclick="openReportModal('${item.id}')" class="text-blue-500 hover:text-white bg-white hover:bg-blue-500 border border-blue-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
+                                    <button onclick="deleteReport('${item.id}', '${item.reporter_name}')" class="text-red-500 hover:text-white bg-white hover:bg-red-500 border border-red-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="ลบ"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    });
+                }
+                tbody.innerHTML = htmlContent;
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล<br><span class="text-xs">อย่าลืมสร้าง Table \`daily_reports\` ใน Supabase นะครับ</span></td></tr>';
+            }
+        }
+
+        function openReportModal(id = null) {
+            document.getElementById('reportModal').classList.remove('hidden');
+            if (id) {
+                const item = reportsData.find(a => a.id === id);
+                document.getElementById('reportModalTitle').innerText = 'แก้ไขรายงานประจำวัน';
+                document.getElementById('reportId').value = item.id;
+                document.getElementById('reportDate').value = item.report_date || '';
+                document.getElementById('reporterName').value = item.reporter_name || '';
+                document.getElementById('reportDetails').value = item.report_details || '';
+            } else {
+                document.getElementById('reportModalTitle').innerText = 'เขียนรายงานประจำวัน';
+                document.getElementById('reportId').value = '';
+                
+                // เซ็ตค่าเริ่มต้นเป็นวันที่ปัจจุบัน
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('reportDate').value = today;
+                document.getElementById('reporterName').value = '';
+                document.getElementById('reportDetails').value = '';
+            }
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.add('hidden');
+        }
+
+        async function saveReport() {
+            const id = document.getElementById('reportId').value;
+            const date = document.getElementById('reportDate').value;
+            const name = document.getElementById('reporterName').value.trim();
+            const details = document.getElementById('reportDetails').value.trim();
+            
+            if (!date || !name || !details) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน (วันที่, ชื่อ, รายละเอียด)');
+                return;
+            }
+
+            const payload = {
+                report_date: date,
+                reporter_name: name,
+                report_details: details
+            };
+
+            try {
+                if (id) {
+                    const { error } = await supabaseClient.from('daily_reports').update(payload).eq('id', id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseClient.from('daily_reports').insert([payload]);
+                    if (error) throw error;
+                }
+                closeReportModal();
+                fetchReports();
+            } catch (err) {
+                console.error(err);
+                alert('บันทึกไม่สำเร็จ: ' + err.message + '\n* กรุณาตรวจสอบว่าสร้าง Table \`daily_reports\` แล้ว');
+            }
+        }
+
+        async function deleteReport(id, name) {
+            if (!confirm(`คุณต้องการลบข้อมูลรายงานของ "${name}" ใช่หรือไม่?`)) return;
+            try {
+                const { error } = await supabaseClient.from('daily_reports').delete().eq('id', id);
+                if (error) throw error;
+                fetchReports();
             } catch (err) {
                 console.error(err);
                 alert('เกิดข้อผิดพลาดในการลบข้อมูล');
