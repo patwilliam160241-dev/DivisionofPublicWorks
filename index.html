@@ -251,7 +251,6 @@
             </div>
 
             <div id="adminWorkView" class="hidden flex-1 overflow-auto p-3 md:p-8 custom-scrollbar flex flex-col gap-4">
-                
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden shrink-0">
                     <div class="p-4 border-b border-slate-100 bg-amber-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                         <div>
@@ -263,7 +262,7 @@
                         </button>
                     </div>
                     <div id="adminCategoryTabs" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-3 bg-slate-50">
-                        </div>
+                    </div>
                 </div>
 
                 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex-1 flex flex-col">
@@ -295,7 +294,6 @@
                         </table>
                     </div>
                 </div>
-
             </div>
 
             <div id="dailyTaskView" class="hidden flex-1 overflow-auto p-3 md:p-8 custom-scrollbar">
@@ -355,30 +353,45 @@
                 </div>
             </div>
 
-            <div id="reportWorkView" class="hidden flex-1 overflow-auto p-3 md:p-8 custom-scrollbar">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full">
-                    <div class="p-4 md:p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pink-50 shrink-0">
-                        <h2 class="text-base md:text-lg font-semibold text-slate-800 truncate flex items-center"><i class="fa-solid fa-book-open mr-2 text-pink-600"></i>บันทึกรายงานประจำวันของบุคลากร</h2>
-                        <button onclick="openReportModal()" class="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 text-white px-4 py-3 md:py-2.5 rounded-lg transition-colors text-sm font-medium shadow-sm flex justify-center items-center">
+            <div id="reportWorkView" class="hidden flex-1 overflow-auto p-3 md:p-8 custom-scrollbar flex flex-col gap-4">
+                
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden shrink-0">
+                    <div class="p-4 border-b border-slate-100 bg-pink-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div>
+                            <h2 class="text-base md:text-lg font-semibold text-slate-800"><i class="fa-solid fa-users mr-2 text-pink-600"></i>แฟ้มรายงานประจำวัน</h2>
+                            <p class="text-xs text-slate-500 mt-0.5">เลือกแฟ้มบุคลากรเพื่อดูหรือบันทึกรายงาน</p>
+                        </div>
+                        <button onclick="createReportCategory()" class="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 text-white px-4 py-3 md:py-2.5 rounded-lg transition-colors text-sm font-medium shadow-sm flex items-center justify-center">
+                            <i class="fa-solid fa-folder-plus mr-2"></i> สร้างแฟ้มบุคลากร
+                        </button>
+                    </div>
+                    <div id="reportCategoryTabs" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-3 bg-slate-50">
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex-1 flex flex-col">
+                    <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white shrink-0 gap-3">
+                        <h3 id="currentReportCatTitle" class="text-sm md:text-base font-bold text-slate-700 truncate mr-2">กรุณาเลือกแฟ้มบุคลากรด้านบน</h3>
+                        <button id="btnAddReport" onclick="openReportModal()" class="hidden w-full sm:w-auto bg-pink-600 hover:bg-pink-700 text-white px-4 py-3 md:py-2 rounded-lg transition-colors text-sm font-medium shadow-sm flex items-center justify-center shrink-0">
                             <i class="fa-solid fa-plus mr-2"></i> เขียนรายงานใหม่
                         </button>
                     </div>
                     <div class="overflow-x-auto custom-scrollbar flex-1 relative">
-                        <table class="w-full text-left border-collapse min-w-[900px]">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
                             <thead>
                                 <tr class="bg-slate-100 text-slate-600 text-xs md:text-sm border-b border-slate-200">
                                     <th class="py-3 px-4 font-medium text-center min-w-[120px]">วันที่รายงาน</th>
-                                    <th class="py-3 px-4 font-medium min-w-[150px]">ชื่อผู้รายงาน</th>
                                     <th class="py-3 px-4 font-medium min-w-[300px]">รายละเอียดการปฏิบัติงาน</th>
                                     <th class="py-3 px-4 font-medium text-center sticky-col bg-slate-100 min-w-[100px]">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody id="reportTableBody" class="text-sm divide-y divide-slate-100">
-                                <tr><td colspan="4" class="text-center py-8 text-slate-400">กำลังโหลดข้อมูล...</td></tr>
+                                <tr><td colspan="3" class="text-center py-8 text-slate-400">กรุณาเลือกแฟ้มบุคคลก่อน</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+
             </div>
 
         </main>
@@ -573,20 +586,14 @@
             <div class="p-4 md:p-6 overflow-y-auto flex-1 space-y-4 custom-scrollbar">
                 <input type="hidden" id="reportId">
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1.5">วันที่ <span class="text-red-500">*</span></label>
-                        <input type="date" id="reportDate" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1.5">ชื่อผู้รายงาน <span class="text-red-500">*</span></label>
-                        <input type="text" id="reporterName" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none" placeholder="ระบุชื่อผู้ปฏิบัติงาน">
-                    </div>
+                <div class="w-full sm:w-1/2">
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">วันที่ปฏิบัติงาน <span class="text-red-500">*</span></label>
+                    <input type="date" id="reportDate" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none bg-slate-50 focus:bg-white transition-colors">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">รายละเอียดการปฏิบัติงาน <span class="text-red-500">*</span></label>
-                    <textarea id="reportDetails" rows="5" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none resize-none" placeholder="ระบุรายละเอียดงานที่ทำในวันนี้..."></textarea>
+                    <textarea id="reportDetails" rows="5" class="w-full border border-slate-300 rounded-lg px-4 py-3 md:py-2 text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none resize-none bg-slate-50 focus:bg-white transition-colors" placeholder="ระบุรายละเอียดงานที่ทำในวันนี้..."></textarea>
                 </div>
             </div>
 
@@ -804,6 +811,8 @@
         let dailyTasksData = []; // เก็บข้อมูลงานประจำวัน
         let eventsData = []; // ตัวแปรเก็บข้อมูลงานประชุม/กิจกรรม
         
+        let reportCategoriesData = []; // เก็บข้อมูลแฟ้มบุคลากรสำหรับรายงาน
+        let currentReportCategoryId = null;
         let reportsData = []; // เก็บข้อมูลรายงานประจำวัน
 
         let calcCurrentProject = null;
@@ -897,6 +906,7 @@
                         loadCategories();
                         fetchSurveys();
                         loadAdminCategories(); // โหลดหมวดหมู่ธุรการ
+                        loadReportCategories(); // โหลดแฟ้มบุคลากร (รายงาน)
                     }
 
                     // --- เปิดเมนูอัตโนมัติเมื่อใช้มือถือ ---
@@ -992,7 +1002,7 @@
             } else if (view === 'report') {
                 if(reportView) reportView.classList.remove('hidden');
                 title.innerHTML = '<i class="fa-solid fa-book-open text-pink-500 mr-2"></i> บันทึกรายงานประจำวัน';
-                fetchReports();
+                if(reportCategoriesData.length === 0) loadReportCategories();
             }
 
             // ซ่อน Sidebar อัตโนมัติเมื่อเลือกเมนู (เฉพาะในมือถือ)
@@ -2366,504 +2376,106 @@
             }
         }
 
-        // ================= ระบบจัดการหมวดหมู่และไฟล์ =================
-        async function loadCategories() {
+        // ================= ระบบบันทึกรายงานประจำวัน (แยกบุคคล) =================
+        let reportCategoriesData = [];
+        let currentReportCategoryId = null;
+
+        async function loadReportCategories() {
+            if(!supabaseClient) return;
             try {
-                const { data, error } = await supabaseClient.from('categories').select('*').order('created_at', { ascending: true });
-                if (error) throw error;
+                const { data, error } = await supabaseClient.from('report_categories').select('*').order('created_at', { ascending: true });
+                if(error) throw error;
+                reportCategoriesData = data;
+                renderReportCategories();
                 
-                categoriesData = data;
-                renderCategoriesMenu();
-                renderCategorySelect();
-                fetchFiles(); 
-            } catch (err) {
-                console.error('Error loading categories:', err);
+                if(reportCategoriesData.length > 0 && !currentReportCategoryId) {
+                    selectReportCategory(reportCategoriesData[0].id);
+                } else if(currentReportCategoryId) {
+                    fetchReports();
+                } else {
+                    document.getElementById('currentReportCatTitle').innerText = 'กรุณาสร้างและเลือกแฟ้มบุคลากรก่อน';
+                    document.getElementById('btnAddReport').classList.add('hidden');
+                    document.getElementById('reportTableBody').innerHTML = '<tr><td colspan="3" class="text-center py-8 text-slate-400">ยังไม่มีแฟ้มบุคลากร กรุณากดสร้างแฟ้มใหม่</td></tr>';
+                }
+            } catch(e) { 
+                console.error(e); 
             }
         }
 
-        function renderCategoriesMenu() {
-            const menu = document.getElementById('categoryMenu');
-            menu.innerHTML = `
-                <a href="#" onclick="selectCategory('all', 'ไฟล์ทั้งหมด')" 
-                   class="flex items-center px-4 py-3 rounded-lg transition-colors ${currentCategoryId === 'all' ? 'active-category' : 'inactive-category hover:bg-slate-800'}">
-                    <i class="fa-solid fa-layer-group w-6"></i> ไฟล์ทั้งหมด
-                </a>
-            `;
-
-            categoriesData.forEach(cat => {
-                const isActive = currentCategoryId === cat.id;
-                const cssClass = isActive ? 'active-category' : 'inactive-category hover:bg-slate-800';
-                
-                menu.innerHTML += `
-                    <div class="flex items-center justify-between px-4 py-3 rounded-lg transition-colors cursor-pointer group ${cssClass}">
-                        <div class="flex items-center flex-1" onclick="selectCategory('${cat.id}', '${cat.name}')">
-                            <i class="fa-solid fa-folder w-6"></i> ${cat.name}
+        function renderReportCategories() {
+            const container = document.getElementById('reportCategoryTabs');
+            if(!container) return;
+            let html = '';
+            
+            if(reportCategoriesData.length === 0) {
+                html = '<span class="text-sm text-slate-400 py-2">ยังไม่มีแฟ้มบุคลากร...</span>';
+            } else {
+                reportCategoriesData.forEach(cat => {
+                    const isActive = cat.id === currentReportCategoryId;
+                    html += `
+                        <div class="${isActive ? 'border-pink-500 ring-2 ring-pink-100' : 'border-slate-200'} bg-white rounded-xl border p-4 cursor-pointer hover:border-pink-300 hover:shadow-sm transition-all group">
+                            <div class="flex items-center justify-between gap-3">
+                                <div onclick="selectReportCategory('${cat.id}')" class="flex items-center gap-3 flex-1 min-w-0">
+                                    <span class="w-10 h-10 rounded-lg ${isActive ? 'bg-pink-600 text-white' : 'bg-pink-50 text-pink-600'} flex items-center justify-center shrink-0"><i class="fa-solid fa-user"></i></span>
+                                    <div class="min-w-0"><div class="font-bold text-slate-800 truncate">${cat.name}</div><div class="text-[11px] text-slate-400">คลิกเพื่อดูรายงาน</div></div>
+                                </div>
+                                <button onclick="deleteReportCategory('${cat.id}', '${cat.name}'); event.stopPropagation();" class="text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 rounded-lg p-2 md:p-1.5 w-10 md:w-8 h-10 md:h-8 flex items-center justify-center shrink-0" title="ลบแฟ้ม"><i class="fa-solid fa-trash"></i></button>
+                            </div>
                         </div>
-                        <div class="flex opacity-0 group-hover:opacity-100 transition-opacity gap-3">
-                            <i class="fa-solid fa-pen text-blue-400 hover:text-blue-600 p-2 md:p-1" 
-                               onclick="editCategory('${cat.id}', '${cat.name}'); event.stopPropagation();" title="แก้ไขชื่อแฟ้ม"></i>
-                            <i class="fa-solid fa-trash text-red-400 hover:text-red-600 p-2 md:p-1" 
-                               onclick="deleteCategory('${cat.id}', '${cat.name}'); event.stopPropagation();" title="ลบแฟ้มนี้"></i>
-                        </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            }
+            container.innerHTML = html;
         }
 
-        function renderCategorySelect() {
-            const select = document.getElementById('uploadCategorySelect');
-            select.innerHTML = '<option value="">-- กรุณาเลือกแฟ้มบุคคล --</option>';
-            categoriesData.forEach(cat => {
-                select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
-            });
-            if(currentCategoryId !== 'all') {
-                select.value = currentCategoryId;
+        function selectReportCategory(id) {
+            currentReportCategoryId = id;
+            renderReportCategories();
+            const cat = reportCategoriesData.find(c => c.id === id);
+            if(cat) {
+                document.getElementById('currentReportCatTitle').innerHTML = `รายงานของ: <span class="text-pink-600 truncate inline-block max-w-[200px] align-bottom">${cat.name}</span>`;
+                document.getElementById('btnAddReport').classList.remove('hidden');
+                fetchReports();
             }
         }
 
-        function selectCategory(id, name) {
-            currentCategoryId = id;
-            document.getElementById('currentCategoryTitle').innerText = name === 'ไฟล์ทั้งหมด' ? name : `หมวดหมู่: ${name}`;
-            renderCategoriesMenu();
-            renderCategorySelect();
-            fetchFiles();
-        }
-
-        async function createCategory() {
-            const name = prompt("ตั้งชื่อแฟ้ม / บุคคล:");
+        async function createReportCategory() {
+            const name = prompt("ตั้งชื่อแฟ้ม / ระบุชื่อบุคลากร:");
             if (!name || name.trim() === "") return;
 
             try {
-                const { error } = await supabaseClient.from('categories').insert([{ name: name.trim() }]);
+                const { error } = await supabaseClient.from('report_categories').insert([{ name: name.trim() }]);
                 if (error) throw error;
-                loadCategories();
+                loadReportCategories();
             } catch (err) {
-                alert("เกิดข้อผิดพลาด หรือชื่อนี้อาจมีอยู่แล้ว");
+                alert("เกิดข้อผิดพลาดในการสร้างแฟ้ม");
                 console.error(err);
             }
         }
 
-        async function editCategory(id, currentName) {
-            const newName = prompt("แก้ไขชื่อแฟ้ม / บุคคล:", currentName);
-            if (!newName || newName.trim() === "" || newName === currentName) return;
-
+        async function deleteReportCategory(id, name) {
+            if (!confirm(`ยืนยันการลบแฟ้ม "${name}" ใช่หรือไม่?\n(คำเตือน: ข้อมูลรายงานทั้งหมดของคนๆ นี้จะถูกลบไปด้วย!)`)) return;
             try {
-                const { error } = await supabaseClient
-                    .from('categories')
-                    .update({ name: newName.trim() })
-                    .eq('id', id);
-                    
+                const { error } = await supabaseClient.from('report_categories').delete().eq('id', id);
                 if (error) throw error;
-                
-                // ถ้ายืนยันการแก้ไขตรงกับหมวดที่เปิดอยู่ ให้เปลี่ยนชื่อหัวเรื่องด้วย
-                if (currentCategoryId === id) {
-                    document.getElementById('currentCategoryTitle').innerText = `หมวดหมู่: ${newName.trim()}`;
-                }
-                
-                loadCategories(); 
-            } catch (err) {
-                alert("แก้ไขไม่สำเร็จ: " + err.message);
-            }
-        }
-
-        async function deleteCategory(id, name) {
-            if (!confirm(`ยืนยันการลบแฟ้ม "${name}" ใช่หรือไม่?\n(คำเตือน: ไฟล์ทั้งหมดในแฟ้มนี้จะถูกลบออกไปจากระบบ)`)) return;
-            try {
-                const { error } = await supabaseClient.from('categories').delete().eq('id', id);
-                if (error) throw error;
-                if(currentCategoryId === id) selectCategory('all', 'ไฟล์ทั้งหมด'); 
-                else loadCategories();
+                if(currentReportCategoryId === id) currentReportCategoryId = null;
+                loadReportCategories();
             } catch (err) {
                 alert("ลบไม่สำเร็จ: " + err.message);
             }
         }
 
-        function createFileRowHTML(file, groupId = '', isHidden = false) {
-            const date = new Date(file.created_at).toLocaleDateString('th-TH');
-            const categoryName = file.categories ? file.categories.name : '- ไม่ระบุ -';
-            
-            let iconClass = 'fa-file text-slate-500';
-            if(file.file_name.endsWith('.pdf')) iconClass = 'fa-file-pdf text-red-500';
-            else if(file.file_name.match(/\.(jpg|jpeg|png|gif)$/i)) iconClass = 'fa-file-image text-green-500';
-            else if(file.file_name.match(/\.(doc|docx|xls|xlsx)$/i)) iconClass = 'fa-file-word text-blue-500';
-
-            const displayClass = isHidden ? 'hidden' : '';
-            const groupClass = groupId ? `group-item-${groupId}` : '';
-
-            return `
-                <tr class="hover:bg-slate-50 transition-colors ${displayClass} ${groupClass}">
-                    <td class="py-4 md:py-3 px-4 md:px-6 flex items-start pl-[40px]">
-                        <i class="fa-solid ${iconClass} text-lg mr-3 mt-1 shrink-0"></i> 
-                        <span class="break-words whitespace-normal text-sm">${file.file_name}</span>
-                    </td>
-                    <td class="py-4 md:py-3 px-4 md:px-6 text-slate-600">
-                        <span class="bg-slate-200 px-2 py-1 rounded text-xs whitespace-nowrap">${categoryName}</span>
-                    </td>
-                    <td class="py-4 md:py-3 px-4 md:px-6 text-slate-500 whitespace-nowrap">${formatBytes(file.file_size)}</td>
-                    <td class="py-4 md:py-3 px-4 md:px-6 text-slate-500 whitespace-nowrap">${date}</td>
-                    <td class="py-4 md:py-3 px-4 md:px-6 text-center space-x-1 md:space-x-2 whitespace-nowrap sticky-col bg-white border-l border-slate-100">
-                        <a href="${file.file_url}" target="_blank" class="text-indigo-500 hover:text-white bg-white hover:bg-indigo-500 border border-indigo-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 inline-flex items-center justify-center rounded-lg shadow-sm transition-colors" title="ดาวน์โหลดไฟล์"><i class="fa-solid fa-download"></i></a>
-                        <button onclick="moveFile('${file.id}', '${file.file_name}')" class="text-amber-500 hover:text-white bg-white hover:bg-amber-500 border border-amber-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 inline-flex items-center justify-center rounded-lg shadow-sm transition-colors" title="ย้ายโฟลเดอร์"><i class="fa-solid fa-folder-tree"></i></button>
-                        <button onclick="deleteFile('${file.id}', '${file.file_name}')" class="text-red-500 hover:text-white bg-white hover:bg-red-500 border border-red-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 inline-flex items-center justify-center rounded-lg shadow-sm transition-colors" title="ลบไฟล์นี้"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>
-            `;
-        }
-
-        async function moveFile(fileId, fileName) {
-            let catList = "พิมพ์หมายเลขโฟลเดอร์ที่ต้องการย้ายไป:\n0: ยกเลิกการระบุแฟ้ม (ไม่มีหมวดหมู่)\n";
-            categoriesData.forEach((cat, index) => {
-                catList += `${index + 1}: ${cat.name}\n`;
-            });
-
-            const choice = prompt(`ย้ายไฟล์: ${fileName}\n\n${catList}`);
-            if (choice === null || choice.trim() === "") return;
-
-            const choiceNum = parseInt(choice);
-            let targetCategoryId = null;
-
-            if (choiceNum > 0 && choiceNum <= categoriesData.length) {
-                targetCategoryId = categoriesData[choiceNum - 1].id;
-            } else if (choiceNum !== 0) {
-                alert("หมายเลขไม่ถูกต้อง กรุณาลองใหม่");
-                return;
-            }
-
-            try {
-                const { error } = await supabaseClient
-                    .from('files')
-                    .update({ category_id: targetCategoryId })
-                    .eq('id', fileId);
-                    
-                if (error) throw error;
-                alert("ย้ายไฟล์สำเร็จ!");
-                fetchFiles();
-            } catch (err) {
-                alert("ย้ายไฟล์ไม่สำเร็จ: " + err.message);
-            }
-        }
-
-        function toggleGroup(groupId) {
-            const rows = document.querySelectorAll(`.group-item-${groupId}`);
-            const icon = document.getElementById(`icon-${groupId}`);
-            
-            let isExpanding = false;
-            
-            rows.forEach(row => {
-                if(row.classList.contains('hidden')) {
-                    row.classList.remove('hidden');
-                    isExpanding = true;
-                } else {
-                    row.classList.add('hidden');
-                }
-            });
-
-            if(isExpanding) {
-                icon.classList.remove('fa-plus');
-                icon.classList.add('fa-minus');
-            } else {
-                icon.classList.remove('fa-minus');
-                icon.classList.add('fa-plus');
-            }
-        }
-
-        async function fetchFiles() {
-            if (!supabaseClient) return;
-            const tbody = document.getElementById('fileTableBody');
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
-
-            try {
-                let query = supabaseClient.from('files').select('*, categories(name)').order('created_at', { ascending: false });
-                
-                if (currentCategoryId !== 'all') {
-                    query = query.eq('category_id', currentCategoryId);
-                }
-
-                const { data, error } = await query;
-                if (error) throw error;
-
-                document.getElementById('totalFilesCount').innerText = data.length;
-                let htmlContent = '';
-
-                if (data.length === 0) {
-                    htmlContent = '<tr><td colspan="5" class="text-center py-8 text-slate-400">ไม่พบไฟล์ในแฟ้มนี้</td></tr>';
-                } 
-                else if (currentCategoryId === 'all') {
-                    const groupedData = {};
-                    const noCategoryData = [];
-
-                    data.forEach(file => {
-                        if(file.category_id && file.categories) {
-                            if(!groupedData[file.category_id]) {
-                                groupedData[file.category_id] = {
-                                    name: file.categories.name,
-                                    files: []
-                                };
-                            }
-                            groupedData[file.category_id].files.push(file);
-                        } else {
-                            noCategoryData.push(file);
-                        }
-                    });
-
-                    for (const catId in groupedData) {
-                        const group = groupedData[catId];
-                        htmlContent += `
-                            <tr class="bg-indigo-50 border-b border-indigo-100 cursor-pointer hover:bg-indigo-100 transition-colors" onclick="toggleGroup('${catId}')">
-                                <td colspan="5" class="py-4 md:py-3 px-4 md:px-6 font-semibold text-indigo-800">
-                                    <i id="icon-${catId}" class="fa-solid fa-plus w-5 text-indigo-500"></i>
-                                    <i class="fa-solid fa-folder text-indigo-400 mr-2"></i> ${group.name} 
-                                    <span class="text-sm font-normal text-indigo-500 ml-2">(${group.files.length} ไฟล์)</span>
-                                </td>
-                            </tr>
-                        `;
-                        group.files.forEach(file => {
-                            htmlContent += createFileRowHTML(file, catId, true);
-                        });
-                    }
-
-                    if(noCategoryData.length > 0) {
-                        htmlContent += `
-                            <tr class="bg-slate-100 border-b border-slate-200">
-                                <td colspan="5" class="py-4 md:py-3 px-4 md:px-6 font-semibold text-slate-700">
-                                    <i class="fa-solid fa-folder-open text-slate-400 mr-2"></i> ไม่ระบุแฟ้ม
-                                </td>
-                            </tr>
-                        `;
-                        noCategoryData.forEach(file => {
-                            htmlContent += createFileRowHTML(file, '', false);
-                        });
-                    }
-                } 
-                else {
-                    data.forEach(file => {
-                        htmlContent += createFileRowHTML(file, '', false);
-                    });
-                }
-
-                tbody.innerHTML = htmlContent;
-
-            } catch (err) {
-                console.error('Error:', err);
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
-            }
-        }
-
-        function triggerUpload() {
-            const selectedCat = document.getElementById('uploadCategorySelect').value;
-            if(!selectedCat) {
-                alert("กรุณาเลือกแฟ้มบุคคลจาก Dropdown (ด้านบน) ก่อนทำการอัปโหลดไฟล์ครับ!");
-                return;
-            }
-            document.getElementById('fileInput').click();
-        }
-
-        async function uploadFile(event) {
-            const selectedCat = document.getElementById('uploadCategorySelect').value;
-            if (!selectedCat) return;
-
-            const files = event.target.files;
-            if (!files || files.length === 0) return;
-
-            const icon = document.getElementById('uploadIcon');
-            const text = document.getElementById('uploadText');
-            
-            icon.className = 'fa-solid fa-spinner fa-spin text-4xl md:text-5xl text-indigo-500 mb-3';
-            
-            let successCount = 0;
-            let failCount = 0;
-
-            document.getElementById('uploadBox').style.pointerEvents = 'none';
-
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                text.innerText = `กำลังอัปโหลดไฟล์ที่ ${i + 1} จาก ${files.length} (${file.name})...`;
-
-                const fileExt = file.name.split('.').pop();
-                const randomString = Math.random().toString(36).substring(2, 10);
-                const safeStorageName = `${Date.now()}_${randomString}.${fileExt}`;
-
-                try {
-                    const { error: storageError } = await supabaseClient.storage.from('uploads').upload(safeStorageName, file);
-                    if (storageError) throw storageError;
-
-                    const { data: urlData } = supabaseClient.storage.from('uploads').getPublicUrl(safeStorageName);
-
-                    const { error: dbError } = await supabaseClient.from('files').insert([{ 
-                        file_name: file.name, 
-                        file_size: file.size, 
-                        file_url: urlData.publicUrl,
-                        category_id: selectedCat 
-                    }]);
-
-                    if (dbError) throw dbError;
-                    
-                    successCount++;
-                } catch (error) {
-                    console.error(`Error uploading ${file.name}:`, error);
-                    failCount++;
-                }
-            }
-
-            icon.className = 'fa-solid fa-file-circle-plus text-4xl md:text-5xl text-indigo-400 mb-3';
-            text.innerHTML = 'คลิกพื้นที่นี้เพื่อเลือกไฟล์<br class="md:hidden"><span class="text-xs md:text-sm text-slate-500 mt-1 block"> (สามารถเลือกพร้อมกันหลายไฟล์ได้)</span>';
-            document.getElementById('fileInput').value = ''; 
-            document.getElementById('uploadBox').style.pointerEvents = 'auto';
-
-            if (failCount === 0) {
-                alert(`อัปโหลดเสร็จสิ้น! สำเร็จทั้งหมด ${successCount} ไฟล์`);
-            } else {
-                alert(`อัปโหลดเสร็จสิ้น!\nสำเร็จ: ${successCount} ไฟล์\nล้มเหลว: ${failCount} ไฟล์`);
-            }
-
-            if (currentCategoryId === 'all' || currentCategoryId === selectedCat) {
-                fetchFiles(); 
-            }
-        }
-
-        async function deleteFile(id, fileName) {
-            if (!confirm(`คุณต้องการลบไฟล์ "${fileName}" ใช่หรือไม่?`)) return;
-            try {
-                const { error } = await supabaseClient.from('files').delete().eq('id', id);
-                if (error) throw error;
-                fetchFiles(); 
-            } catch (error) {
-                alert('เกิดข้อผิดพลาดในการลบ: ' + error.message);
-            }
-        }
-
-        // ================= ระบบ Daily Task Checklist =================
-        async function fetchDailyTasks() {
-            if (!supabaseClient) return;
-            const tbody = document.getElementById('dailyTableBody');
-            if(!tbody) return;
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
-
-            try {
-                const { data, error } = await supabaseClient
-                    .from('daily_tasks')
-                    .select('*')
-                    .order('schedule_date', { ascending: false, nullsFirst: true }) // เรียงตามวันที่
-                    .order('created_at', { ascending: false });
-                    
-                if (error) throw error;
-                dailyTasksData = data;
-                let htmlContent = '';
-
-                if (data.length === 0) {
-                    htmlContent = '<tr><td colspan="6" class="text-center py-8 text-slate-400">ยังไม่มีงานประจำวัน</td></tr>';
-                } else {
-                    data.forEach(item => {
-                        let statusBadge = '';
-                        if (item.status === 'รอดำเนินการ') statusBadge = '<span class="bg-red-50 text-red-600 px-2 py-1 rounded text-xs font-medium border border-red-200">รอดำเนินการ</span>';
-                        else if (item.status === 'กำลังดำเนินการ') statusBadge = '<span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-medium border border-blue-200">กำลังดำเนินการ</span>';
-                        else if (item.status === 'เสร็จสิ้น') statusBadge = '<span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-xs font-medium border border-emerald-200">เสร็จสิ้น</span>';
-                        else statusBadge = `<span class="bg-orange-50 text-orange-600 px-2 py-1 rounded text-xs font-medium border border-orange-200">${item.status}</span>`;
-
-                        htmlContent += `
-                        <tr class="hover:bg-blue-50/50 transition-colors">
-                            <td class="py-3 px-4 font-medium text-slate-800 break-words">${item.task_name}</td>
-                            <td class="py-3 px-4 text-slate-600 text-xs whitespace-pre-wrap">${item.task_description || '-'}</td>
-                            <td class="py-3 px-4 text-center text-slate-600 whitespace-nowrap">${formatThaiDate(item.schedule_date)}</td>
-                            <td class="py-3 px-4 text-center text-slate-600 whitespace-nowrap">${item.assignee || '-'}</td>
-                            <td class="py-3 px-4 text-center whitespace-nowrap">${statusBadge}</td>
-                            <td class="py-3 px-4 text-center sticky-col bg-white border-l border-slate-100">
-                                <div class="flex items-center justify-center gap-1.5">
-                                    <button onclick="openDailyModal('${item.id}')" class="text-blue-500 hover:text-white bg-white hover:bg-blue-500 border border-blue-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
-                                    <button onclick="deleteDailyTask('${item.id}', '${item.task_name}')" class="text-red-500 hover:text-white bg-white hover:bg-red-500 border border-red-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="ลบ"><i class="fa-solid fa-trash"></i></button>
-                                </div>
-                            </td>
-                        </tr>`;
-                    });
-                }
-                tbody.innerHTML = htmlContent;
-            } catch (err) {
-                console.error(err);
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
-            }
-        }
-
-        function openDailyModal(id = null) {
-            document.getElementById('dailyModal').classList.remove('hidden');
-            if (id) {
-                const item = dailyTasksData.find(a => a.id === id);
-                document.getElementById('dailyModalTitle').innerText = 'แก้ไขงานประจำวัน';
-                document.getElementById('dailyId').value = item.id;
-                document.getElementById('dailyTaskName').value = item.task_name;
-                document.getElementById('dailyDescription').value = item.task_description || '';
-                document.getElementById('dailyStatus').value = item.status || 'รอดำเนินการ';
-                document.getElementById('dailyScheduleDate').value = item.schedule_date || '';
-                document.getElementById('dailyAssignee').value = item.assignee || '';
-            } else {
-                document.getElementById('dailyModalTitle').innerText = 'เพิ่มงานประจำวัน';
-                document.getElementById('dailyId').value = '';
-                document.getElementById('dailyTaskName').value = '';
-                document.getElementById('dailyDescription').value = '';
-                document.getElementById('dailyStatus').value = 'รอดำเนินการ';
-                document.getElementById('dailyScheduleDate').value = '';
-                document.getElementById('dailyAssignee').value = '';
-            }
-        }
-
-        function closeDailyModal() {
-            document.getElementById('dailyModal').classList.add('hidden');
-        }
-
-        async function saveDailyTask() {
-            const id = document.getElementById('dailyId').value;
-            const taskName = document.getElementById('dailyTaskName').value.trim();
-            if (!taskName) {
-                alert('กรุณาระบุชื่องานครับ');
-                return;
-            }
-
-            const payload = {
-                task_name: taskName,
-                task_description: document.getElementById('dailyDescription').value.trim() || null,
-                status: document.getElementById('dailyStatus').value,
-                schedule_date: document.getElementById('dailyScheduleDate').value || null,
-                assignee: document.getElementById('dailyAssignee').value.trim() || null
-            };
-
-            try {
-                if (id) {
-                    const { error } = await supabaseClient.from('daily_tasks').update(payload).eq('id', id);
-                    if (error) throw error;
-                } else {
-                    const { error } = await supabaseClient.from('daily_tasks').insert([payload]);
-                    if (error) throw error;
-                }
-                closeDailyModal();
-                fetchDailyTasks();
-            } catch (err) {
-                console.error(err);
-                alert('บันทึกไม่สำเร็จ: ' + err.message);
-            }
-        }
-
-        async function deleteDailyTask(id, taskName) {
-            if (!confirm(`คุณต้องการลบงาน "${taskName}" ใช่หรือไม่?`)) return;
-            try {
-                const { error } = await supabaseClient.from('daily_tasks').delete().eq('id', id);
-                if (error) throw error;
-                fetchDailyTasks();
-            } catch (err) {
-                console.error(err);
-                alert('เกิดข้อผิดพลาดในการลบข้อมูล');
-            }
-        }
-
-        // ================= ระบบบันทึกรายงานประจำวัน (Daily Reports) =================
         async function fetchReports() {
-            if (!supabaseClient) return;
+            if (!supabaseClient || !currentReportCategoryId) return;
             const tbody = document.getElementById('reportTableBody');
             if(!tbody) return;
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</td></tr>';
 
             try {
                 const { data, error } = await supabaseClient
                     .from('daily_reports')
                     .select('*')
+                    .eq('category_id', currentReportCategoryId)
                     .order('report_date', { ascending: false, nullsFirst: true })
                     .order('created_at', { ascending: false });
                     
@@ -2872,18 +2484,17 @@
                 let htmlContent = '';
 
                 if (data.length === 0) {
-                    htmlContent = '<tr><td colspan="4" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลรายงานประจำวัน</td></tr>';
+                    htmlContent = '<tr><td colspan="3" class="text-center py-8 text-slate-400">ยังไม่มีข้อมูลรายงานในแฟ้มนี้</td></tr>';
                 } else {
                     data.forEach(item => {
                         htmlContent += `
                         <tr class="hover:bg-pink-50/50 transition-colors">
                             <td class="py-3 px-4 text-center text-slate-600 whitespace-nowrap">${formatThaiDate(item.report_date)}</td>
-                            <td class="py-3 px-4 font-bold text-slate-800">${item.reporter_name}</td>
-                            <td class="py-3 px-4 text-slate-600 text-sm whitespace-pre-wrap">${item.report_details || '-'}</td>
+                            <td class="py-3 px-4 text-slate-700 text-sm whitespace-pre-wrap">${item.report_details || '-'}</td>
                             <td class="py-3 px-4 text-center sticky-col bg-white border-l border-slate-100">
                                 <div class="flex items-center justify-center gap-1.5">
                                     <button onclick="openReportModal('${item.id}')" class="text-blue-500 hover:text-white bg-white hover:bg-blue-500 border border-blue-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
-                                    <button onclick="deleteReport('${item.id}', '${item.reporter_name}')" class="text-red-500 hover:text-white bg-white hover:bg-red-500 border border-red-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="ลบ"><i class="fa-solid fa-trash"></i></button>
+                                    <button onclick="deleteReport('${item.id}', '${item.report_date}')" class="text-red-500 hover:text-white bg-white hover:bg-red-500 border border-red-200 p-2 md:p-1.5 w-9 md:w-8 h-9 md:h-8 flex items-center justify-center rounded-lg shadow-sm transition-colors" title="ลบ"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </td>
                         </tr>`;
@@ -2892,27 +2503,29 @@
                 tbody.innerHTML = htmlContent;
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล<br><span class="text-xs">อย่าลืมสร้าง Table \`daily_reports\` ใน Supabase นะครับ</span></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
             }
         }
 
         function openReportModal(id = null) {
+            if(!currentReportCategoryId) {
+                alert("กรุณาเลือกแฟ้มบุคลากรก่อนบันทึกรายงานครับ");
+                return;
+            }
+
             document.getElementById('reportModal').classList.remove('hidden');
             if (id) {
                 const item = reportsData.find(a => a.id === id);
                 document.getElementById('reportModalTitle').innerText = 'แก้ไขรายงานประจำวัน';
                 document.getElementById('reportId').value = item.id;
                 document.getElementById('reportDate').value = item.report_date || '';
-                document.getElementById('reporterName').value = item.reporter_name || '';
                 document.getElementById('reportDetails').value = item.report_details || '';
             } else {
                 document.getElementById('reportModalTitle').innerText = 'เขียนรายงานประจำวัน';
                 document.getElementById('reportId').value = '';
                 
-                // เซ็ตค่าเริ่มต้นเป็นวันที่ปัจจุบัน
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('reportDate').value = today;
-                document.getElementById('reporterName').value = '';
                 document.getElementById('reportDetails').value = '';
             }
         }
@@ -2924,18 +2537,22 @@
         async function saveReport() {
             const id = document.getElementById('reportId').value;
             const date = document.getElementById('reportDate').value;
-            const name = document.getElementById('reporterName').value.trim();
             const details = document.getElementById('reportDetails').value.trim();
             
-            if (!date || !name || !details) {
-                alert('กรุณากรอกข้อมูลให้ครบถ้วน (วันที่, ชื่อ, รายละเอียด)');
+            if (!date || !details) {
+                alert('กรุณากรอกวันที่และรายละเอียดให้ครบถ้วน');
                 return;
             }
 
+            // ดึงชื่อ Category มาใส่เป็น reporter_name อัตโนมัติ (เพื่อรองรับ SQL โครงสร้างเดิม)
+            const cat = reportCategoriesData.find(c => c.id === currentReportCategoryId);
+            const reporterName = cat ? cat.name : '-';
+
             const payload = {
                 report_date: date,
-                reporter_name: name,
-                report_details: details
+                reporter_name: reporterName,
+                report_details: details,
+                category_id: currentReportCategoryId
             };
 
             try {
@@ -2950,12 +2567,12 @@
                 fetchReports();
             } catch (err) {
                 console.error(err);
-                alert('บันทึกไม่สำเร็จ: ' + err.message + '\n* กรุณาตรวจสอบว่าสร้าง Table \`daily_reports\` แล้ว');
+                alert('บันทึกไม่สำเร็จ: ' + err.message);
             }
         }
 
-        async function deleteReport(id, name) {
-            if (!confirm(`คุณต้องการลบข้อมูลรายงานของ "${name}" ใช่หรือไม่?`)) return;
+        async function deleteReport(id, reportDate) {
+            if (!confirm(`คุณต้องการลบข้อมูลรายงานของวันที่ ${formatThaiDate(reportDate)} ใช่หรือไม่?`)) return;
             try {
                 const { error } = await supabaseClient.from('daily_reports').delete().eq('id', id);
                 if (error) throw error;
